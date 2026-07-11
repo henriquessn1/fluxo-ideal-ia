@@ -3,8 +3,8 @@ name: precificador
 description: O sistema de precificação do Fluxo Ideal — como se configura preço (catálogo, tabelas, condições e formas de pagamento, favoritos) e como isso converge em orçamento e venda. Use para entender "quanto custa", como montar um orçamento e por que os valores são o que são.
 audience: [ia, humano]
 depends_on: [precos, catalogo, convenios, condicoes-pagamento, orcamentos]
-version: 0.3.0
-updated: 2026-07-10
+version: 0.3.1
+updated: 2026-07-11
 ---
 
 # Precificador
@@ -83,14 +83,16 @@ Três ideias que sustentam tudo:
    - **Venda direta** (sem orçamento): montar e registrar a **venda** na hora.
 
 ## Ferramentas (tarefa → ferramenta)
-> A execução depende de **autorização** — o MCP aplica permissão; a skill só ensina a intenção e o _quando_.
+> A execução depende de **autorização** — o MCP aplica permissão; a skill ensina a intenção e o _quando_.
 
-- Ver/gerir procedimentos, produtos e pacotes → ferramentas de catálogo (pacote também **simula** preço).
-- Ver quais tabelas de preço existem e gerí-las → ferramentas de tabelas de preço.
-- Ver/definir o preço de um item numa tabela → ferramentas de preço de item.
-- Consultar as condições e formas de pagamento de uma tabela → ferramentas de pagamento (config).
+**Hoje, por ferramenta:**
+- Ver/gerir procedimentos, produtos e pacotes → ferramentas de catálogo.
+- Ver e gerir as tabelas de preço → ferramentas de tabelas de preço.
+- Ver/definir o preço de um item numa tabela (inclui a parte do convênio) → ferramentas de preço de item.
 - Saber quais convênios a clínica atende → ferramenta de convênios.
-- Consultar/ montar orçamentos (e o preço fotografado) → ferramentas de orçamento.
+- Listar orçamentos e retornos pendentes (leitura) → ferramentas de orçamento/retornos.
+
+**Feito na plataforma (ainda não por ferramenta):** montar/editar/aprovar orçamento, simular e registrar venda, converter orçamento em venda, condições e formas de pagamento (parcelamento), split de coparticipação e autorização de convênio, favoritos e revisão de no-show. A IA raciocina sobre isso, mas a **ação** hoje passa pela plataforma.
 
 **Ordem mental para "quanto custa":** tabela aplicável → preço do item nela → cobertura (particular / coberto / coparticipação) → desconto → condição de pagamento → total no orçamento.
 

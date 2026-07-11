@@ -1,0 +1,27 @@
+# Fluxo Ideal — Skills
+
+> Biblioteca pública e sanitizada de skills de domínio da plataforma Fluxo Ideal (gestão para
+> clínicas). Cada skill é um pacote de conhecimento conceitual — como o negócio funciona, o
+> vocabulário, os fluxos e as regras — para uma IA raciocinar sobre a área antes de agir. Não contém
+> código, endpoints, segredos nem dados sensíveis.
+
+## Skills
+
+- [precificador](skills/precificador/SKILL.md): o sistema de precificação — catálogo, tabelas de preço, condições e formas de pagamento, favoritos, cobertura de convênio/coparticipação, e como tudo converge em orçamento e venda.
+- [secretaria](skills/secretaria/SKILL.md): recepção e agenda — cadastrar/encontrar pacientes, marcar/remarcar/cancelar, disponibilidade de horários e contexto de conversas.
+- [auxiliar-medico](skills/auxiliar-medico/SKILL.md): o fluxo operacional do atendimento — check-in, etapas de estado, comentários da equipe, pendências e métricas.
+- [designer-documentos](skills/designer-documentos/SKILL.md): desenhar e gerir documentos — templates (sistema × design), conteúdo/versão, simular, publicar e documentos gerados por paciente.
+- [designer-mensageria](skills/designer-mensageria/SKILL.md): desenhar a comunicação com o paciente — templates, canais (WhatsApp/HSM, e-mail), enviar por intenção e checar entrega.
+- [financeiro](skills/financeiro/SKILL.md): o dinheiro depois da venda — pagamentos, parcelas, contas a receber/pagar, caixa, fluxo de caixa e ponto de equilíbrio.
+- [designer-agentes](skills/designer-agentes/SKILL.md): como se desenha o comportamento de um agente de IA — persona, capacidades, gatilhos e modo (LLM × script).
+- [conversas](skills/conversas/SKILL.md): atender e triar o relacionamento via tickets/filas — atribuição, resolução (com CSAT), transferência, observadores, notas internas e detecção de frustração.
+- [pesquisas-satisfacao](skills/pesquisas-satisfacao/SKILL.md): medir satisfação (CX/NPS) — a pesquisa e seus gatilhos, funil de convites, reenviar/antecipar e resultados agregados.
+- [indicadores](skills/indicadores/SKILL.md): a visão de gestão/BI — o dashboard executivo que cruza agenda, comercial, atendimento, financeiro e satisfação, e a exportação de dados.
+- [administrador-clinica](skills/administrador-clinica/SKILL.md): configurar a clínica — dados do estabelecimento, branding, profissionais e convênios aceitos.
+- [gestor-tarefas](skills/gestor-tarefas/SKILL.md): afazeres internos da equipe — criar, atribuir, mover pelos estados, buscar e ver "minhas pendências".
+
+## Meta
+
+- [README](README.md): visão geral, públicos e como usar.
+- [CONTRIBUTING](CONTRIBUTING.md): regras de sanitização e gatilho de atualização.
+- [Template de skill](skills/_template/SKILL.md): esqueleto para uma nova skill.

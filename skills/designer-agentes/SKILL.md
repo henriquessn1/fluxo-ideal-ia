@@ -3,8 +3,8 @@ name: designer-agentes
 description: Como se DESENHA o comportamento de um agente de IA no Fluxo Ideal — o que é um agente aqui, sua persona/instrução, as capacidades que ele pode acionar, os gatilhos que o acordam e a escolha entre raciocínio (LLM) e roteiro determinístico. Princípio central: comportamento de agente é configuração (dado), nunca código. Use para montar, ajustar ou explicar um agente sem cair em detalhe de implementação.
 audience: [ia, humano]
 depends_on: [agentes, comportamento, gatilhos]
-version: 0.1.0
-updated: 2026-07-10
+version: 0.2.0
+updated: 2026-07-11
 ---
 
 # Designer de agentes
@@ -115,20 +115,23 @@ Três verdades operacionais:
 - **Snapshot / versão**: cada versão da configuração do agente é guardada — dá pra auditar e reverter.
 
 ## Ferramentas (tarefa → como se faz)
-> **Neste domínio não há tools de MCP para operar agentes.** O comportamento é **configuração**, e a
-> configuração é feita **pela plataforma** — pela tela de Gestão de Agentes na Central, ou por
-> **import declarativo** de um manifesto de time. A execução de qualquer ação que o agente aciona
-> depende de **autorização** aplicada pela plataforma.
+> O comportamento é **configuração**. **Desenhar, gerar e conferir** pode ser feito **com a IA**;
+> **aplicar** (criar as identidades, permissões e usuários dos agentes) é sempre **humano, na Central**.
+> A execução de qualquer ação de um agente depende de **autorização** aplicada pela plataforma.
 
-- **Desenhar/ajustar um agente** → pela tela de Gestão de Agentes: define-se persona/instrução (LLM)
-  ou o roteiro (script), a lista de ações que ele pode acionar, e os gatilhos que o acordam. Editar a
-  instrução ou o roteiro **muda o comportamento na hora**, sem redeploy — é dado, não código.
-- **Montar um time portável** → escrever/importar um **manifesto declarativo** que descreve os agentes,
-  como se referenciam, e os knobs por-clínica. Importar é como se leva o mesmo time para outra clínica.
-- **Levar o mesmo comportamento entre clínicas** → export/import do manifesto; os knobs personalizam
-  cada clínica sem tocar no molde.
-- **Entender por que um agente agiu** → olhar o registro de execução (metadados: qual gatilho, qual
-  decisão, status) e a versão da configuração ativa no momento.
+- **Co-desenhar um agente/time com a IA** → você discute com a IA o que cada agente faz, o que ele
+  pode acionar, quando age e o que aconteceria; ao final a IA **gera o manifesto declarativo** (o
+  arquivo do time) com o que foi combinado. O schema exato é carregado pela IA **em contexto
+  autenticado** — não é público.
+- **Conferir antes de aplicar** → a IA **valida** o manifesto gerado (coerência de referências, knobs
+  e capacidades) num ensaio, sem aplicar nada. *(em construção)*
+- **Aplicar** → **você importa** o manifesto na Central, que então **cria as roles, as permissões e os
+  usuários/identidades** dos agentes. Esse passo é **humano** — a IA propõe e confere; quem cria acesso
+  é a pessoa. *(fronteira de segurança)*
+- **Desenhar/ajustar direto na tela** → a Gestão de Agentes na Central segue disponível para editar
+  persona/roteiro, lista de ações e gatilhos.
+- **Acompanhar gastos e execuções** → quanto os agentes LLM gastaram, quantas execuções/erros, e por
+  que um agente agiu — sempre por **metadados**, nunca conteúdo. *(em construção)*
 
 **Ordem mental para desenhar um agente:** qual **evento** deve acordá-lo (gatilho + filtro) → ele
 precisa **julgar linguagem** (LLM) ou basta um **roteiro** (script)? → **o que ele pode acionar**
@@ -154,6 +157,13 @@ observada quando um convite sai), outro **tria** de forma determinística (despa
 rótulo), e um terceiro **decide sob incerteza** (LLM) quando a triagem não resolve. Cada um é uma peça
 pequena; o manifesto amarra as referências entre eles e expõe knobs por-clínica (qual template, quanto
 tempo esperar). O ganho: cada agente faz uma coisa, é testável, e o caso ambíguo custa LLM só quando precisa.
+
+### Co-desenhar um time com a IA e gerar o manifesto
+Você conversa com a IA sobre o problema ("quero confirmar presença por WhatsApp e escalar o caso
+ambíguo"): a IA propõe os agentes, o que cada um aciona, os gatilhos e os knobs, e **explica o que
+aconteceria** em cada caminho. Fechado o desenho, a IA **gera o manifesto** e o **confere**; você
+**importa na Central**, que cria as identidades e permissões. A IA **desenha e propõe**; a pessoa
+**aplica** — quem cria acesso é sempre o humano.
 
 ### Escolher LLM vs. script
 - **Script** quando: a entrada é estruturada/previsível, você quer resposta determinística e auditável,

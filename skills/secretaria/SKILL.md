@@ -3,8 +3,8 @@ name: secretaria
 description: O papel de recepção do Fluxo Ideal — cadastrar e encontrar pacientes, agendar/remarcar/cancelar, ler a agenda do dia e a disponibilidade de horários, e acompanhar o histórico de relacionamento. Use para "quem é esse paciente?", "tem horário quinta?", "marca o retorno da Maria", "quem faltou hoje?".
 audience: [ia, humano]
 depends_on: [clientes, agenda, conversas]
-version: 0.2.0
-updated: 2026-07-11
+version: 0.3.0
+updated: 2026-07-12
 ---
 
 # Secretária
@@ -140,9 +140,18 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 - Procurar interações por critério ("mensagens de WhatsApp hoje", "cancelamentos desta semana")
   → ferramenta de busca de interações.
 
-**A caminho** (backend pronto, ferramenta chegando): **RSVP** do paciente (confirmação bidirecional),
-**visão do dia** consolidada de toda a clínica (cross-profissional), **lista de espera** com alerta de
-encaixe (match), e a **fila de retornos vencidos**.
+**Lista de espera & encaixe**
+- Gerir a **lista de espera** (inscrever paciente, listar, editar, cancelar) e ver os **candidatos que
+  casam** com um horário que abriu → ferramentas de lista de espera. O **alerta de match em tempo real**
+  aparece na **tela** (via websocket) — a IA inscreve/consulta; **quem vê o match e decide chamar é a
+  recepção**, nunca um disparo automático ao paciente.
+
+**Confirmação & panorama**
+- Registrar o **RSVP** do paciente (confirmou / recusou) → ferramenta de RSVP; dá para **filtrar a agenda
+  por RSVP** também.
+- Ver a **visão do dia** consolidada de toda a clínica (todos os profissionais; contagens/agregados, sem
+  PII) → ferramenta de visão do dia.
+- Ver a **fila de retornos vencidos** (aging + KPIs) → ferramenta de retornos vencidos.
 
 ## Fluxos comuns
 

@@ -3,7 +3,7 @@ name: auxiliar-medico
 description: Apoio ao fluxo de ATENDIMENTO clínico no Fluxo Ideal — check-in do paciente, o estado/etapa em que cada atendimento está, anotações da equipe, pendências operacionais do profissional e métricas do atendimento. Use para acompanhar "onde está o paciente hoje", registrar chegada, mover o atendimento de etapa e ver a fila de trabalho. NÃO cobre o conteúdo do prontuário nem conduta clínica.
 audience: [ia, humano]
 depends_on: [atendimento, checkin, evolucao-operacional, pendencias]
-version: 0.1.0
+version: 0.2.0
 updated: 2026-07-10
 ---
 
@@ -84,8 +84,10 @@ Ideias que sustentam o domínio:
   item de checklist não concluído), classificado por **urgência** (`urgente`, `alta`, `media`, `baixa`).
 - **Retorno**: atendimento marcado como retorno de um anterior (vínculo operacional; a regra de recobrança
   é do domínio de preço).
-- **Insights**: resumo textual do atendimento; parte dele é restrita por papel (só quem tem função
-  clínica vê a fatia clínica). É leitura, quando a permissão permite — não é conduta a inventar.
+- **Insights / briefing**: um **cartão de contexto** do atendimento gerado por IA. A **síntese clínica
+  NÃO trafega** pela IA (guardrail LGPD) — nenhuma leitura via MCP a devolve. Um **briefing não-clínico**
+  (contexto/relacionamento: é retorno, aniversário, cidade) está sendo gerado por um agente e será
+  legível quando amadurecer. *(a caminho)*
 
 ## Ferramentas (tarefa → ferramenta)
 > Ensine a intenção e o _quando_. A **execução depende de autorização** — o MCP aplica permissão; a
@@ -103,6 +105,8 @@ Ideias que sustentam o domínio:
   motivo/tipo) → ferramenta de **mudança de estado**. Confirme com o usuário antes.
 - **Deixar uma anotação da equipe** num atendimento → ferramenta de **comentário**. Só recado
   operacional — nada de conteúdo clínico sensível.
+- **Concluir ou reabrir um item do checklist** de preparo do atendimento → ferramenta de **checklist**.
+  É operacional (preparo de sala/fila), não clínico.
 - **Ver a minha lista de pendências** como profissional (contagens por urgência + referências) →
   ferramenta de **pendências**. Devolve **referências**, nunca o texto do prontuário.
 - **Ler métricas do atendimento** (resumo por período dia-a-dia, ou o dashboard agregado) → ferramenta

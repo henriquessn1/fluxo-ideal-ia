@@ -3,7 +3,7 @@ name: financeiro
 description: O ciclo do DINHEIRO depois da venda no Fluxo Ideal — receber (parcelas, contas a receber, aging/DSO/inadimplência), pagar (despesas, fornecedores, recorrências), o caixa (saldo, conferência, frente de caixa) e a saúde financeira (fluxo de caixa projetado, ponto de equilíbrio). Use para responder "quanto entrou / quanto a clínica deve / tem dinheiro em caixa / vai empatar?".
 audience: [ia, humano]
 depends_on: [pagamentos, contas-receber, contas-pagar, caixa, indicadores-financeiros]
-version: 0.2.2
+version: 0.3.0
 updated: 2026-07-12
 ---
 
@@ -136,9 +136,14 @@ Três ideias sustentam tudo:
   ferramenta de **KPIs de contas a pagar**.
 - **Contas a pagar a terceiros** de uma venda (repasse a anestesista/hospital/laboratório) →
   ferramenta de **pagamentos a terceiros** (leitura + KPIs).
-- *(a caminho)* **Criar/editar uma despesa** ou um **custo recorrente** (o dia a dia: aluguel, taxas,
-  assinaturas) → ferramentas de **gestão de despesas** — com prévia + confirmação. É **cadastro**;
-  **pagar** a despesa (que sai do caixa) continua **humano**.
+- **Criar/editar uma despesa** ou um **custo recorrente** (o dia a dia: aluguel, taxas, assinaturas,
+  energia) → ferramentas de **gestão de despesas** — com **prévia + confirmação**. Inclui **cancelar** o
+  registro. É **cadastro**; **pagar** a despesa (que sai do caixa) continua **humano**.
+- **Cadastrar/editar um fornecedor** (a quem se paga) → ferramenta de **gestão de fornecedores**, também
+  com prévia + confirmação. Cadastro institucional — não movimenta dinheiro.
+- **Consultar os cadastros de apoio** para classificar uma despesa — **fornecedores**, **plano de contas**
+  (categorias) e **centros de custo**, além dos **templates de recorrência** já existentes → ferramentas
+  de **leitura de cadastros**. É o contexto que a IA usa para saber *onde* encaixar a despesa nova.
 
 **Caixa**
 - "Quanto tem em caixa?" por conta + total, com o recorte **conferido × provisório** →
@@ -149,8 +154,10 @@ Três ideias sustentam tudo:
 **Saúde financeira**
 - "Como fica meu caixa nos próximos dias?" (baldes por dia/semana com saldo projetado) →
   ferramenta de **projeção de fluxo de caixa**. As **entradas previstas caem no dia/semana certo**
-  (via os recebíveis por vencimento). Leia os avisos de degradação: se a fonte de recebíveis cai, a
-  projeção mostra **só as saídas** — não é caixa zerado de entradas.
+  (via os recebíveis por vencimento). As **recorrências de valor variável** (energia, água) entram na
+  projeção por **estimativa** — a média dos últimos meses realizados — enquanto as **fixas** usam o valor
+  do template. Leia os avisos de degradação: se a fonte de recebíveis cai, a projeção mostra **só as
+  saídas** — não é caixa zerado de entradas.
 - "Quanto preciso faturar pra empatar?" → ferramenta de **ponto de equilíbrio**. Distinga:
   *margem indisponível* (fonte de vendas fora — não calcule, não invente) de *break-even
   indefinido de verdade* (margem ≤ 0).
@@ -224,8 +231,8 @@ faturando o suficiente?).
   confirme com o usuário antes.
 - **Configurar ≠ movimentar.** A IA pode **configurar o que a clínica deve** — criar/editar **despesas e
   custos recorrentes** ("o aluguel subiu, edita"; "taxa nova, adiciona") — com **confirmação**, porque é
-  **cadastro** (reversível, interno; não toca paciente nem o caixa). *(escrita de config: a caminho.)* Mas
-  **MOVIMENTAR** dinheiro de fato — **pagar** a despesa (sai do caixa), registrar/confirmar recebimento,
+  **cadastro** (reversível, interno; não toca paciente nem o caixa) — hoje **por ferramenta, com
+  confirmação**, incluindo o **fornecedor**. Mas **MOVIMENTAR** dinheiro de fato — **pagar** a despesa (sai do caixa), registrar/confirmar recebimento,
   **estorno**, **frente de caixa** (sangria/fechamento) — é **humano**. A única escrita **fiscal** é a
   **NFS-e**, e mesmo essa é **gated**.
 

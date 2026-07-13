@@ -3,7 +3,7 @@ name: indicadores
 description: A visão de GESTÃO/BI da clínica no Fluxo Ideal — o dashboard executivo que cruza agenda, comercial, atendimento, financeiro e satisfação num lugar só: ler os KPIs, abrir as quebras (drill-down por profissional/convênio/procedimento), comparar com o período anterior e ver a evolução no tempo. Ensina o que cada indicador significa em NEGÓCIO (ocupação, no-show, conversão, ticket médio, produção, DSO, inadimplência, TMA, NPS). Exportar a base crua é papel à parte (backup/DPO). Use para "como está a clínica?", "quero um panorama", "abre por profissional", "compara com o mês passado".
 audience: [ia, humano]
 depends_on: [indicadores, gestao, exportacao]
-version: 0.2.0
+version: 0.2.1
 updated: 2026-07-13
 ---
 
@@ -153,9 +153,12 @@ conversão, TMA, taxa de retorno). É por onde começar um panorama.
   ferramenta de **comparação de períodos**.
 
 **Evolução no tempo (série)**
-- A **curva de produção** ao longo do tempo (por mês / semana / dia) — o que o "total do período" não
-  mostra → a ferramenta de **série temporal**. *(Hoje cobre a produção/comercial; as curvas de agenda,
-  atendimento e financeiro ainda **não** estão por ferramenta — em desenvolvimento.)*
+- A **curva ao longo do tempo** (por mês / semana / dia) — o que o "total do período" não mostra → a
+  ferramenta de **série temporal**, escolhendo a **fonte**: **produção** (vendas) · **agenda** (no-show /
+  ocupação / comparecimento) · **atendimento** (TMA / taxa de retorno) · **financeiro** (despesas pagas /
+  caixa realizado — o **histórico**, não a projeção futura). *Os filtros variam por fonte:* **convênio** só
+  vale em produção; **profissional** vale em produção / agenda / atendimento; o financeiro filtra por
+  **plano de contas / centro de custo / conta**.
 
 **Exportar a base crua (papel à parte — NÃO é do BI)**
 - "Exporta tudo em Excel / backup / pro contador" gera a **base crua** da clínica (dados pessoais **sem
@@ -217,5 +220,4 @@ conversão, TMA, taxa de retorno). É por onde começar um panorama.
 - **Configurar** o dashboard, criar indicadores, administrar a pesquisa de satisfação → administração, fora do escopo.
 - **Alertas / metas automáticos por KPI** (avisar quando um número cruza um limite) **não existem** ainda —
   o acompanhamento é manual (leia e compare você mesmo).
-- A **série no tempo** hoje cobre só a **produção/comercial**; agenda, atendimento e financeiro ainda não.
 - Não expõe como os indicadores são compostos/consultados por dentro — só como **lê-los, interpretá-los, aprofundá-los e compará-los**.

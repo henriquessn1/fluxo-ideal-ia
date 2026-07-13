@@ -1,10 +1,10 @@
 ---
 name: gestor-tarefas
-description: As TAREFAS INTERNAS da equipe da clínica no Fluxo Ideal — o quadro de afazeres da operação (ligar pro fornecedor, revisar o convênio, imprimir formulários). Criar uma tarefa, atribuir a um responsável, movê-la pelo quadro (a fazer → em andamento → concluída), buscar/detalhar e ver "minhas pendências". Use para "cria uma tarefa pra…", "o que eu tenho pra fazer?", "passa essa tarefa pro Fulano", "marca como concluída".
+description: As TAREFAS INTERNAS da equipe da clínica no Fluxo Ideal — o quadro de afazeres da operação (ligar pro fornecedor, revisar o convênio, imprimir formulários). Criar/editar uma tarefa, atribuir, movê-la pelo quadro, gerir vínculos e impedimentos (resolver o impedimento destrava a conclusão), comentar/ver a atividade, privatizar/arquivar, o board agregado e "minhas pendências". Use para "cria uma tarefa pra…", "o que eu tenho pra fazer?", "passa pro Fulano", "resolve o impedimento e conclui", "comenta na tarefa", "como está o quadro?".
 audience: [ia, humano]
 depends_on: [tarefas]
-version: 0.1.0
-updated: 2026-07-10
+version: 0.2.0
+updated: 2026-07-13
 ---
 
 # Gestor de tarefas internas
@@ -65,10 +65,14 @@ Ideias que sustentam o domínio:
   ter **um** responsável — que pode ser uma **pessoa** ou um **agente/bot** da clínica. Atribuir
   dá dono; desatribuir devolve ao "sem dono". Trocar o dono de uma tarefa de outra pessoa é um ato
   deliberado — **confirme** antes.
-- **Impedimento trava a conclusão.** Uma tarefa pode carregar um **impedimento** aberto — está
-  **bloqueada** por outra coisa ou **aguardando** algo/alguém. Enquanto houver impedimento aberto,
-  **não dá pra concluir** por aqui; o impedimento tem que ser resolvido na tela primeiro. Não há
-  atalho de "forçar" por esta via — e é de propósito.
+- **Impedimento trava a conclusão — e resolvê-lo destrava.** Uma tarefa pode carregar um
+  **impedimento** aberto (**bloqueada por** algo ou **aguardando** alguém); enquanto ele estiver
+  aberto, **não dá pra concluir**. **Resolver o impedimento** (agora por ferramenta) libera a
+  conclusão — isso é **tratar o bloqueio**, não "forçar" a conclusão por cima dele. Continua não
+  havendo atalho de pular um impedimento sem resolvê-lo.
+- **Comentário e atividade dão a história da tarefa.** Além dos campos, a tarefa tem uma **trilha**:
+  comentários livres da equipe e um **log automático** do que aconteceu (mudou de dono, de estado…).
+  É rastro interno — nunca vai ao paciente e respeita a mesma privacidade (tarefa privada de outro não se vê).
 - **Vínculo é referência, não posse.** Ligar uma tarefa a um paciente, atendimento, orçamento etc.
   é só **contexto** ("essa tarefa é sobre aquilo") — ajuda a achar e a entender. **Não** dá acesso
   ao item vinculado nem move nada nele.
@@ -109,17 +113,25 @@ Ideias que sustentam o domínio:
 - **Abrir o detalhe de UMA tarefa** (descrição completa + vínculos + impedimentos) → use a
   ferramenta de **detalhe da tarefa**, com o id vindo da busca. Se a tarefa for privada de outra
   pessoa, ela simplesmente "não existe" pra você.
+- **A visão do quadro agregada** (quantas em cada coluna — o placar) → ferramenta de **board**
+  (contagem por estado, com preview opcional).
+- **A trilha de uma tarefa** (comentários + log do que aconteceu) → ferramenta de **atividades da tarefa**.
 
 **Operar o quadro** (mudam o mundo — confirmam antes)
-- **Criar uma tarefa** (entra em "a fazer", pública) → use a ferramenta de **criar tarefa**. Título
-  é obrigatório; prioridade, prazo, dono e vínculos são opcionais. Para atribuir a si mesmo, use a
-  sua própria identidade como responsável.
-- **Atribuir ou trocar o dono** (ou tirar o dono) → use a ferramenta de **atribuir tarefa**. Tirar
-  o dono é uma ação **explícita** (guarda contra desatribuir sem querer). Confirme antes de reatribuir
-  tarefa de terceiro.
-- **Mover pelo quadro** (a fazer ↔ em andamento ↔ concluída) → use a ferramenta de **mudar estado**.
-  Concluir uma tarefa **com impedimento aberto falha** — resolva o impedimento na tela e conclua
-  depois. Voltar de concluída reabre.
+- **Criar uma tarefa** (entra em "a fazer", pública) → ferramenta de **criar tarefa**. Título é
+  obrigatório; prioridade, prazo, dono e vínculos são opcionais. Para atribuir a si, use a própria identidade.
+- **Editar** os campos de uma tarefa (título, descrição, prioridade, prazo…) → ferramenta de **editar tarefa**.
+- **Atribuir / trocar / tirar o dono** → ferramenta de **atribuir tarefa**. Tirar o dono é **explícito**
+  (anti-acidente); confirme antes de reatribuir tarefa de terceiro.
+- **Mover pelo quadro** (a fazer ↔ em andamento ↔ concluída) → ferramenta de **mudar estado**. Concluir
+  **com impedimento aberto falha** — **resolva o impedimento** (abaixo) e conclua. Voltar de concluída reabre.
+- **Gerir impedimentos** — abrir (bloqueada/aguardando) ou **resolver** (⭐ resolver **destrava** a
+  conclusão) → ferramenta de **impedimentos**.
+- **Gerir vínculos** — apontar/retirar a referência a um paciente/atendimento/orçamento/venda → ferramenta
+  de **vínculos** (só contexto; não dá acesso ao item).
+- **Comentar** na tarefa (nota da equipe na trilha) → ferramenta de **comentar**.
+- **Privatizar** (torná-la visível só ao destinatário — **gated**, confirme; some da visão da equipe) →
+  ferramenta de **privatizar**; **arquivar** uma tarefa encerrada → ferramenta de **arquivar**.
 
 **Ordem mental para "cuida das tarefas":** ver **minhas pendências** (ou buscar) → abrir o **detalhe**
 da tarefa certa → decidir → **criar / atribuir / mover** (confirmando).
@@ -141,8 +153,9 @@ da tarefa certa → decidir → **criar / atribuir / mover** (confirmando).
 
 ### Andar com uma tarefa
 1. Ao começar, **mova** de "a fazer" para "em andamento" (assuma como dono se ainda não tiver).
-2. Ao terminar, **mova** para "concluída". Se falhar por **impedimento aberto**, abra o detalhe,
-   veja o que trava, resolva na tela e conclua depois — não há como forçar por aqui.
+2. Ao terminar, **mova** para "concluída". Se falhar por **impedimento aberto**, veja o que trava,
+   **resolva o impedimento** (por ferramenta) e conclua — resolver o bloqueio destrava; não há como
+   pular um impedimento sem resolvê-lo.
 3. Se ficou algo pendente numa tarefa recém-concluída, dá pra **reabrir** (voltar de concluída).
 
 ### Passar a tarefa pra outra pessoa
@@ -157,13 +170,16 @@ da tarefa certa → decidir → **criar / atribuir / mover** (confirmando).
   **aponta** pra eles por vínculo.
 - **Três estados; concluída é terminal e reabrível.** Mover pro mesmo estado é idempotente; voltar
   de concluída limpa a conclusão.
-- **Impedimento aberto trava a conclusão.** Não há "forçar" por este caminho — resolva o impedimento
-  na tela antes de concluir. É de propósito.
+- **Impedimento aberto trava a conclusão; resolvê-lo destrava.** Resolver o impedimento (por ferramenta)
+  libera a conclusão — é tratar o bloqueio, não forçar por cima. Pular um impedimento sem resolvê-lo não existe.
+- **Comentário/atividade é rastro interno.** Comentar deixa nota na trilha da equipe; o log automático
+  registra as mudanças. Nunca vai ao paciente e respeita a privacidade da tarefa.
 - **Dono é opcional e pode ser bot.** Atribuir dá dono; a desatribuição é **explícita** (anti-acidente).
 - **Vínculo é só contexto.** Aponta pra uma entidade de outro domínio; **não** concede acesso a ela
   nem altera nada nela.
-- **Privacidade é opaca.** Tarefa privada de outra pessoa não aparece na busca e não abre no detalhe —
-  some por design (indistinguível de inexistente). Criar tarefa privada / privatizar é ação da tela.
+- **Privacidade é opaca — na leitura E na escrita.** Tarefa privada de outra pessoa não aparece na
+  busca, não abre no detalhe e **também não pode ser editada por ID** — dá "não existe" em qualquer
+  caminho (a ação corre com a identidade de quem chama). Privatizar é **gated** (some da visão da equipe).
 - **Ações que mexem no quadro confirmam.** Criar, atribuir e mover agem no mundo real — confirme com
   o usuário. A autorização efetiva é da plataforma; a skill só ensina a intenção.
 
@@ -173,7 +189,8 @@ da tarefa certa → decidir → **criar / atribuir / mover** (confirmando).
 - **Orçamentos a vencer, retornos a cobrar, contas a pagar** como número do negócio →
   `precificador` / `financeiro` (uma tarefa pode só **referenciar** esses itens).
 - **Agenda, cadastro de paciente, mensagem ao paciente** → `secretaria` / `designer-mensageria`.
-- **Privatizar, arquivar, editar em massa, gerir impedimentos e vínculos em profundidade, e a visão
-  de quadro agregada** são operações da interface da clínica — fora deste papel.
+- **Editar em massa** (mexer em muitas tarefas de uma vez) e **apagar** uma tarefa não são deste papel —
+  aqui se opera **uma** por vez. (Privatizar, arquivar, board, impedimentos, vínculos e comentários
+  **agora são** por ferramenta.)
 - Não expõe **como** as tarefas são armazenadas ou processadas por dentro — só **como criá-las,
   operá-las e pensá-las**.

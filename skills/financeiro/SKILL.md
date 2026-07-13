@@ -3,8 +3,8 @@ name: financeiro
 description: O ciclo do DINHEIRO depois da venda no Fluxo Ideal — receber (parcelas, contas a receber, aging/DSO/inadimplência), pagar (despesas, fornecedores, recorrências), o caixa (saldo, conferência, frente de caixa) e a saúde financeira (fluxo de caixa projetado, ponto de equilíbrio). Use para responder "quanto entrou / quanto a clínica deve / tem dinheiro em caixa / vai empatar?".
 audience: [ia, humano]
 depends_on: [pagamentos, contas-receber, contas-pagar, caixa, indicadores-financeiros]
-version: 0.1.0
-updated: 2026-07-10
+version: 0.2.0
+updated: 2026-07-12
 ---
 
 # Financeiro
@@ -118,6 +118,10 @@ Três ideias sustentam tudo:
   **glosa** (nega) e **recorrer**. É um ciclo próprio, fora do dia a dia de caixa. Mencione
   quando aparecer; não detalhe aqui.
 
+**Nota fiscal (NFS-e)**
+- **NFS-e**: a nota fiscal de serviço emitida ao fisco. Vive numa **fila** (pendente → transmitindo →
+  autorizada / rejeitada); a transmissão é **assíncrona**. **Emitir** e **reenviar** são atos fiscais.
+
 ## Ferramentas (tarefa → ferramenta)
 > A execução depende de **autorização** — o MCP aplica permissão; a skill só ensina a
 > intenção e o *quando*. As leituras respeitam a visão de quem chama.
@@ -128,28 +132,45 @@ Três ideias sustentam tudo:
   vencimento.
 - Totais agregados ("quanto devo", "quanto vence em N dias", "quanto paguei este mês") →
   ferramenta de **KPIs de contas a pagar**.
+- **Contas a pagar a terceiros** de uma venda (repasse a anestesista/hospital/laboratório) →
+  ferramenta de **pagamentos a terceiros** (leitura + KPIs).
 
 **Caixa**
 - "Quanto tem em caixa?" por conta + total, com o recorte **conferido × provisório** →
   ferramenta de **saldo de caixa**.
+- As **sessões de frente de caixa** (turnos: abertura, sangrias, suprimentos, fechamento/divergência)
+  → ferramenta de **sessões de caixa** (leitura).
 
 **Saúde financeira**
 - "Como fica meu caixa nos próximos dias?" (baldes por dia/semana com saldo projetado) →
-  ferramenta de **projeção de fluxo de caixa**. Leia os avisos de degradação: se os
-  recebíveis estão indisponíveis, a projeção mostra **só as saídas** — não é caixa zerado de
-  entradas.
+  ferramenta de **projeção de fluxo de caixa**. As **entradas previstas caem no dia/semana certo**
+  (via os recebíveis por vencimento). Leia os avisos de degradação: se a fonte de recebíveis cai, a
+  projeção mostra **só as saídas** — não é caixa zerado de entradas.
 - "Quanto preciso faturar pra empatar?" → ferramenta de **ponto de equilíbrio**. Distinga:
   *margem indisponível* (fonte de vendas fora — não calcule, não invente) de *break-even
   indefinido de verdade* (margem ≤ 0).
 
-**Contas a receber e conversão (lado das vendas)**
-- A **carteira de recebíveis** (aging / DSO / inadimplência) e os indicadores comerciais
-  vivem no painel de **indicadores** (a ferramenta agregadora do dashboard, seção financeira/
-  comercial) — é por lá que se lê "quanto tenho a receber / prazo médio / inadimplência".
-- Documentos que **aguardam assinatura** do paciente (orçamento/TCLE) e **enviar/revogar** o
-  link de assinatura → ferramentas de **assinatura** (lado vendas). São a ponte entre fechar
-  a proposta e o dinheiro começar a entrar; enviar link é **ação outward-facing** (o paciente
-  recebe e-mail real) → confirme antes.
+**Contas a receber (dinheiro dos pacientes)**
+- A **carteira de recebíveis** — **aging** (por faixa), **DSO**, **inadimplência**, visão consolidada
+  → ferramenta de **contas a receber**. Leitura direta de "quanto tenho a receber / prazo médio / quem
+  está em atraso" (o painel de **indicadores** segue trazendo a versão agregada de topo).
+- **Recebíveis por vencimento** (o que entra em cada dia/semana) → ferramenta de **recebíveis por
+  vencimento** — é o que alimenta a projeção de fluxo de caixa com as entradas no dia certo.
+- **Pagamentos e parcelas** (pendências, parcelas vencidas, situação) → ferramenta de **pagamentos**; o
+  **status de conciliação** (lançamentos × extrato) → ferramenta de **conciliação**. Ambas leitura.
+
+**Nota fiscal (NFS-e)**
+- **Consultar** a fila de notas fiscais e seus estados → ferramenta de **notas fiscais**.
+- **Reenviar** uma NFS-e que falhou/foi rejeitada (re-transmite uma nota já criada — baixo risco) →
+  ferramenta de **reenvio de nota fiscal**.
+- **Emitir** uma NFS-e → ferramenta de **emissão de nota fiscal**, **gated por confirmação** (é ato
+  fiscal); dinheiro em modo revisão cai na **fila de revisão** (gate humano). *Cancelar/revisar/dispensar
+  ficam com o humano.*
+
+**Assinatura (ponte com as vendas)**
+- Documentos que **aguardam assinatura** do paciente (orçamento/TCLE) e **enviar/revogar** o link →
+  ferramentas de **assinatura**. Enviar link é **outward-facing** (o paciente recebe e-mail real) →
+  confirme antes.
 
 **Ordem mental para "como está o dinheiro da clínica":**
 saldo de caixa (conferido) → contas a receber (o que vai entrar, com aging) → contas a pagar
@@ -196,6 +217,9 @@ faturando o suficiente?).
   são dos pacientes (parcelas em aberto). Não confunda os dois lados.
 - **Ações que tocam o paciente são outward-facing** (enviar link de assinatura, e-mail) →
   confirme com o usuário antes.
+- **A IA lê o dinheiro; não o move.** Registrar/confirmar pagamento, estorno, pagar despesa e mexer no
+  caixa (sangria/fechamento) são **humano** — fronteira de segurança. A única escrita fiscal da IA é a
+  **NFS-e**, e mesmo essa é **gated** (confirmação; emitir dinheiro-em-revisão cai em fila humana).
 
 ## Limites / o que esta skill NÃO cobre
 - **Antes** do dinheiro circular (preço, tabela, condição/forma de pagamento, orçamento,

@@ -2,7 +2,7 @@
 name: pesquisas-satisfacao
 description: O instrumento de SATISFAÇÃO do paciente no Fluxo Ideal — criar/editar/ativar a pesquisa de CX/NPS (perguntas, gatilho, anonimato), configurar o disparo automático (ligar/desligar, atraso), acompanhar quem foi convidado e como caminhou o convite, e ler os resultados AGREGADOS (NPS, notas médias, distribuição). Use para "cria uma pesquisa de NPS", "liga o disparo pós-consulta", "qual o NPS deste mês?", "qual a taxa de resposta?", "por que o paciente não recebeu?", "reenvia/antecipa o convite".
 audience: [ia, humano]
-depends_on: [pesquisas, satisfacao, nps]
+depends_on: [pesquisa-cx, satisfacao, nps]
 version: 0.2.0
 updated: 2026-07-13
 ---

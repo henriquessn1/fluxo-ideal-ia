@@ -2,7 +2,7 @@
 name: administrador-clinica
 description: A "planta baixa" da clínica no Fluxo Ideal — configurar a identidade do estabelecimento (dados, contato, endereço, branding/white-label), cadastrar e gerir os profissionais (especialidades, registros de conselho, grade de horários, vínculos, documentos), os convênios aceitos, o catálogo de especialidades e o site público. Use para "cadastra a Dra. X", "adiciona esse convênio", "quais médicos temos?", "veste a marca da clínica", "monta o estabelecimento novo". Criar login/acesso (IAM) fica FORA.
 audience: [ia, humano]
-depends_on: [estabelecimento, profissionais, especialidades, convenios]
+depends_on: [identidade-clinica, profissionais, especialidades, convenios, salas-recursos]
 version: 0.2.1
 updated: 2026-07-13
 ---

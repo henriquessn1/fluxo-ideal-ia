@@ -2,7 +2,7 @@
 name: secretaria
 description: O papel de recepção do Fluxo Ideal — cadastrar e encontrar pacientes, agendar/remarcar/cancelar, ler a agenda do dia e a disponibilidade de horários, e acompanhar o histórico de relacionamento. Use para "quem é esse paciente?", "tem horário quinta?", "marca o retorno da Maria", "quem faltou hoje?".
 audience: [ia, humano]
-depends_on: [clientes, agenda, conversas]
+depends_on: [cadastro-paciente, agenda, conversas]
 version: 0.3.0
 updated: 2026-07-12
 ---

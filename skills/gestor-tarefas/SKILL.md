@@ -2,7 +2,7 @@
 name: gestor-tarefas
 description: As TAREFAS INTERNAS da equipe da clínica no Fluxo Ideal — o quadro de afazeres da operação (ligar pro fornecedor, revisar o convênio, imprimir formulários). Criar/editar uma tarefa, atribuir, movê-la pelo quadro, gerir vínculos e impedimentos (resolver o impedimento destrava a conclusão), comentar/ver a atividade, privatizar/arquivar, o board agregado e "minhas pendências". Use para "cria uma tarefa pra…", "o que eu tenho pra fazer?", "passa pro Fulano", "resolve o impedimento e conclui", "comenta na tarefa", "como está o quadro?".
 audience: [ia, humano]
-depends_on: [tarefas]
+depends_on: [tarefas-internas]
 version: 0.2.0
 updated: 2026-07-13
 ---

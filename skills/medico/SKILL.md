@@ -2,7 +2,7 @@
 name: medico
 description: O papel médico assistido por IA no Fluxo Ideal — conduzir e DOCUMENTAR o atendimento (adendo write-only) sem que a IA jamais leia o prontuário. Use para registrar evolução, mover o atendimento e ver a fila, com o clínico protegido.
 audience: [ia, humano]
-depends_on: [atendimento, evolucao-write-only]
+depends_on: [atendimento-clinico, evolucao-write-only]
 version: 0.2.0
 updated: 2026-07-12
 ---

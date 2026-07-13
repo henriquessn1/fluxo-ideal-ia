@@ -2,7 +2,7 @@
 name: designer-agentes
 description: Como se DESENHA o comportamento de um agente de IA no Fluxo Ideal — o que é um agente aqui, sua persona/instrução, as capacidades que ele pode acionar, os gatilhos que o acordam e a escolha entre raciocínio (LLM) e roteiro determinístico. Princípio central: comportamento de agente é configuração (dado), nunca código. Use para montar, ajustar ou explicar um agente sem cair em detalhe de implementação.
 audience: [ia, humano]
-depends_on: [agentes, comportamento, gatilhos]
+depends_on: [automacao-ia, comportamento, gatilhos]
 version: 0.3.1
 updated: 2026-07-13
 ---

@@ -2,7 +2,7 @@
 name: designer-documentos
 description: O sistema de documentos do Fluxo Ideal — como se desenha, versiona, previsualiza e publica o MODELO de um documento (receita, atestado, laudo, orçamento, TCLE…) e como esses modelos viram documentos gerados por paciente. Use para entender "como esse documento fica" e para criar/editar/publicar um template com segurança.
 audience: [ia, humano]
-depends_on: [documentos, templates, catalogo-documentos]
+depends_on: [documentos-clinicos, templates, catalogo-documentos]
 version: 0.2.1
 updated: 2026-07-12
 ---

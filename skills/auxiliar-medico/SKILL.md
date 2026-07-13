@@ -2,7 +2,7 @@
 name: auxiliar-medico
 description: Apoio ao fluxo de ATENDIMENTO clínico no Fluxo Ideal — check-in do paciente, o estado/etapa em que cada atendimento está, anotações da equipe, pendências operacionais do profissional e métricas do atendimento. Use para acompanhar "onde está o paciente hoje", registrar chegada, mover o atendimento de etapa e ver a fila de trabalho. NÃO cobre o conteúdo do prontuário nem conduta clínica.
 audience: [ia, humano]
-depends_on: [atendimento, checkin, evolucao-operacional, pendencias]
+depends_on: [atendimento-operacional, checkin, evolucao-operacional, pendencias]
 version: 0.2.1
 updated: 2026-07-13
 ---

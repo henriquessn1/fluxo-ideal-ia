@@ -3,7 +3,7 @@ name: reportar-problema
 description: Como a IA reporta um BUG ou sugere uma MELHORIA do próprio sistema Fluxo Ideal — e acompanha o desfecho. É a ponte de qualidade: cada report vira um registro estruturado no backlog do time. Reportar é SEGURO e não conserta nada (cai numa fila de revisão). Use quando encontrar um erro/resultado incorreto ao operar uma ferramenta ou tela, tiver uma ideia de melhoria, ou quiser saber o que aconteceu com o que você reportou.
 audience: [ia, humano]
 depends_on: [feedback, qualidade, melhoria-continua]
-version: 0.1.1
+version: 0.1.2
 updated: 2026-07-14
 ---
 
@@ -19,8 +19,9 @@ tempo todo, cada tropeço virando conhecimento acionável.
 - Você **operou uma ferramenta e deu errado**: erro, resultado incorreto, comportamento inesperado
   (ex.: "a ferramenta de gravar devolveu o registro **sem o campo que enviei**", "o total do relatório
   **não bateu** com a soma dos itens", "a ação **retornou erro** mesmo com um filtro válido").
-- Você percebeu uma **melhoria**: um passo que poderia ser automatizado, uma informação que
-  faltou, uma ideia que ajudaria a clínica.
+- Você percebeu uma **melhoria**: um atrito a suavizar (um passo automatizável, uma informação que
+  faltou, um filtro ausente) — **ou uma parte nova do sistema** que a clínica precisaria e que **não
+  existe** (ex.: controle de estoque, folha de pagamento dos colaboradores, comissões).
 - Você quer **saber o desfecho** de um bug/sugestão que **você** reportou antes (foi corrigido?
   o time precisa de mais info?).
 
@@ -72,8 +73,9 @@ Ideias que sustentam tudo:
 ## Glossário
 - **Bug**: um erro/resultado incorreto/comportamento inesperado **do sistema** ao operar uma
   ferramenta ou tela.
-- **Sugestão de melhoria**: uma ideia de como o sistema poderia ser melhor (automação, informação
-  que falta, atrito a remover).
+- **Sugestão de melhoria**: uma ideia de como o sistema poderia ser melhor — de **suavizar um atrito**
+  do que já existe (automação, informação que falta, filtro ausente) a **uma parte nova** que ainda
+  não existe (ex.: controle de estoque, folha de pagamento).
 - **Evidência**: num bug, o par **esperado × obtido** (o que deveria ter acontecido × o que
   aconteceu). O que torna o report acionável.
 - **Severidade**: o quão grave é o bug — de leve a crítico. Ajuda o time a priorizar.
@@ -91,8 +93,9 @@ Ideias que sustentam tudo:
   **aconteceu** e o que você **esperava**. Ajuda muito informar a **área** afetada (ex.: agenda,
   vendas, atendimento), a **ferramenta/rota**, os **passos** para reproduzir e a **severidade**. **Sem
   PII.**
-- **Sugerir uma melhoria** → a ferramenta de **sugestão**. Descreva a ideia e, se souber, a **área**
-  a que se aplica. Sem PII.
+- **Sugerir uma melhoria** → a ferramenta de **sugestão** — de um **atrito a suavizar** a uma
+  **capacidade nova** que falta no sistema (ex.: estoque, folha de pagamento). Descreva a ideia e, se
+  souber, a **área** a que se aplica. Sem PII.
 - **Acompanhar o que você reportou** → a ferramenta de **status dos seus reportes**. Devolve **só os
   seus**, com o desfecho curado (corrigido / não será feito / precisa de info…) e se virou tarefa.
 
@@ -113,11 +116,17 @@ PII) → depois, se quiser, **consulte o desfecho**.
 5. Diga ao usuário que **foi registrado** (não que "já foi corrigido").
 
 ### Sugerir uma melhoria
-1. Descreva o **atrito** ou a **ideia** de forma concreta, **do jeito que você opera** (por
-   ferramenta, não por tela): p.ex. *"para achar um atendimento eu preciso buscar o paciente primeiro
-   e depois cruzar — seria melhor buscar o atendimento direto pelo nome do paciente"*, ou *"a
-   ferramenta de busca não tem filtro por período, então trago tudo e filtro na mão"*.
-2. Aponte a **área**, se souber. Sem PII.
+1. Descreva a **ideia** de forma concreta. Dois tipos valem — os dois são ouro:
+   - **Suavizar um atrito** do que já existe, **do jeito que você opera** (por ferramenta, não por
+     tela): *"para achar um atendimento eu preciso buscar o paciente primeiro e depois cruzar — seria
+     melhor buscar o atendimento direto pelo nome do paciente"*, ou *"a ferramenta de busca não tem
+     filtro por período, então trago tudo e filtro na mão"*.
+   - **Uma parte NOVA do sistema** que ainda não existe — uma capacidade que a clínica precisaria e
+     para a qual **não há ferramenta**: *"não há como controlar o estoque de materiais"*, *"faltaria
+     uma folha de pagamento dos colaboradores"*, *"seria útil um controle de comissões"*. Você opera o
+     sistema todo dia — quando percebe um **buraco de capacidade**, sinalizar é dos feedbacks mais
+     valiosos que existem.
+2. Aponte a **área**, se souber (ou diga que é **capacidade nova**). Sem PII.
 3. **Sugira**. Vira um registro para o time avaliar.
 
 ### Acompanhar / re-verificar

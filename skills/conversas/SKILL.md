@@ -3,7 +3,7 @@ name: conversas
 description: A operação do atendimento ao paciente no Fluxo Ideal via tickets e filas — o inbox e os contadores do setor, o ciclo de uma conversa (atribuir/transferir/escalar/devolver/pausar/resolver/cancelar/reabrir, com CSAT no fechamento), observar (acompanhar, com prazo), comentar por dentro, marcar a timeline, buscar conversas e histórico, o feed multi-canal do paciente, e detectar conversas frustradas (risco de churn). Responder ao paciente e break-glass ficam FORA. Use para "atende esse ticket", "quantos na fila?", "passa pra recepção", "escala isso", "resolve", "quem está insatisfeito?".
 audience: [ia, humano]
 depends_on: [conversas, tickets, filas, observadores]
-version: 0.2.1
+version: 0.2.2
 updated: 2026-07-13
 ---
 
@@ -27,9 +27,9 @@ mensagem, nem de quem só lê a conversa para ter contexto.
 - Anotar um **marco na linha do tempo** da clínica (início de campanha, aviso, feriado).
 
 ## Quando NÃO usar
-- **Escrever/enviar a mensagem** que vai ao paciente (texto do lembrete, e-mail, HSM,
-  disparo) → skill `designer-mensageria`. Aqui você cuida do **thread e do estado**; lá,
-  do **conteúdo**.
+- **O texto** da mensagem que vai ao paciente (assunto/corpo do template, HSM) → `designer-mensageria`
+  (autoria); **enviar/disparar** de fato ao paciente → `comunicacao-paciente`. Aqui você cuida do
+  **thread e do estado**, não do conteúdo nem do disparo.
 - Só **ler** a conversa para dar contexto num atendimento telefônico, sem operar o ciclo →
   skill `secretaria` (ela lê; esta **opera**).
 - Agenda, cadastro de paciente, marcar/remarcar → `secretaria`.
@@ -81,7 +81,7 @@ Ideias que sustentam tudo:
   próprio acesso. Observação pode ser **temporária** (some sozinha quando o marco chega).
 - **Comentar é por dentro.** Uma nota interna fica **só para a equipe** e **nunca** vai ao
   paciente. É o lugar de justificar uma transição, registrar o que foi decidido, ou passar
-  contexto para quem assumir. Para falar **com** o paciente, é `designer-mensageria`.
+  contexto para quem assumir. Para **falar com** o paciente (enviar mensagem governada), é `comunicacao-paciente`.
 - **Marcador de timeline é global, não do paciente.** Um marco (início de campanha, aviso)
   aparece sobreposto na linha do tempo de **todos** os pacientes cuja janela pegar aquela
   data — é um recado da clínica, não um evento de uma pessoa.
@@ -237,12 +237,12 @@ desobservar no fim).
   para "sem resolução" (com motivo), não para fugir da nota.
 - **Transferir mantém aberto; resolver fecha.** Não misture handoff com fechamento.
 - **Atribuir dá dono; transferir para fila tira o dono.** São movimentos opostos.
-- **Nota interna nunca vai ao paciente.** Comentar é rastro de equipe; falar com o paciente é
-  `designer-mensageria`.
+- **Nota interna nunca vai ao paciente.** Comentar é rastro de equipe; falar com o paciente (enviar) é
+  `comunicacao-paciente`.
 - **Observar não é autorizar.** Inscrição só direciona eventos; o acesso ao conteúdo depende do
   próprio direito do observador (anti-vazamento). Observação pode expirar.
 - **Responder ao paciente e break-glass ficam FORA — por design.** Enviar mensagem ao paciente é
-  `designer-mensageria`; **revelar o conteúdo privado** de um ticket escalado (break-glass) é ato
+  `comunicacao-paciente`; **revelar o conteúdo privado** de um ticket escalado (break-glass) é ato
   auditado à parte, não desta via. Este papel opera **estado e encaminhamento**, não destrava sigilo
   nem fala pelo thread.
 - **Marco de timeline é global.** Confirme antes — impacta a visão de todos os pacientes na
@@ -253,8 +253,8 @@ desobservar no fim).
   marco agem no mundo real — confirme com o usuário. A autorização efetiva é da plataforma.
 
 ## Limites / o que esta skill NÃO cobre
-- **Escrever ou enviar a mensagem ao paciente** (texto, e-mail, HSM, disparo, checar entrega)
-  → `designer-mensageria`. Esta skill cuida do **thread/fila/estado**, não do **conteúdo**.
+- **O texto** da mensagem ao paciente (template, HSM) → `designer-mensageria` (autoria); **enviar /
+  disparar / checar entrega** → `comunicacao-paciente`. Esta skill cuida do **thread/fila/estado**.
 - **Revelar conteúdo privado** de um ticket escalado (**break-glass**) fica **fora** desta via, por
   design — é ato auditado à parte. A skill opera o estado; não destrava sigilo.
 - **Só ler a conversa para contexto**, sem operar o ciclo → `secretaria` (lê); esta **opera**.

@@ -36,7 +36,8 @@ Cada skill serve aos dois públicos no mesmo arquivo — a diferença está na d
 | [auxiliar-medico](skills/auxiliar-medico/SKILL.md) | Atendimento clínico (operacional) | check-in, etapas do atendimento, comentários da equipe, pendências, métricas | ✅ |
 | [medico](skills/medico/SKILL.md) | Médico (assistencial) | conduzir + documentar o atendimento (adendo write-only), fila do dia — **IA nunca lê prontuário** | ✅ |
 | [designer-documentos](skills/designer-documentos/SKILL.md) | Documentos | templates (sistema × design), conteúdo/versão, simular, publicar, documentos por paciente | ✅ |
-| [designer-mensageria](skills/designer-mensageria/SKILL.md) | Comunicação | templates, canais (WhatsApp/HSM, e-mail), enviar por intenção, checar entrega | ✅ |
+| [designer-mensageria](skills/designer-mensageria/SKILL.md) | Autoria de mensageria | templates, canais (WhatsApp/HSM, e-mail), aprovação de HSM — **desenhar**, não enviar | ✅ |
+| [comunicacao-paciente](skills/comunicacao-paciente/SKILL.md) | Envio governado ao paciente | enviar e-mail por template, intenção governada (quiet-hours/teto/idempotência), checar entrega | ✅ |
 | [financeiro](skills/financeiro/SKILL.md) | O dinheiro depois | pagamentos, parcelas, contas a receber/pagar, caixa, fluxo de caixa, break-even, nota fiscal | ✅ |
 | [faturamento-convenio](skills/faturamento-convenio/SKILL.md) | Financeiro de convênio (TISS) | faturar guias/lotes, demonstrativo, glosa, recurso | ✅ |
 | [designer-agentes](skills/designer-agentes/SKILL.md) | Agentes de IA | desenhar comportamento (persona, capacidades, gatilhos, LLM × script) | ✅ |

@@ -24,7 +24,7 @@
 - [indicadores](https://fluxoideal.com/skills/indicadores/SKILL.md): a visão de gestão/BI — o dashboard executivo que cruza agenda, comercial, atendimento, financeiro e satisfação, e a exportação de dados.
 - [administrador-clinica](https://fluxoideal.com/skills/administrador-clinica/SKILL.md): configurar a clínica — dados do estabelecimento, branding, profissionais e convênios aceitos.
 - [gestor-tarefas](https://fluxoideal.com/skills/gestor-tarefas/SKILL.md): afazeres internos da equipe — criar, atribuir, mover pelos estados, buscar e ver "minhas pendências".
-- [reportar-problema](https://fluxoideal.com/skills/reportar-problema/SKILL.md): reportar um bug ou sugerir uma melhoria do próprio sistema — com evidência (esperado × obtido), sem PII — e acompanhar o desfecho. Ação segura e universal (qualquer papel).
+- [reportar-e-sugerir](https://fluxoideal.com/skills/reportar-e-sugerir/SKILL.md): reportar um bug ou sugerir uma melhoria do próprio sistema (de suavizar um atrito a apontar uma capacidade que falta) — com evidência (esperado × obtido), sem PII — e acompanhar o desfecho. Ação segura e universal (qualquer papel).
 
 ## Meta
 
@@ -2635,15 +2635,15 @@ Três ideias que sustentam tudo:
 
 
 # ============================================================
-# SKILL: reportar-problema  —  https://fluxoideal.com/skills/reportar-problema/SKILL.md
+# SKILL: reportar-e-sugerir  —  https://fluxoideal.com/skills/reportar-e-sugerir/SKILL.md
 # ============================================================
 
 ---
-name: reportar-problema
-description: Como a IA reporta um BUG ou sugere uma MELHORIA do próprio sistema Fluxo Ideal — e acompanha o desfecho. É a ponte de qualidade: cada report vira um registro estruturado no backlog do time. Reportar é SEGURO e não conserta nada (cai numa fila de revisão). Use quando encontrar um erro/resultado incorreto ao operar uma ferramenta ou tela, tiver uma ideia de melhoria, ou quiser saber o que aconteceu com o que você reportou.
+name: reportar-e-sugerir
+description: Como a IA reporta um BUG ou sugere uma MELHORIA do próprio sistema Fluxo Ideal (de suavizar um atrito a apontar uma capacidade que falta, como estoque ou folha de pagamento) — e acompanha o desfecho. É a ponte de qualidade: cada report vira um registro estruturado no backlog do time. Reportar é SEGURO e não conserta nada (cai numa fila de revisão). Use quando encontrar um erro/resultado incorreto ao operar uma ferramenta, tiver uma ideia de melhoria, ou quiser saber o que aconteceu com o que você reportou.
 audience: [ia, humano]
 depends_on: [feedback, qualidade, melhoria-continua]
-version: 0.1.2
+version: 0.1.3
 updated: 2026-07-14
 ---
 

@@ -24,7 +24,7 @@
 - [indicadores](https://fluxoideal.com/skills/indicadores/SKILL.md): a visão de gestão/BI — o dashboard executivo que cruza agenda, comercial, atendimento, financeiro e satisfação, e a exportação de dados.
 - [administrador-clinica](https://fluxoideal.com/skills/administrador-clinica/SKILL.md): configurar a clínica — dados do estabelecimento, branding, profissionais e convênios aceitos.
 - [gestor-tarefas](https://fluxoideal.com/skills/gestor-tarefas/SKILL.md): afazeres internos da equipe — criar, atribuir, mover pelos estados, buscar e ver "minhas pendências".
-- [reportar-problema](https://fluxoideal.com/skills/reportar-problema/SKILL.md): reportar um bug ou sugerir uma melhoria do próprio sistema — com evidência (esperado × obtido), sem PII — e acompanhar o desfecho. Ação segura e universal (qualquer papel).
+- [reportar-e-sugerir](https://fluxoideal.com/skills/reportar-e-sugerir/SKILL.md): reportar um bug ou sugerir uma melhoria do próprio sistema (de suavizar um atrito a apontar uma capacidade que falta) — com evidência (esperado × obtido), sem PII — e acompanhar o desfecho. Ação segura e universal (qualquer papel).
 
 ## Meta
 

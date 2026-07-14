@@ -1,9 +1,9 @@
 ---
-name: reportar-problema
-description: Como a IA reporta um BUG ou sugere uma MELHORIA do próprio sistema Fluxo Ideal — e acompanha o desfecho. É a ponte de qualidade: cada report vira um registro estruturado no backlog do time. Reportar é SEGURO e não conserta nada (cai numa fila de revisão). Use quando encontrar um erro/resultado incorreto ao operar uma ferramenta ou tela, tiver uma ideia de melhoria, ou quiser saber o que aconteceu com o que você reportou.
+name: reportar-e-sugerir
+description: Como a IA reporta um BUG ou sugere uma MELHORIA do próprio sistema Fluxo Ideal (de suavizar um atrito a apontar uma capacidade que falta, como estoque ou folha de pagamento) — e acompanha o desfecho. É a ponte de qualidade: cada report vira um registro estruturado no backlog do time. Reportar é SEGURO e não conserta nada (cai numa fila de revisão). Use quando encontrar um erro/resultado incorreto ao operar uma ferramenta, tiver uma ideia de melhoria, ou quiser saber o que aconteceu com o que você reportou.
 audience: [ia, humano]
 depends_on: [feedback, qualidade, melhoria-continua]
-version: 0.1.2
+version: 0.1.3
 updated: 2026-07-14
 ---
 

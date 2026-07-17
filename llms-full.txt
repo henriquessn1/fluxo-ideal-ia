@@ -1870,7 +1870,7 @@ name: gestor-tarefas
 description: As TAREFAS INTERNAS da equipe da clínica no Fluxo Ideal — o quadro de afazeres da operação (ligar pro fornecedor, revisar o convênio, imprimir formulários) e, cada vez mais, o TECIDO que conecta a operação: a tarefa virou cidadã de primeira classe e aparece no contexto (na agenda do dia, no check-in, na ficha do paciente/atendimento/agendamento), além do quadro próprio. Criar/editar uma tarefa, atribuir, movê-la pelo quadro, gerir vínculos e impedimentos (resolver o impedimento destrava a conclusão), comentar/ver a atividade, privatizar/arquivar, o board agregado e "minhas pendências". Use para "cria uma tarefa pra…", "o que eu tenho pra fazer?", "passa pro Fulano", "resolve o impedimento e conclui", "que tarefas tem esse paciente/agendamento?", "como está o quadro?".
 audience: [ia, humano]
 depends_on: [tarefas-internas]
-version: 0.3.0
+version: 0.3.1
 updated: 2026-07-17
 ---
 
@@ -2010,6 +2010,11 @@ Ideias que sustentam o domínio:
   pessoa, ela simplesmente "não existe" pra você.
 - **A visão do quadro agregada** (quantas em cada coluna — o placar) → ferramenta de **board**
   (contagem por estado, com preview opcional).
+- **"Quais destes têm tarefa pendente?"** — contar tarefas por **entidade vinculada, em lote**
+  (vários pacientes/atendimentos/agendamentos de uma vez) → ferramenta de **contagem por vínculo**.
+  É o que acende o **badge** no contexto (agenda/check-in/ficha): responde de uma vez, sem listar,
+  quantas tarefas **abertas** cada item tem — e conta **uma só** quando a tarefa está ligada a mais
+  de um deles (ex.: ao agendamento **e** ao paciente). Para a **lista** em si, use a busca.
 - **A trilha de uma tarefa** (comentários + log do que aconteceu) → ferramenta de **atividades da tarefa**.
 
 **Operar o quadro** (mudam o mundo — confirmam antes)

@@ -26,6 +26,7 @@
 - [gestor-tarefas](https://fluxoideal.com/skills/gestor-tarefas/SKILL.md): afazeres internos da equipe — criar, atribuir, mover pelos estados, buscar e ver "minhas pendências".
 - [jornada](https://fluxoideal.com/skills/jornada/SKILL.md): a Jornada de Cuidado — o caso longo do paciente (cirurgia/procedimento com pré e pós): configurar o modelo (fases, etapas, marcos), acompanhar onde cada paciente está (fase, quem travou) e operar a jornada; a fase é sempre derivada dos marcos, que são tarefas.
 - [reportar-e-sugerir](https://fluxoideal.com/skills/reportar-e-sugerir/SKILL.md): reportar um bug ou sugerir uma melhoria do próprio sistema (de suavizar um atrito a apontar uma capacidade que falta) — com evidência (esperado × obtido), sem PII — e acompanhar o desfecho. Ação segura e universal (qualquer papel).
+- [navegar-central](https://fluxoideal.com/skills/navegar-central/SKILL.md): como GUIAR o usuário até a tela certa da Central (o painel da clínica) — sem navegar por ele — para as ações que são dele (importar um time de agentes, conceder um acesso, configurar): o caminho, os passos, e um link clicável quando se sabe o endereço da Central. Universal (qualquer papel).
 
 ## Meta
 

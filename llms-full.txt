@@ -1867,11 +1867,11 @@ faturando o suficiente?).
 
 ---
 name: gestor-tarefas
-description: As TAREFAS INTERNAS da equipe da clínica no Fluxo Ideal — o quadro de afazeres da operação (ligar pro fornecedor, revisar o convênio, imprimir formulários). Criar/editar uma tarefa, atribuir, movê-la pelo quadro, gerir vínculos e impedimentos (resolver o impedimento destrava a conclusão), comentar/ver a atividade, privatizar/arquivar, o board agregado e "minhas pendências". Use para "cria uma tarefa pra…", "o que eu tenho pra fazer?", "passa pro Fulano", "resolve o impedimento e conclui", "comenta na tarefa", "como está o quadro?".
+description: As TAREFAS INTERNAS da equipe da clínica no Fluxo Ideal — o quadro de afazeres da operação (ligar pro fornecedor, revisar o convênio, imprimir formulários) e, cada vez mais, o TECIDO que conecta a operação: a tarefa virou cidadã de primeira classe e aparece no contexto (na agenda do dia, no check-in, na ficha do paciente/atendimento/agendamento), além do quadro próprio. Criar/editar uma tarefa, atribuir, movê-la pelo quadro, gerir vínculos e impedimentos (resolver o impedimento destrava a conclusão), comentar/ver a atividade, privatizar/arquivar, o board agregado e "minhas pendências". Use para "cria uma tarefa pra…", "o que eu tenho pra fazer?", "passa pro Fulano", "resolve o impedimento e conclui", "que tarefas tem esse paciente/agendamento?", "como está o quadro?".
 audience: [ia, humano]
 depends_on: [tarefas-internas]
-version: 0.2.0
-updated: 2026-07-13
+version: 0.3.0
+updated: 2026-07-17
 ---
 
 # Gestor de tarefas internas
@@ -1881,6 +1881,12 @@ Operar o **quadro de afazeres da equipe** de uma clínica: o trabalho interno a 
 convênio, organizar a agenda da semana, revisar um cadastro. Este papel **cria** a tarefa, dá a
 ela um **dono**, move-a pelas colunas do quadro e mostra a lista de pendências de quem trabalha.
 É a lista de "to-do" da operação, não o prontuário e não a conversa.
+
+E, cada vez mais, a tarefa é o **tecido que conecta a operação**: ela deixou de viver só num quadro à
+parte e virou **cidadã de primeira classe** — aparece **no contexto onde importa** (na agenda do dia,
+no check-in, na ficha do paciente/atendimento/agendamento) e é o material de que **outros fluxos** são
+feitos (os **marcos de uma jornada SÃO tarefas** — ver `jornada`). Continua sendo to-do **interno**;
+o que mudou é que ela **vem até você** no lugar certo, além de ter o board próprio.
 
 ## Quando usar
 - "Cria uma tarefa pra ligar pro laboratório amanhã", "anota pra comprar luvas".
@@ -1900,8 +1906,28 @@ ela um **dono**, move-a pelas colunas do quadro e mostra a lista de pendências 
 - **Pendência comercial/financeira como número do negócio** (orçamentos a vencer, retornos a
   cobrar, contas a pagar) → skills `precificador` / `financeiro`. Você pode **criar uma tarefa**
   que aponte pra um desses itens, mas o item em si vive no domínio dele.
+- **Desenhar/acompanhar o caso longo do paciente** (cirurgia com etapas pré/pós, fases) → skill
+  `jornada`. Lá os **marcos** de uma jornada **são tarefas** — você as **opera** por aqui (mover,
+  concluir, destravar), mas o **desenho** do caso (fases, etapas, quando o marco fecha) é da `jornada`.
 - **Agenda, cadastro de paciente, mensagem ao paciente** → `secretaria` / `conversas` /
   `designer-mensageria`.
+
+## A tarefa é transversal — aparece onde o trabalho está
+
+A tarefa é **cidadã de primeira classe** da operação: além do quadro próprio, ela **aparece no
+contexto onde importa**, sem obrigar ninguém a abrir o board.
+
+- **Na agenda do dia e no check-in** — cada compromisso sinaliza se tem tarefa pendente (um contador);
+  dá pra abrir o painel, **criar já vinculada** (ao agendamento **e** ao paciente) e **concluir** ali mesmo.
+- **Na ficha do paciente, do atendimento e do agendamento** — um painel lateral lista as tarefas
+  **daquele contexto**, com ações rápidas (iniciar/concluir) e o **prazo** em destaque quando atrasa.
+- **Dois recortes naturais** ao surgir num contexto: as **daquela entidade** (deste agendamento/
+  atendimento) e as **do paciente** (todas as abertas dele) — **sem duplicar**: uma tarefa ligada ao
+  agendamento **e** ao paciente conta **uma só**.
+- **É o tecido que conecta** — a mesma tarefa pode ser o **marco de uma jornada** (`jornada`), o
+  afazer atrelado a um orçamento, ou o lembrete de um retorno. O **vínculo** (abaixo) é o que faz a
+  tarefa aparecer no lugar certo. O quadro geral continua existindo; o que mudou é que a tarefa também
+  **vem até você** no contexto.
 
 ## Modelo mental
 
@@ -1940,9 +1966,11 @@ Ideias que sustentam o domínio:
 - **Comentário e atividade dão a história da tarefa.** Além dos campos, a tarefa tem uma **trilha**:
   comentários livres da equipe e um **log automático** do que aconteceu (mudou de dono, de estado…).
   É rastro interno — nunca vai ao paciente e respeita a mesma privacidade (tarefa privada de outro não se vê).
-- **Vínculo é referência, não posse.** Ligar uma tarefa a um paciente, atendimento, orçamento etc.
-  é só **contexto** ("essa tarefa é sobre aquilo") — ajuda a achar e a entender. **Não** dá acesso
-  ao item vinculado nem move nada nele.
+- **Vínculo é referência, não posse — e é o que faz a tarefa aparecer no contexto.** Ligar uma
+  tarefa a um paciente, atendimento, agendamento, orçamento ou venda é só **contexto** ("essa tarefa
+  é sobre aquilo") — ajuda a achar, a entender e a **surgir na ficha/agenda daquele item**. **Não**
+  dá acesso ao item vinculado nem move nada nele. Uma tarefa pode ter **mais de um** vínculo (ex.:
+  do agendamento **e** do paciente) — e ainda assim conta como **uma**.
 - **Pública por padrão; privada é da tela.** Uma tarefa nasce **pública** (a equipe enxerga).
   Torná-la **privada** (visível só ao destinatário) é uma ação da interface da clínica, não deste
   papel. Tarefa privada de **outra** pessoa é invisível — nem aparece na busca, nem abre no detalhe

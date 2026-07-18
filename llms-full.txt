@@ -7,6 +7,8 @@
 
 > **Tudo num arquivo só (para agentes que preferem um único fetch):** https://fluxoideal.com/llms-full.txt
 
+> **Para NAVEGAR ou CLONAR tudo (explorar a árvore, listar skills/agents, `git clone`):** o repositório público em **https://github.com/henriquessn1/fluxo-ideal-ia**. O site `fluxoideal.com` **serve** cada arquivo por URL conhecida (este `llms.txt` é o índice → cada `skills/<x>/SKILL.md` e `agents/<time>/manifest.json`), mas **não lista diretórios**; uma IA que quer **explorar/enumerar** (em vez de só ler o índice) deve usar o GitHub (clone ou a API de conteúdo).
+
 ## Skills
 
 - [precificador](https://fluxoideal.com/skills/precificador/SKILL.md): o sistema de precificação — catálogo, tabelas de preço, condições e formas de pagamento, favoritos, cobertura de convênio/coparticipação, e como tudo converge em orçamento e venda.

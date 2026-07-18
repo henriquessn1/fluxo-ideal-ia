@@ -900,8 +900,8 @@ name: designer-agentes
 description: Como se DESENHA o comportamento de um agente de IA no Fluxo Ideal — o que é um agente aqui, sua persona/instrução, as capacidades (capabilities nomeadas) que ele pode acionar, os gatilhos que o acordam e a escolha entre raciocínio (LLM) e roteiro determinístico. Antes de criar, checar o REGISTRO público de times prontos para reusar. Princípio central: comportamento de agente é configuração (dado), nunca código. Use para reusar, montar, ajustar ou explicar um agente sem cair em detalhe de implementação.
 audience: [ia, humano]
 depends_on: [automacao-ia, comportamento, gatilhos]
-version: 0.4.0
-updated: 2026-07-17
+version: 0.4.1
+updated: 2026-07-18
 ---
 
 # Designer de agentes
@@ -1018,8 +1018,10 @@ Cinco verdades operacionais:
 - **Time de agentes**: um conjunto de agentes que colaboram num fluxo, descritos juntos num
   **manifesto declarativo** (JSON). Um agente pode **referenciar** outro do mesmo time e o time pode ter
   **valores ajustáveis por clínica** (knobs).
-- **Registro (de agentes)**: um **catálogo público** de times prontos (oficiais) que qualquer clínica
-  pode **instalar por link**. É o primeiro lugar a olhar: reusar um time pronto é melhor que redesenhar.
+- **Registro (de agentes)**: um **catálogo público** de times prontos (oficiais), em
+  **`https://fluxoideal.com/agents/`** (índice na seção "Agents" do `llms.txt` e no `agents/README.md`),
+  que qualquer clínica pode **instalar por link**. É o primeiro lugar a olhar: reusar um time pronto é
+  melhor que redesenhar.
   O manifesto publicado cita **capabilities por nome** (sem endereços internos) e declara as
   **permissões** que o time pede — para a clínica consentir com consciência.
 - **Cartão de risco**: ao instalar, a Central mostra em bom português o que o time vai poder fazer —
@@ -1035,8 +1037,12 @@ Cinco verdades operacionais:
 > Central**. A execução de qualquer ação depende de **autorização** aplicada pela plataforma.
 
 - **Reusar do registro (ANTES de tudo)** → veja se já existe um time que resolve o problema no
-  **registro público** de agentes. Se existe, instalar é **colar o link** na Central e ajustar os
-  knobs — sem desenhar nada. Comece sempre por aqui.
+  **registro público** de agentes, em **`https://fluxoideal.com/agents/`**. Para descobrir **o que já
+  existe**, olhe a **seção "Agents" do índice** `https://fluxoideal.com/llms.txt` (ou baixe
+  `https://fluxoideal.com/agents/README.md`, que lista e descreve os times) — a listagem de diretório
+  não é navegável, então o índice/README é o mapa. O manifesto de cada time fica em
+  `https://fluxoideal.com/agents/<time>/manifest.json`. Se um time resolve, instalar é **colar esse
+  link** na Central e ajustar os knobs — sem desenhar nada. Comece sempre por aqui.
 - **Consultar o material de desenho** → a IA carrega, **em contexto autenticado** (não público), o
   **schema do manifesto** e os catálogos reais: as **capabilities** que existem (o que um agente pode
   acionar, por nome), os **tipos de evento** (gatilhos), os **perfis** e os **modelos de LLM**.
@@ -1062,11 +1068,13 @@ Cinco verdades operacionais:
 ## Fluxos comuns
 
 ### Reusar um time do registro (antes de criar do zero)
-Antes de desenhar, pergunte: **"isso já existe?"** O registro público tem times oficiais (confirmação
-de presença, briefing de contexto, jornada de cuidado, avisos de jornada…). Se um deles resolve,
-instalar é **colar o link** na Central e ajustar os knobs — sem desenhar nada, e vendo o **cartão de
-risco** antes de aplicar. Só desenhe do zero o que o registro **não** cobre; e, se você criar algo
-genérico e útil, ele pode virar um novo time do registro.
+Antes de desenhar, pergunte: **"isso já existe?"** — e vá conferir em **`https://fluxoideal.com/agents/`**
+(a seção "Agents" do `llms.txt` e o `agents/README.md` listam os times). O registro público tem times
+oficiais (confirmação de presença, briefing de contexto, jornada de cuidado, avisos de jornada…). Se um
+deles resolve, instalar é **colar o link do `manifest.json`** (`.../agents/<time>/manifest.json`) na
+Central e ajustar os knobs — sem desenhar nada, e vendo o **cartão de risco** antes de aplicar. Só
+desenhe do zero o que o registro **não** cobre; e, se você criar algo genérico e útil, ele pode virar um
+novo time do registro.
 
 ### Desenhar um agente que reage à resposta do paciente
 1. **Gatilho**: escolha o evento que representa "o paciente respondeu" e filtre para as conversas que

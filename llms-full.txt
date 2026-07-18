@@ -902,7 +902,7 @@ name: designer-agentes
 description: Como se DESENHA o comportamento de um agente de IA no Fluxo Ideal — o que é um agente aqui, sua persona/instrução, as capacidades (capabilities nomeadas) que ele pode acionar, os gatilhos que o acordam e a escolha entre raciocínio (LLM) e roteiro determinístico. Antes de criar, checar o REGISTRO público de times prontos para reusar. Princípio central: comportamento de agente é configuração (dado), nunca código. Use para reusar, montar, ajustar ou explicar um agente sem cair em detalhe de implementação.
 audience: [ia, humano]
 depends_on: [automacao-ia, comportamento, gatilhos]
-version: 0.4.1
+version: 0.4.2
 updated: 2026-07-18
 ---
 
@@ -1042,7 +1042,9 @@ Cinco verdades operacionais:
   **registro público** de agentes, em **`https://fluxoideal.com/agents/`**. Para descobrir **o que já
   existe**, olhe a **seção "Agents" do índice** `https://fluxoideal.com/llms.txt` (ou baixe
   `https://fluxoideal.com/agents/README.md`, que lista e descreve os times) — a listagem de diretório
-  não é navegável, então o índice/README é o mapa. O manifesto de cada time fica em
+  **não é navegável pelo site** (o site *serve* arquivos por URL, não lista pastas), então o
+  índice/README é o mapa; se a IA quiser **explorar/clonar** a árvore inteira, o repositório público é
+  **`https://github.com/henriquessn1/fluxo-ideal-ia`**. O manifesto de cada time fica em
   `https://fluxoideal.com/agents/<time>/manifest.json`. Se um time resolve, instalar é **colar esse
   link** na Central e ajustar os knobs — sem desenhar nada. Comece sempre por aqui.
 - **Consultar o material de desenho** → a IA carrega, **em contexto autenticado** (não público), o

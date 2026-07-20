@@ -3,7 +3,7 @@ name: designer-documentos
 description: O sistema de documentos do Fluxo Ideal — como se desenha, versiona, previsualiza e publica o MODELO de um documento (receita, atestado, laudo, orçamento, TCLE…) e como esses modelos viram documentos gerados por paciente. Cobre também os TEMPLATES DE TERMOS (o texto legal versionado de aceite/intercorrências/itens não inclusos/TCLE que entra nos orçamentos) — o CONTEÚDO, distinto da fôrma HTML. Use para entender "como esse documento fica", para criar/editar/publicar um template com segurança e para redigir/versionar os termos.
 audience: [ia, humano]
 depends_on: [documentos-clinicos, templates, catalogo-documentos, termos-orcamento]
-version: 0.3.0
+version: 0.3.1
 updated: 2026-07-19
 ---
 
@@ -78,6 +78,15 @@ Quatro ideias sustentam tudo:
   clínica), **não** no catálogo de design. Mexer na fôrma HTML **não** muda o texto do termo,
   e vice-versa. Cada **tipo de termo** (declaração de aceite, intercorrências, itens não inclusos, TCLE,
   outros) pode ter vários templates, e **um** deles é o **padrão** — o que o orçamento novo já traz.
+- **O tipo TCLE tem caminho próprio — é o que muda de verdade.** Os tipos declaração de aceite,
+  intercorrências, itens não inclusos e outros são **blocos de texto** que entram no orçamento e pronto.
+  O **TCLE** é diferente: seu template é o **molde de um consentimento assinável**. Quando o TCLE é
+  aplicado a uma venda, ele vira um **documento próprio, juridicamente forte** — com o **texto travado**
+  (snapshot), assinaturas do **médico e do paciente**, e obrigatoriedade/validade. Ou seja: aqui você
+  **redige e versiona o molde do TCLE** (o texto + os itens de consentimento + o tempo de leitura); a
+  **coleta das assinaturas** e a geração do documento assinável **não** são desta skill (é a plataforma,
+  ato jurídico). É a diferença entre **escrever a minuta** e **assinar o contrato**. Nos outros tipos
+  essa segunda camada nem existe.
 
 **Distinção digital × impresso:** um vínculo pode ter um modelo para a via **digital** e outro para a
 **impressa**. São dois templates para o mesmo tipo, escolhidos conforme a saída.
@@ -120,7 +129,9 @@ Quatro ideias sustentam tudo:
   opcionalmente, os **itens de consentimento** e um **tempo mínimo de leitura**.
 - **Tipo de termo**: a categoria do termo — **declaração de aceite**, **intercorrências**, **itens não
   inclusos**, **TCLE** (consentimento) e **outros**. Cada tipo pode ter vários templates; **um** é o
-  **padrão**.
+  **padrão**. ⚠️ **O TCLE é o tipo especial**: enquanto os outros são blocos de texto no orçamento, o
+  molde de TCLE gera um **documento assinável** (texto travado + assinaturas médico/paciente) quando
+  aplicado a uma venda. Aqui você cuida do **molde**; o assinável é da plataforma.
 - **Padrão do tipo**: o template que o **orçamento novo já traz** para aquele tipo. Definir um novo
   padrão **desmarca** o anterior (é sempre **um** por tipo).
 - **Versão do termo**: como no design, o conteúdo é **versionado** — mas aqui a regra é automática:

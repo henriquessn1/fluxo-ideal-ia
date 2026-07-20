@@ -3,7 +3,7 @@ name: designer-documentos
 description: O sistema de documentos do Fluxo Ideal — como se desenha, versiona, previsualiza e publica o MODELO de um documento (receita, atestado, laudo, orçamento, TCLE…) e como esses modelos viram documentos gerados por paciente. Cobre BLOCOS REUTILIZÁVEIS (cabeçalho/rodapé/assinatura/cláusula incluídos em vários modelos — sempre reaproveitar em vez de duplicar HTML), nascer um corpo do zero (inclusive migrar DOCX→HTML, herdando as habilitações do legado pra o documento não sumir do picker), GERIR HABILITAÇÕES (quem pode emitir cada documento) e os TEMPLATES DE TERMOS (o texto legal versionado de aceite/intercorrências/itens não inclusos/TCLE que entra nos orçamentos) — o CONTEÚDO, distinto da fôrma HTML. Use para entender "como esse documento fica", para criar/editar/publicar um template com segurança, reaproveitar blocos e redigir/versionar os termos.
 audience: [ia, humano]
 depends_on: [documentos-clinicos, templates, catalogo-documentos, termos-orcamento]
-version: 0.4.2
+version: 0.4.3
 updated: 2026-07-20
 ---
 
@@ -142,8 +142,11 @@ Algumas ideias sustentam tudo:
   modelo (a inspeção de variáveis do modelo já traz as dos blocos incluídos).
 
 **Assets**
-- **Asset**: imagem/logo usada no design (ex.: logo no cabeçalho). Um asset em uso não some sem confirmação
-  explícita (o sistema avisa onde ele é referenciado).
+- **Asset**: arquivo usado no design — **imagem/logo** (ex.: logo no cabeçalho) ou **folha de estilo (CSS)**
+  do design system. Um asset em uso não some sem confirmação explícita (o sistema avisa onde ele é
+  referenciado). Dá para **ler o conteúdo** de um asset antes de mexer nele: os de **texto** (CSS, SVG)
+  vêm com o conteúdo **à mão** para você propor a mudança; os **binários** (imagens) vêm como **referência**
+  (a leitura fiel do texto é o que permite editar sem sobrescrever às cegas).
 
 **Modelos de sistema**
 - **Orçamento** e **TCLE**: os dois modelos **globais** (admin-only) que fogem do catálogo de design.
@@ -222,10 +225,15 @@ Algumas ideias sustentam tudo:
   estrutura de dados como uma unidade → ferramentas de **modelo** (listar/gerir). Só HTML/DB — **DOCX e
   HTML-em-disco ficam fora**.
 
-**Gerir imagens do design**
-- **Listar/enviar/excluir assets** (logos/imagens) e **ver onde um asset é usado** (antes de excluir)
-  → ferramenta que **gerencia assets** (+ consulta de uso). Excluir um asset **em uso** exige
-  confirmação/forçar (o sistema mostra onde ele é referenciado).
+**Gerir imagens e estilos do design**
+- **Ler o conteúdo de um asset** (a folha de estilo/CSS ou um SVG vigente) **antes de sobrescrevê-lo**
+  → ferramenta que **gerencia assets** (ação de **leitura de conteúdo**). É o passo que fecha o ciclo
+  **ler → modificar → gravar**: nunca reenvie um asset por cima sem ler o conteúdo atual antes — o envio
+  com sobrescrita substitui **às cegas**. Texto (CSS/SVG) vem **à mão** para propor o diff; binário vem
+  como **referência**.
+- **Listar/enviar/excluir assets** (logos/imagens/estilos) e **ver onde um asset é usado** (antes de
+  excluir) → a mesma ferramenta (+ consulta de uso). Excluir um asset **em uso** exige confirmação/forçar
+  (o sistema mostra onde ele é referenciado).
 
 **Prontuário gráfico (diagramas anatômicos, #1129)**
 - **Navegar a biblioteca de diagramas** — as imagens-base (rosto, corpo, arcada dentária, olho…) sobre
@@ -324,10 +332,13 @@ Algumas ideias sustentam tudo:
 5. Se algum profissional ainda ficou de fora (ou o legado não tinha as habilitações certas), **habilite/
    desabilite** direto (gerir habilitações) e confira **quem pode emitir** o tipo-template.
 
-### Trocar um logo/imagem do design
-1. **Envie** o asset novo (ou liste os existentes).
-2. **Ajuste o rascunho** do template para referenciar o asset.
-3. **Simule** e **publique**. Para **excluir** um asset em uso, o sistema **avisa onde** ele aparece —
+### Trocar um logo/imagem ou ajustar um estilo (CSS) do design
+1. Se vai **sobrescrever** um asset existente (ex.: editar a folha de estilo do design system), **leia o
+   conteúdo atual primeiro** — texto (CSS/SVG) vem à mão para você propor a mudança sobre ele. **Nunca**
+   reenvie por cima às cegas (a sobrescrita substitui o conteúdo vigente sem volta).
+2. **Envie** o asset (novo, ou a versão ajustada a partir do que você leu), ou liste os existentes.
+3. **Ajuste o rascunho** do template para referenciar o asset, se for o caso.
+4. **Simule** e **publique**. Para **excluir** um asset em uso, o sistema **avisa onde** ele aparece —
    só sai com confirmação/forçar.
 
 ### Redigir ou atualizar um termo (ex.: o texto do TCLE)
@@ -367,6 +378,9 @@ tipo/modelo aplicável → ler a versão atual → **rascunho** com a mudança �
   clone **não** altera o original. Só **crie do zero** quando não há de onde clonar (ex.: migração de DOCX).
 - **Digital e impresso podem ter modelos distintos** para o mesmo tipo.
 - **Asset em uso não some por acidente** — exclusão avisa onde é referenciado e exige confirmação/forçar.
+- **Leia um asset antes de sobrescrevê-lo** — o envio com sobrescrita substitui às cegas; para editar um
+  estilo/CSS ou SVG, leia o conteúdo vigente primeiro e proponha a mudança sobre ele (texto vem à mão,
+  binário vem como referência).
 - **Leitura de documento do paciente é só listagem** — nunca link de download; abrir é pela Central.
 - **Ler ≠ desenhar ≠ publicar** — cada nível exige mais alçada; a execução depende de autorização.
 

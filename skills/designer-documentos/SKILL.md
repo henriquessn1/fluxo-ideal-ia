@@ -3,7 +3,7 @@ name: designer-documentos
 description: O sistema de documentos do Fluxo Ideal — como se desenha, versiona, previsualiza e publica o MODELO de um documento (receita, atestado, laudo, orçamento, TCLE…) e como esses modelos viram documentos gerados por paciente. Cobre BLOCOS REUTILIZÁVEIS (cabeçalho/rodapé/assinatura/cláusula incluídos em vários modelos — sempre reaproveitar em vez de duplicar HTML), nascer um corpo do zero (inclusive migrar DOCX→HTML) e os TEMPLATES DE TERMOS (o texto legal versionado de aceite/intercorrências/itens não inclusos/TCLE que entra nos orçamentos) — o CONTEÚDO, distinto da fôrma HTML. Use para entender "como esse documento fica", para criar/editar/publicar um template com segurança, reaproveitar blocos e redigir/versionar os termos.
 audience: [ia, humano]
 depends_on: [documentos-clinicos, templates, catalogo-documentos, termos-orcamento]
-version: 0.4.0
+version: 0.4.1
 updated: 2026-07-20
 ---
 
@@ -128,7 +128,9 @@ Algumas ideias sustentam tudo:
 - **Rascunho**: versão em edição, reversível, que **não** é usada em geração real.
 - **Publicação**: promover uma versão a **oficial** — passa a ser a usada de fato. Alcance amplo.
 - **Preview / simulação**: renderização fiel do modelo com **dados fictícios** e marca d'água de amostra,
-  **sem efeito** (não grava nada, não emite nada). É a rede de segurança antes de publicar/ativar.
+  **sem efeito** (não grava nada, não emite nada). É a rede de segurança antes de publicar/ativar. O preview
+  chega como um **link temporário** (abre/baixa; expira em ~30 min) — repasse-o ao usuário para ele ver; o
+  arquivo em si não vem embutido na conversa.
 
 **Blocos reutilizáveis**
 - **Bloco reutilizável**: um modelo HTML **marcado como reutilizável** — um pedaço (cabeçalho, rodapé,
@@ -190,7 +192,8 @@ Algumas ideias sustentam tudo:
   versão informada, cria rascunho novo; com versão, edita o rascunho. **Versão publicada não se edita** —
   crie um rascunho novo. Ela roda em modo **pré-visualização por padrão** (mostra o que faria sem gravar).
 - **Previsualizar antes de publicar** → ferramenta que **simula** o modelo com dados fictícios. **Sem
-  efeito**. Regra de ouro: **simule sempre antes** de publicar ou ativar.
+  efeito**. Devolve um **link temporário** do preview (não o arquivo embutido) — **repasse o link ao
+  usuário** para ele abrir/baixar. Regra de ouro: **simule sempre antes** de publicar ou ativar.
 - **Publicar a versão oficial** → ferramenta que **publica**. Alcance amplo → **exige confirmação humana**.
 
 **Montar o catálogo (tipo novo)**

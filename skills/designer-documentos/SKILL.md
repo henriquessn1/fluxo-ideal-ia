@@ -1,9 +1,9 @@
 ---
 name: designer-documentos
-description: O sistema de documentos do Fluxo Ideal — como se desenha, versiona, previsualiza e publica o MODELO de um documento (receita, atestado, laudo, orçamento, TCLE…) e como esses modelos viram documentos gerados por paciente. Cobre BLOCOS REUTILIZÁVEIS (cabeçalho/rodapé/assinatura/cláusula incluídos em vários modelos — sempre reaproveitar em vez de duplicar HTML), nascer um corpo do zero (inclusive migrar DOCX→HTML) e os TEMPLATES DE TERMOS (o texto legal versionado de aceite/intercorrências/itens não inclusos/TCLE que entra nos orçamentos) — o CONTEÚDO, distinto da fôrma HTML. Use para entender "como esse documento fica", para criar/editar/publicar um template com segurança, reaproveitar blocos e redigir/versionar os termos.
+description: O sistema de documentos do Fluxo Ideal — como se desenha, versiona, previsualiza e publica o MODELO de um documento (receita, atestado, laudo, orçamento, TCLE…) e como esses modelos viram documentos gerados por paciente. Cobre BLOCOS REUTILIZÁVEIS (cabeçalho/rodapé/assinatura/cláusula incluídos em vários modelos — sempre reaproveitar em vez de duplicar HTML), nascer um corpo do zero (inclusive migrar DOCX→HTML, herdando as habilitações do legado pra o documento não sumir do picker), GERIR HABILITAÇÕES (quem pode emitir cada documento) e os TEMPLATES DE TERMOS (o texto legal versionado de aceite/intercorrências/itens não inclusos/TCLE que entra nos orçamentos) — o CONTEÚDO, distinto da fôrma HTML. Use para entender "como esse documento fica", para criar/editar/publicar um template com segurança, reaproveitar blocos e redigir/versionar os termos.
 audience: [ia, humano]
 depends_on: [documentos-clinicos, templates, catalogo-documentos, termos-orcamento]
-version: 0.4.1
+version: 0.4.2
 updated: 2026-07-20
 ---
 
@@ -174,6 +174,10 @@ Algumas ideias sustentam tudo:
   TCLE…), guardado no **atendimento**. A leitura aqui lista **quais** existem (nome, tamanho, data, tipo)
   — sem baixar o arquivo.
 - **Modelos habilitados por profissional**: dentre os tipos ativos, quais **este** profissional pode emitir.
+- **Habilitação (quem pode emitir)**: o vínculo **profissional ↔ tipo-template** que faz um documento
+  aparecer no **picker de emissão** daquele profissional. Um tipo-template ativo mas **sem habilitação**
+  não aparece pra ninguém. Ao **substituir** um documento (migração), o vínculo novo **não herda** as
+  habilitações do antigo sozinho — peça pra **herdar** na hora de vincular, ou **habilite** depois.
 
 ## Ferramentas (tarefa → ferramenta)
 > Ensine a intenção e o _quando_. A **execução depende de autorização** — o MCP aplica permissão;
@@ -260,6 +264,12 @@ Algumas ideias sustentam tudo:
 **Do lado do paciente (leitura)**
 - **Quais modelos um profissional pode emitir** → ferramenta que **lista os templates disponíveis** para
   o profissional.
+- **Gerir quem pode emitir um documento** (habilitações) → ferramenta que **lista/habilita/desabilita**
+  profissional↔tipo-template: ver quem está habilitado num tipo-template, ver o que um profissional emite,
+  e **habilitar/desabilitar** um profissional. É como você diagnostica e corrige quando um documento
+  (migrado ou novo) **não aparece** pra quem deveria. Escritas em pré-visualização por padrão.
+- **Herdar habilitações ao substituir** (migração) → ao **vincular** um tipo-template que substitui um
+  legado, indique o legado para **copiar as habilitações** dele — o documento migrado não some do picker.
 - **Quais documentos um paciente (ou um atendimento) já tem** ("a receita foi gerada?") → ferramenta que
   **lista os documentos** por **paciente** ou por **atendimento**. Devolve a lista (nome, tamanho, data,
   tipo) — **sem** link de download nem chave interna do arquivo; abrir/baixar é pela Central.
@@ -307,7 +317,12 @@ Algumas ideias sustentam tudo:
 2. Traga o conteúdo como **rascunho** e **reaproveite os blocos** que já existirem (cabeçalho/rodapé/
    assinatura) em vez de recriá-los; extraia para **bloco** o que for reaparecer em outros documentos.
 3. **Simule**, ajuste, **publique**.
-4. **Vincule** ao tipo e **ative** quando estiver pronto — só então fica emissível.
+4. **Vincule** ao tipo — e, como você está **substituindo** um documento legado, peça pra **herdar as
+   habilitações do legado** (indique o tipo-template antigo que este substitui). Sem isso, o documento
+   migrado **some do picker** dos profissionais até você re-habilitar um a um. **Ative** quando estiver
+   pronto — só então fica emissível.
+5. Se algum profissional ainda ficou de fora (ou o legado não tinha as habilitações certas), **habilite/
+   desabilite** direto (gerir habilitações) e confira **quem pode emitir** o tipo-template.
 
 ### Trocar um logo/imagem do design
 1. **Envie** o asset novo (ou liste os existentes).

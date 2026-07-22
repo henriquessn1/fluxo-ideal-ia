@@ -1,0 +1,47 @@
+{
+  "chave": "avisos-diretivas-ui",
+  "versao": "1.0",
+  "escopo": "por-tenant",
+  "roles": [
+    {
+      "nome": "botfn-ui-emitter",
+      "grants": [
+        "notificacao:emitir_ui"
+      ]
+    }
+  ],
+  "agentes": [
+    {
+      "chave": "orcamento_aprovado_aviso",
+      "tipo": "script",
+      "roles": [
+        "botfn-ui-emitter"
+      ],
+      "triggers": [
+        {
+          "event_type": "vendas.orcamento_aprovado",
+          "enabled": true
+        }
+      ],
+      "config": {
+        "script": "// avisos-diretivas-ui / orcamento_aprovado_aviso (#1168 B6) — cenário de validação\n// da primitiva de diretivas de UI (agente -> tela). Ao aprovar um orçamento, empurra\n// um MODAL persistente pra equipe (alvo por role) com um botão LINK 'ver o orçamento'.\n// Config-driven: `config.alvo_role` (quem vê) e `config.base_path` (rota da Central).\n//\n// Injetados pelo runtime: event ({event_type, subject, payload_safe}), config, call(), log().\n// call('emitir_ui', <corpo do POST /diretivas>) — capability curada; RBAC do SA é a jaula.\n\nvar subject = event.subject || {};\nvar safe = event.payload_safe || {};\n\nvar orcId = subject.orcamento_id || subject.id;\nif (!orcId) { log('aviso: evento sem orcamento_id'); return { skip: 'sem_orcamento_id' }; }\norcId = String(orcId);\n\nvar numero = safe.numero || orcId;\nvar alvoRole = config.alvo_role || 'recepcionista';\nvar basePath = config.base_path || '/vendas/orcamentos/';\n\nvar r = call('emitir_ui', {\n  type: 'diretiva_ui',\n  kind: 'modal',\n  titulo: 'Orçamento aprovado',\n  corpo: 'O orçamento **' + numero + '** foi aprovado. Você pode dar sequência.',\n  botoes: [\n    { label: 'Ver o orçamento', estilo: 'primary', acao: { tipo: 'link', href: basePath + orcId } }\n  ],\n  alvo: { role: alvoRole },\n  persistencia: 'persistente'\n});\n\nif (r && r.ok === false) { log('aviso: emitir_ui falhou HTTP ' + r.status_code); return { erro: 'emitir_ui', status: r.status_code }; }\nlog('aviso: diretiva de UI emitida p/ role=' + alvoRole + ' (orcamento ' + numero + ')');\nreturn { emitido: true, orcamento_id: orcId, alvo_role: alvoRole };\n",
+        "alvo_role": "{{knob.alvo_role}}",
+        "base_path": "/orcamento/",
+        "acoes": [
+          {
+            "nome": "emitir_ui",
+            "capability": "notificacao.emitir_ui"
+          }
+        ]
+      }
+    }
+  ],
+  "knobs": [
+    {
+      "chave": "alvo_role",
+      "tipo": "string",
+      "valor": "recepcionista",
+      "descricao": "Papel (role) que vê o aviso na tela quando um orçamento é aprovado. Use uma role que os usuários tenham no login (ex.: recepcionista, secretaria, administrador)."
+    }
+  ]
+}

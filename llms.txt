@@ -7,7 +7,7 @@
 
 > **Tudo num arquivo só (para agentes que preferem um único fetch):** https://fluxoideal.com/llms-full.txt
 
-> **Para NAVEGAR ou CLONAR tudo (explorar a árvore, listar skills/agents, `git clone`):** o repositório público em **https://github.com/henriquessn1/fluxo-ideal-ia**. O site `fluxoideal.com` **serve** cada arquivo por URL conhecida (este `llms.txt` é o índice → cada `skills/<x>/SKILL.md` e `agents/<time>/manifest.json`), mas **não lista diretórios**; uma IA que quer **explorar/enumerar** (em vez de só ler o índice) deve usar o GitHub (clone ou a API de conteúdo).
+> **Para NAVEGAR ou CLONAR tudo (explorar a árvore, listar skills/agents, `git clone`):** o repositório público em **https://github.com/henriquessn1/fluxo-ideal-ia**. O site `fluxoideal.com` **serve** cada arquivo por URL conhecida (este `llms.txt` é o índice → cada `skills/<x>/SKILL.md` e `agents/times/<time>/manifest.json` ou `agents/exemplos/<x>/manifest.json`), mas **não lista diretórios**; uma IA que quer **explorar/enumerar** (em vez de só ler o índice) deve usar o GitHub (clone ou a API de conteúdo).
 
 ## Skills
 
@@ -32,9 +32,11 @@
 
 ## Agents (times de agentes instaláveis)
 
-Diferente de uma skill (conhecimento), um time de agentes é uma automação que a clínica IMPORTA por link na Central e põe para AGIR. Cada ação cita uma capability por nome (sem rota interna); a instalação roda com o acesso de quem importa (não escala privilégio) e mostra um cartão de risco antes de aplicar.
+Diferente de uma skill (conhecimento), um time de agentes é uma automação que a clínica IMPORTA por link na Central e põe para AGIR. Cada ação cita uma capability por nome (sem rota interna); a instalação roda com o acesso de quem importa (não escala privilégio) e mostra um cartão de risco antes de aplicar. O registro tem DUAS pastas: `agents/times/` (times PRODUTIVOS, para a clínica instalar) e `agents/exemplos/` (exemplos DIDÁTICOS, para quem DESENHA agentes — ponto de partida, não produto).
 
-- [Agents — visão geral, charter e lista de times](https://github.com/henriquessn1/fluxo-ideal-ia/blob/main/agents/README.md): briefing (contexto do paciente), confirmacao-presenca (confirma por WhatsApp e triage), jornada-cuidado (vincula tarefas e avança fases), jornada-avisos (avisa pendências de SLA).
+- [Agents — visão geral, charter e as duas pastas](https://github.com/henriquessn1/fluxo-ideal-ia/blob/main/agents/README.md).
+- Times PRODUTIVOS (`agents/times/`): briefing (contexto do paciente), confirmacao-presenca (confirma por WhatsApp e triage), jornada-cuidado (vincula tarefas e avança fases), jornada-avisos (avisa pendências de SLA).
+- Exemplos DIDÁTICOS (`agents/exemplos/`): avisos-diretivas-ui (padrão de diretiva de UI — aviso/ação na tela com botões, link vs. round-trip). Para desenhar, veja a skill designer-agentes.
 
 ## Meta
 

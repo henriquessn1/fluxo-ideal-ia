@@ -3,7 +3,7 @@ name: designer-agentes
 description: Como se DESENHA o comportamento de um agente de IA no Fluxo Ideal — o que é um agente aqui, sua persona/instrução, as capacidades (capabilities nomeadas) que ele pode acionar, os gatilhos que o acordam e a escolha entre raciocínio (LLM) e roteiro determinístico. Antes de criar, checar o REGISTRO público de times prontos para reusar. Princípio central: comportamento de agente é configuração (dado), nunca código. Use para reusar, montar, ajustar ou explicar um agente sem cair em detalhe de implementação.
 audience: [ia, humano]
 depends_on: [automacao-ia, comportamento, gatilhos]
-version: 0.4.3
+version: 0.4.4
 updated: 2026-07-22
 ---
 
@@ -148,9 +148,12 @@ Cinco verdades operacionais:
   `https://fluxoideal.com/agents/README.md`, que lista e descreve os times) — a listagem de diretório
   **não é navegável pelo site** (o site *serve* arquivos por URL, não lista pastas), então o
   índice/README é o mapa; se a IA quiser **explorar/clonar** a árvore inteira, o repositório público é
-  **`https://github.com/henriquessn1/fluxo-ideal-ia`**. O manifesto de cada time fica em
-  `https://fluxoideal.com/agents/<time>/manifest.json`. Se um time resolve, instalar é **colar esse
-  link** na Central e ajustar os knobs — sem desenhar nada. Comece sempre por aqui.
+  **`https://github.com/henriquessn1/fluxo-ideal-ia`**. O registro tem **duas pastas**: os times
+  **produtivos** (para instalar) ficam em `agents/times/` — o manifesto de cada um em
+  `https://fluxoideal.com/agents/times/<time>/manifest.json`; e `agents/exemplos/` guarda **exemplos
+  didáticos** (para quem *desenha*, ponto de partida — **não** instale como estão). Se um time
+  produtivo resolve, instalar é **colar o link** na Central e ajustar os knobs — sem desenhar nada.
+  Comece sempre por aqui (times para reusar, exemplos para aprender).
 - **Consultar o material de desenho** → a IA carrega, **em contexto autenticado** (não público), o
   **schema do manifesto** e os catálogos reais: as **capabilities** que existem (o que um agente pode
   acionar, por nome), os **tipos de evento** (gatilhos), os **perfis** e os **modelos de LLM**.

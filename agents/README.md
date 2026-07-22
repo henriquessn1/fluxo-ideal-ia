@@ -39,16 +39,33 @@ E **NÃO contém** (por design):
 3. **Consentimento informado.** A tela de importar mostra um **cartão de risco** (lê dados de
    paciente? envia algo pra fora? age sozinho?) antes de aplicar.
 
-## Times disponíveis
+## Duas pastas: produtivos vs. exemplos
+
+- **[`times/`](./times/) — times PRODUTIVOS (para a clínica instalar e usar).** Resolvem problemas
+  comuns; são o que uma clínica importa na Central. É aqui que você procura para **reusar**.
+- **[`exemplos/`](./exemplos/) — exemplos DIDÁTICOS (para quem desenha agentes).** Mostram *o que dá
+  para fazer* e *como*; são ponto de partida para adaptar, **não** produtos para instalar como estão.
+  O material conceitual está na skill [`designer-agentes`](../skills/designer-agentes/SKILL.md).
+
+## Times produtivos disponíveis
 
 | Time | O que faz | Agentes | Risco |
 |------|-----------|---------|-------|
-| [briefing](./briefing/) | Cartão de contexto do paciente antes do atendimento | 1 (IA) | médio |
-| [confirmacao-presenca](./confirmacao-presenca/) | Confirma presença por WhatsApp e triage a resposta | 3 (2 script + 1 IA) | médio |
-| [jornada-cuidado](./jornada-cuidado/) | Vincula tarefas à jornada e avança/fecha fases | 2 (script) | médio |
-| [jornada-avisos](./jornada-avisos/) | Avisa a equipe sobre pendências de SLA da jornada | 1 (script) | médio |
+| [briefing](./times/briefing/) | Cartão de contexto do paciente antes do atendimento | 1 (IA) | médio |
+| [confirmacao-presenca](./times/confirmacao-presenca/) | Confirma presença por WhatsApp e triage a resposta | 3 (2 script + 1 IA) | médio |
+| [jornada-cuidado](./times/jornada-cuidado/) | Vincula tarefas à jornada e avança/fecha fases | 2 (script) | médio |
+| [jornada-avisos](./times/jornada-avisos/) | Avisa a equipe sobre pendências de SLA da jornada | 1 (script) | médio |
 
 Cada pasta tem o `manifest.json` (para importar) e um `README.md` (o que faz, o que pede, o risco).
 
 > **Nota:** estes são os times **oficiais/verificados**. Manifestos de terceiros/não-verificados são
 > um tier separado (com assinatura e travas próprias) — ainda não habilitado.
+
+## Exemplos didáticos
+
+| Exemplo | Mostra o padrão de |
+|---------|--------------------|
+| [avisos-diretivas-ui](./exemplos/avisos-diretivas-ui/) | Diretiva de UI: aviso/ação na tela (toast/modal com botões; link vs. round-trip) |
+
+Veja **[`exemplos/`](./exemplos/)** para o índice e como usá-los — comece pela skill
+[`designer-agentes`](../skills/designer-agentes/SKILL.md).

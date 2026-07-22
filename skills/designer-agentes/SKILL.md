@@ -3,8 +3,8 @@ name: designer-agentes
 description: Como se DESENHA o comportamento de um agente de IA no Fluxo Ideal — o que é um agente aqui, sua persona/instrução, as capacidades (capabilities nomeadas) que ele pode acionar, os gatilhos que o acordam e a escolha entre raciocínio (LLM) e roteiro determinístico. Antes de criar, checar o REGISTRO público de times prontos para reusar. Princípio central: comportamento de agente é configuração (dado), nunca código. Use para reusar, montar, ajustar ou explicar um agente sem cair em detalhe de implementação.
 audience: [ia, humano]
 depends_on: [automacao-ia, comportamento, gatilhos]
-version: 0.4.2
-updated: 2026-07-18
+version: 0.4.3
+updated: 2026-07-22
 ---
 
 # Designer de agentes
@@ -111,7 +111,10 @@ Cinco verdades operacionais:
 
 **Quando ele age**
 - **Gatilho (trigger)**: o evento do fluxo que **acorda** o agente (paciente respondeu, conversa
-  iniciou, algo foi fechado, prazo venceu). Sem gatilho compatível, o agente fica dormindo.
+  iniciou, algo foi fechado, prazo venceu). Sem gatilho compatível, o agente fica dormindo. Um
+  **clique de botão numa diretiva de UI** (ver "avisar/acionar a equipe na tela") também é um evento
+  — é o que fecha um **round-trip**: o agente avisou na tela, a pessoa clicou, o clique acorda um
+  agente que reage.
 - **Filtro**: condição no gatilho que restringe **quando** ele dispara. Vários gatilhos = o agente
   acorda se **qualquer um** bater.
 - **Janela de calma (coalescer)**: pequena espera para **agrupar rajadas** e agir uma vez só, com o
@@ -191,6 +194,23 @@ novo time do registro.
    humano é sempre uma saída válida e honesta.
 5. **Encerramento**: o agente deve **fechar** o que abriu (resolver/transferir o ticket, parar de observar
    a conversa) para não ficar reagindo eternamente.
+
+### Avisar ou acionar a equipe na tela (diretiva de UI)
+Além de reagir a conversas, um agente pode **empurrar um aviso acionável para a tela** de um
+**usuário** ou de um **papel** (uma recepcionista, o dono do orçamento): um **toast** simples ou um
+**popup/modal** com título, texto e **botões**. Cada botão ou **abre uma entidade** (navega para o
+orçamento, a venda, o atendimento) ou **gera um evento de volta para o agente** — o clique é
+**consentimento humano** que fecha um **round-trip**: o agente pediu uma decisão na tela, a pessoa
+clicou, o agente reage (ex.: "enviar o link ao cliente"). É o padrão para **nudges de staff** —
+avisar/pedir uma ação sem depender de a pessoa estar numa tela específica.
+- **Desenho**: escolha o **gatilho** (ex.: um orçamento foi aprovado), o **alvo** (um papel ou um
+  usuário), o **conteúdo** (título + texto + botões) e, para cada botão, se ele **navega** (link) ou
+  **chama de volta** (evento). Avisos importantes podem ser **persistentes** (sobrevivem a recarregar
+  a tela até a pessoa dispensar); avisos triviais são efêmeros (um toast que passa).
+- **Compõe com outro agente**: o botão "de evento" acorda um segundo agente que executa a ação —
+  mesmo princípio de time (um avisa, outro age no clique). A pessoa no meio é o consentimento.
+- **Regras herdadas**: o alvo por **papel** só chega a quem está logado com aquele papel; o agente
+  age com o **próprio acesso** (nunca o do usuário) e o clique fica **registrado** (quem autorizou).
 
 ### Compor um time (armar → triar → decidir)
 Um padrão comum é **encadear** agentes: um agente **arma** o cenário, outro **tria** de forma

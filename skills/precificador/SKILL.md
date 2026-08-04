@@ -3,8 +3,8 @@ name: precificador
 description: O sistema de precificação do Fluxo Ideal — como se configura preço (catálogo, tabelas, condições e formas de pagamento, favoritos) e como isso converge em orçamento e venda. Use para entender "quanto custa", como montar um orçamento e por que os valores são o que são.
 audience: [ia, humano]
 depends_on: [precos, catalogo, convenios, condicoes-pagamento, orcamentos, termos-orcamento]
-version: 0.4.3
-updated: 2026-07-19
+version: 0.4.4
+updated: 2026-08-04
 ---
 
 # Precificador
@@ -97,14 +97,15 @@ Três ideias que sustentam tudo:
   (não requer / automática online / prévia com auditoria / OPME com anexo).
 - Copiar os preços de uma tabela para outra (montar um convênio novo a partir de outro) → ferramenta de cópia de preços.
 - Saber quais convênios a clínica atende → ferramenta de convênios.
-- Consultar, montar, editar e aprovar orçamento (detalhe, pendências, gestão) → ferramentas de orçamento.
+- Consultar, montar, editar e aprovar orçamento (detalhe, pendências, gestão) → ferramentas de orçamento. O **detalhe** mostra o **desfecho do funil**: aprovado/recusado (por **quem** e **quando**), o **motivo da recusa** e o **aceite do cliente** — se aceitou, **em que data/hora** e **como** (vazio = ainda não aceitou). O **conteúdo** sensível do aceite (texto da declaração, IP, documento) **não** é exposto.
+- Acompanhar a **assinatura eletrônica** do orçamento: quais estão **pendentes** da assinatura do paciente e se o **link foi aberto** (quantas vezes / quando — o caso "mandei o link e o paciente diz que não recebeu") → ferramentas de assinatura. **Enviar/reenviar** ou **revogar** o link do paciente é ação de envio (papel financeiro).
 - Ver os **termos** disponíveis para anexar ao orçamento (por tipo, e qual é o **padrão**) → ferramenta que **lista os templates de termos**. Você **seleciona** o termo; **redigir/versionar o texto** é `designer-documentos`.
 - Simular uma venda (memória de cálculo), simular o preço de um pacote, criar a venda a partir da simulação, converter um orçamento aprovado em venda e tocar o ciclo da venda → ferramentas de venda.
 - Definir condições e formas de pagamento e simular o parcelamento → ferramentas de pagamento.
 - Fazer o split de coparticipação e ancorar a autorização de convênio no item → ferramentas de pagador/autorização.
 - Listar retornos pendentes → ferramenta de retornos.
 
-**Feito na plataforma (ainda não por ferramenta):** o **aceite do cliente** e a **edição do orçamento via simulação**, os **favoritos** do profissional e a **revisão de no-show**. A IA raciocina sobre isso, mas a **ação** hoje passa pela plataforma.
+**Feito na plataforma (ainda não por ferramenta):** **registrar** o aceite do cliente e a **edição do orçamento via simulação**, os **favoritos** do profissional e a **revisão de no-show**. A IA raciocina sobre isso, mas a **ação** hoje passa pela plataforma. (⚠️ apenas **registrar** o aceite é da plataforma — **consultar** se/quando o cliente aceitou já vem no detalhe do orçamento, acima.)
 
 > Análise estratégica (reajuste em massa, histórico de preço, comparador de tabelas, simulador de margem, política de desconto) já existe no backend e está **a caminho** como ferramenta.
 

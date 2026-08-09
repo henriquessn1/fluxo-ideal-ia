@@ -52,6 +52,7 @@ Cada skill serve aos dois públicos no mesmo arquivo — a diferença está na d
 | [designer-agentes](skills/designer-agentes/SKILL.md) | Agentes de IA | reusar um time do registro (`agents/`) ou desenhar comportamento (persona, capabilities, gatilhos, LLM × script) | ✅ |
 | [conversas](skills/conversas/SKILL.md) | Atender/triar tickets | filas, atribuição, resolução (CSAT), transferência, observadores, detectar frustração | ✅ |
 | [pesquisas-satisfacao](skills/pesquisas-satisfacao/SKILL.md) | CX / NPS | pesquisa e gatilhos, funil de convites, reenviar/antecipar, resultados agregados (NPS) | ✅ |
+| [anamnese](skills/anamnese/SKILL.md) | Questionário pré-consulta | configurar modelos (perguntas por procedimento/pacote), criar fichas, acompanhar preenchimento/status — **sem ler as respostas (dado de saúde)** | ✅ |
 | [indicadores](skills/indicadores/SKILL.md) | BI / gestão | dashboard executivo cross-domínio, significado dos KPIs, exportação de dados | ✅ |
 | [administrador-clinica](skills/administrador-clinica/SKILL.md) | Config da clínica | dados do estabelecimento, branding, profissionais, convênios | ✅ |
 | [gestor-tarefas](skills/gestor-tarefas/SKILL.md) | Tarefas internas | criar/atribuir/mover/buscar afazeres da equipe, minhas pendências | ✅ |

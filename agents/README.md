@@ -53,6 +53,7 @@ E **NÃO contém** (por design):
 |------|-----------|---------|-------|
 | [briefing](./times/briefing/) | Cartão de contexto do paciente antes do atendimento | 1 (IA) | médio |
 | [confirmacao-presenca](./times/confirmacao-presenca/) | Confirma presença por WhatsApp e triage a resposta | 3 (2 script + 1 IA) | médio |
+| [confirmacao-diaria](./times/confirmacao-diaria/) | Varre 1×/dia os agendamentos não confirmados (hoje+amanhã) e convida à confirmação por WhatsApp | 1 (script) | médio |
 | [jornada-cuidado](./times/jornada-cuidado/) | Vincula tarefas à jornada e avança/fecha fases | 2 (script) | médio |
 | [jornada-avisos](./times/jornada-avisos/) | Avisa a equipe sobre pendências de SLA da jornada | 1 (script) | médio |
 

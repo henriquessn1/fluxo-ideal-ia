@@ -35,7 +35,7 @@
 Diferente de uma skill (conhecimento), um time de agentes é uma automação que a clínica IMPORTA por link na Central e põe para AGIR. Cada ação cita uma capability por nome (sem rota interna); a instalação roda com o acesso de quem importa (não escala privilégio) e mostra um cartão de risco antes de aplicar. O registro tem DUAS pastas: `agents/times/` (times PRODUTIVOS, para a clínica instalar) e `agents/exemplos/` (exemplos DIDÁTICOS, para quem DESENHA agentes — ponto de partida, não produto).
 
 - [Agents — visão geral, charter e as duas pastas](https://github.com/henriquessn1/fluxo-ideal-ia/blob/main/agents/README.md).
-- Times PRODUTIVOS (`agents/times/`): briefing (contexto do paciente), confirmacao-presenca (confirma por WhatsApp e triage), jornada-cuidado (vincula tarefas e avança fases), jornada-avisos (avisa pendências de SLA).
+- Times PRODUTIVOS (`agents/times/`): briefing (contexto do paciente), confirmacao-presenca (confirma por WhatsApp e triage), confirmacao-diaria (varre 1×/dia os não confirmados de hoje+amanhã e convida à confirmação), jornada-cuidado (vincula tarefas e avança fases), jornada-avisos (avisa pendências de SLA).
 - Exemplos DIDÁTICOS (`agents/exemplos/`): avisos-diretivas-ui (padrão de diretiva de UI — aviso/ação na tela com botões, link vs. round-trip). Para desenhar, veja a skill designer-agentes.
 
 ## Meta

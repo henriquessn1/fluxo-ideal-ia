@@ -3,8 +3,8 @@ name: designer-mensageria
 description: A AUTORIA da comunicação da clínica com o paciente no Fluxo Ideal — desenhar os templates de mensagem (assunto + corpo com variáveis), gerir os canais (e-mail, WhatsApp) e a aprovação de HSM no provedor. Use para escrever/ajustar os textos que vão ao paciente, criar/ativar um template, gerir canais e submeter/acompanhar o HSM. Disparar de fato (enviar/programar/checar entrega) é do operador → skill `comunicacao-paciente`.
 audience: [ia, humano]
 depends_on: [mensagens, templates, canais, entrega]
-version: 0.4.0
-updated: 2026-07-13
+version: 0.5.0
+updated: 2026-08-13
 ---
 
 # Designer de Mensageria
@@ -19,6 +19,8 @@ essa voz (enviar/programar/checar entrega) é do operador → skill `comunicacao
   um e-mail de confirmação).
 - **Criar/ativar** um template, gerir seus **canais** e a **política de remetente**.
 - **Submeter um HSM** para o provedor aprovar e **acompanhar o status** dessa aprovação.
+- **Deixar um template pronto para WhatsApp** quando o HSM já foi aprovado mas ele ainda não aparece
+  para enviar (vincular o template ao HSM aprovado + liberar o canal).
 - Descobrir **quais templates** a clínica tem e **quais variáveis** cada um espera.
 - (Para **enviar / programar / checar a entrega** de fato → skill `comunicacao-paciente`.)
 
@@ -136,6 +138,14 @@ Ideias que sustentam tudo:
   nota do número), roda em **prévia por padrão** e só submete com **confirmação humana**. A ferramenta de
   **listar HSM** acompanha os enviados à Meta (junto com o **status HSM**: aprovado/pendente/rejeitado).
   *Deletar* um HSM na Meta é a caminho (follow-up).
+- **Deixar um template PRONTO para sair por WhatsApp** — quando o HSM já foi **aprovado** na Meta mas o
+  template ainda não aparece para enviar (o status dele volta *"não vinculado"*): a ferramenta de
+  **preparar WhatsApp** faz o vínculo numa tacada — casa o template com o HSM aprovado (pelo mesmo nome,
+  ou um que você indique), preenche a ordem das variáveis e libera o canal WhatsApp. Roda em **prévia
+  por padrão**; **só vincula a um HSM APROVADO** (se estiver pendente/rejeitado/inexistente, ela recusa
+  e explica — não há como burlar a aprovação). Se o HSM estiver como **MARKETING** mas for um aviso
+  transacional, ela avisa para recriá-lo como UTILITY (MARKETING fica sujeito a opt-out/limite). Use
+  quando o **status HSM** diz *aprovado na Meta* mas o template não está aparecendo no "Iniciar conversa".
 - **Enviar / programar / checar a entrega** de fato ao paciente **não é deste papel** — é do operador de
   envio → skill `comunicacao-paciente`. Aqui você entrega o template pronto; lá se dispara.
 

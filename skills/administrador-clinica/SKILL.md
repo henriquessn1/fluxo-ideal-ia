@@ -3,8 +3,8 @@ name: administrador-clinica
 description: A "planta baixa" da clínica no Fluxo Ideal — configurar a identidade do estabelecimento (dados, contato, endereço, branding/white-label), cadastrar e gerir os profissionais (especialidades, registros de conselho, grade de horários, vínculos, documentos), os convênios aceitos, o catálogo de especialidades e o site público. Use para "cadastra a Dra. X", "adiciona esse convênio", "quais médicos temos?", "veste a marca da clínica", "monta o estabelecimento novo". Criar login/acesso (IAM) fica FORA.
 audience: [ia, humano]
 depends_on: [identidade-clinica, profissionais, especialidades, convenios, salas-recursos]
-version: 0.2.2
-updated: 2026-07-17
+version: 0.2.3
+updated: 2026-08-19
 ---
 
 # Administrador da clínica
@@ -137,6 +137,27 @@ Ideias que orientam quase tudo:
   anatômica. Para montar um tipo gráfico, você referencia um **diagrama** da biblioteca (ver a skill
   `designer-documentos` para navegar os diagramas por especialidade). Aqui se define o **molde**; o
   **desenho** em si é ato clínico, dentro do atendimento (fora deste papel).
+
+**Medidas de acompanhamento (grandezas longitudinais / gráfico de evolução)**
+- Dentro de um tipo de prontuário, um campo pode ser marcado como **acompanhável**: ele vira uma
+  **grandeza** que a plataforma acompanha ao longo do tempo, com **gráfico de evolução** a cada consulta
+  (ex.: pressão intraocular, peso/IMC, glicemia, acuidade visual). Aqui você define **quais grandezas** o
+  tipo rastreia; o valor é **capturado automaticamente** do que o profissional escreve no atendimento
+  (determinístico — nenhuma IA lê o conteúdo clínico).
+- **Caminho fácil — catálogo de grandezas prontas:** existe uma **biblioteca curada por especialidade**
+  (clínica geral/cardiologia, endocrinologia, pediatria, obstetrícia, psiquiatria, oftalmologia) com as
+  grandezas já modeladas (unidade, código clínico, lados) → consulte o **catálogo de grandezas de
+  acompanhamento** e **adicione ao tipo** (a clínica ajusta a cópia; o catálogo global fica intocado).
+  Prefira isso a montar do zero.
+- **Formas que uma grandeza pode ter:** um número simples (peso, PIO); **por lado** OD/OE/AO (medidas
+  oftálmicas — "AO" preenche os dois olhos); uma **razão** (acuidade Snellen 20/30 — que também vira um
+  valor comparável no gráfico); um **composto** de partes (refração = esférico/cilíndrico/eixo;
+  ceratometria = K1/K2/Kmáx); ou uma **calculada** a partir de outras (IMC = peso + altura). Dá ainda para
+  distinguir **com/sem correção** (acuidade) e **estática/dinâmica** (refração).
+- Quando o profissional anota de um jeito **posicional/embutido** (ex.: "paqui 579-597" = paquimetria do
+  olho direito e do esquerdo), é possível ensinar a captura daquela grandeza com um **padrão de texto**
+  próprio. Aqui se define **o que rastrear e como reconhecer**; preencher/corrigir o valor no atendimento
+  é do médico.
 
 **Estabelecimento (identidade / branding / site)**
 - **Ler:** dados do estabelecimento → detalhe/listagem do estabelecimento.

@@ -3,8 +3,8 @@ name: anamnese
 description: A ANAMNESE pré-consulta do Fluxo Ideal — configurar os MODELOS de questionário (por procedimento/pacote, com vários tipos de pergunta), CRIAR fichas para o paciente responder antes da consulta, e VERIFICAR o preenchimento/status (quem respondeu, por qual canal, quanto já preencheu) — SEM ler o conteúdo de saúde. Use para "cria o questionário pré-cirúrgico", "adiciona uma pergunta ao modelo X", "gera a anamnese do paciente Y", "a anamnese do agendamento Z já foi preenchida?", "quantas fichas estão pendentes?".
 audience: [ia, humano]
 depends_on: [anamnese, questionario-pre-consulta, ficha]
-version: 0.1.0
-updated: 2026-08-09
+version: 0.2.0
+updated: 2026-08-26
 ---
 
 # Anamnese pré-consulta
@@ -16,7 +16,10 @@ das respostas não passa por aqui (fica no prontuário/tablet).
 
 ## Quando usar
 - **Criar / editar / ativar / desativar** um modelo de anamnese: as perguntas (texto livre,
-  escolha única, múltipla escolha, sim/não, nota) e a que **procedimento ou pacote** ele se aplica.
+  escolha única, múltipla escolha, sim/não, nota, **data**, **número**, **seção/subtítulo**) e a
+  que **procedimento ou pacote** ele se aplica. Dá pra usar os **modos avançados**: opção que abre
+  um campo "descreva", cabeçalho auto-preenchido (nome/data) e perguntas condicionais (só aparecem
+  se outra foi respondida de certo jeito).
 - **Criar uma ficha** para um paciente responder (deixá-la pronta pro tablet da recepção ou pra
   ser preenchida no atendimento).
 - "A anamnese do paciente/agendamento já foi preenchida?", "quantas fichas estão pendentes hoje?",
@@ -60,7 +63,17 @@ Três peças, em fila — **o molde**, **a ficha do paciente** e **o quanto já 
 - **Modelo (de anamnese)**: o molde do questionário — um conjunto de **perguntas** ligado a um ou mais
   **procedimentos** OU a um **pacote** (ou genérico, sem vínculo). Tem **versão** e um estado ativo/inativo.
 - **Pergunta**: pode ser **texto livre**, **escolha única** (uma opção), **múltipla escolha** (várias
-  opções), **sim/não** ou **nota** (escala numérica). Escolha única e múltipla exigem **opções**.
+  opções), **sim/não**, **nota** (escala numérica), **data**, **número** (com mínimo/máximo opcional)
+  ou **seção** (subtítulo). Escolha única e múltipla exigem **opções**.
+- **Seção / subtítulo**: uma "pergunta" que é só **título** — agrupa visualmente as perguntas
+  seguintes sob um cabeçalho (ex.: "ZONA 1 — abaixo de 40 cm"). Não é respondível.
+- **Opção com "descreva"**: uma opção de escolha/múltipla que, ao ser marcada, **abre um campo de
+  texto** ("Outras: ___", "qual cirurgia?"). Marca-se quais opções abrem o detalhe e o rótulo do campo.
+- **Auto-preencher**: um campo de cabeçalho (Nome / Data) que já **vem preenchido** do cadastro do
+  paciente / do dia — o paciente não redigita.
+- **Pergunta condicional (mostrar se)**: uma pergunta que só **aparece** quando outra (anterior) foi
+  respondida de um jeito específico (ex.: "é motorista?" = Sim → aparece "dirige à noite?"). O gatilho
+  é sempre uma pergunta **anterior** (evita ciclo). Perguntas escondidas não são exigidas.
 - **Vínculo**: a que **procedimento(s)** ou **pacote** o modelo se aplica — é como o sistema sabe qual
   questionário oferecer. Sem vínculo = **modelo genérico**.
 - **Ficha (instância)**: a anamnese de **um** paciente, criada a partir de um modelo. Tem um **estado**.
@@ -80,9 +93,13 @@ Três peças, em fila — **o molde**, **a ficha do paciente** e **o quanto já 
 
 **Configurar o modelo (o molde — com confirmação)**
 - **Criar / editar / ativar / desativar** um modelo: montar as perguntas (texto livre, escolha única,
-  múltipla escolha, sim/não, nota) e ligar a **procedimento(s) ou pacote** (ou deixar genérico) →
-  ferramenta de autoria do modelo. Pré-visualiza antes de gravar; trocar as perguntas **sobe a versão**.
-  **Excluir** um modelo fica de fora (é feito na Central).
+  múltipla escolha, sim/não, nota, data, número, seção) e ligar a **procedimento(s) ou pacote** (ou
+  deixar genérico) → ferramenta de autoria do modelo. Pré-visualiza antes de gravar; trocar as perguntas
+  **sobe a versão**. **Excluir** um modelo fica de fora (é feito na Central).
+- **Modos avançados** (para digitalizar questionários mais ricos, tipo o pré-cirúrgico): use **seções**
+  pra agrupar sob subtítulos; marque uma opção como **"abre descreva"** pra capturar um detalhe em texto;
+  ligue **auto-preencher** (nome/data) no cabeçalho; e use **mostrar-se** pra sub-perguntas que só
+  aparecem conforme a resposta anterior (o gatilho é sempre uma pergunta que vem antes).
 
 **Criar a ficha do paciente (com confirmação)**
 - **Gerar uma anamnese pendente para um paciente responder** → ferramenta de criar ficha. O modelo é

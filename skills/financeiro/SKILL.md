@@ -3,8 +3,8 @@ name: financeiro
 description: O ciclo do DINHEIRO depois da venda no Fluxo Ideal — receber (parcelas, contas a receber, aging/DSO/inadimplência), pagar (despesas, fornecedores, recorrências), o caixa (saldo, conferência, frente de caixa) e a saúde financeira (fluxo de caixa projetado, ponto de equilíbrio). Use para responder "quanto entrou / quanto a clínica deve / tem dinheiro em caixa / vai empatar?".
 audience: [ia, humano]
 depends_on: [pagamentos, contas-receber, contas-pagar, caixa, indicadores-financeiros]
-version: 0.3.2
-updated: 2026-07-17
+version: 0.3.3
+updated: 2026-09-14
 ---
 
 # Financeiro
@@ -181,8 +181,13 @@ Três ideias sustentam tudo:
 
 **Assinatura (ponte com as vendas)**
 - Documentos que **aguardam assinatura** do paciente (orçamento/TCLE) e **enviar/revogar** o link →
-  ferramentas de **assinatura**. Enviar link é **outward-facing** (o paciente recebe e-mail real) →
-  confirme antes.
+  ferramentas de **assinatura**. Enviar link é **outward-facing** (o paciente recebe uma mensagem
+  real) → confirme antes.
+- **Escolha do canal**: ao enviar o link, dá para escolher **e-mail** (padrão) ou **WhatsApp** — e o
+  conjunto de canais é **aberto** (novos canais podem surgir sem mudar a forma de pedir). Só diga o
+  canal desejado; o **destinatário (e-mail/telefone) é sempre resolvido pelo cadastro do documento**
+  (anti-fraude — você não informa contato). Se o canal pedido não estiver disponível para aquele
+  documento, o envio cai automaticamente no e-mail. A resposta informa por **qual canal** de fato saiu.
 - **O paciente recebeu/abriu o link que mandei?** (cobrar via link assinado depende disso) →
   ferramenta de **aberturas do link de assinatura**: mostra se e **quantas vezes** aquele
   orçamento/TCLE foi aberto, e quando. Por privacidade (LGPD), o IP vem **mascarado** e o aparelho

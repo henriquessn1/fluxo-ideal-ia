@@ -3,8 +3,8 @@ name: designer-documentos
 description: O sistema de documentos do Fluxo Ideal — como se desenha, versiona, previsualiza e publica o MODELO de um documento (receita, atestado, laudo, orçamento, TCLE…) e como esses modelos viram documentos gerados por paciente. Cobre BLOCOS REUTILIZÁVEIS (cabeçalho/rodapé/assinatura/cláusula incluídos em vários modelos — sempre reaproveitar em vez de duplicar HTML), nascer um corpo do zero (inclusive migrar DOCX→HTML, herdando as habilitações do legado pra o documento não sumir do picker), GERIR HABILITAÇÕES (quem pode emitir cada documento) e os TEMPLATES DE TERMOS (o texto legal versionado de aceite/intercorrências/itens não inclusos/TCLE que entra nos orçamentos) — o CONTEÚDO, distinto da fôrma HTML. Use para entender "como esse documento fica", para criar/editar/publicar um template com segurança, reaproveitar blocos e redigir/versionar os termos.
 audience: [ia, humano]
 depends_on: [documentos-clinicos, templates, catalogo-documentos, termos-orcamento]
-version: 0.4.3
-updated: 2026-07-20
+version: 0.5.0
+updated: 2026-09-25
 ---
 
 # Designer de Documentos
@@ -148,6 +148,31 @@ Algumas ideias sustentam tudo:
   vêm com o conteúdo **à mão** para você propor a mudança; os **binários** (imagens) vêm como **referência**
   (a leitura fiel do texto é o que permite editar sem sobrescrever às cegas).
 
+**Variáveis do modelo (`{{ var }}`)**
+- **Variável**: um marcador `{{ nome }}` no HTML que a geração troca pelo valor real na emissão.
+  Vêm de duas fontes: (a) os **campos da estrutura de dados** (o que o operador digita); e (b) as
+  **variáveis de sistema** — sempre disponíveis, injetadas pela plataforma (dados do paciente/médico/
+  clínica/assinatura), independem da estrutura de dados. As principais de sistema:
+  - `{{ nome_cliente }}` — nome do paciente.
+  - `{{ medico_nome }}` · `{{ medico_documentos }}` — nome e registros (CRM/CRO…) do profissional.
+  - `{{ clinica_nome }}` · `{{ clinica_logo }}` · `{{ clinica_logo_pequeno }}` — identidade da clínica.
+  - `{{ emissao }}` · `{{ validade }}` — datas de emissão e validade.
+  - `{{ info_assinatura }}` · `{{ assinatura_img }}` · `{{ precisa_certificar }}` — bloco/imagem de
+    assinatura e se o documento exige certificação.
+  - `{{ qr_code }}` — o **QR** do documento. Numa **receita** com a **validação por QR** ligada, esse
+    QR abre a página de validação **da própria clínica** (a farmácia confere a autenticidade); sem a
+    validação ligada, sai o QR genérico. É a variável que marca "este documento usa QR".
+  > Ao **inspecionar as variáveis** de um modelo, as dos **blocos incluídos** vêm junto. Para saber
+  > **quais documentos usam uma variável** (ex.: quais receitas têm `{{ qr_code }}`), dá para
+  > **filtrar por variável** na lista de documentos/conjuntos.
+
+**Validação por QR (o QR próprio da clínica na receita)**
+- **`emite_validacao_portal`**: um interruptor **por corpo de receita** — ligado, a receita sai com
+  um **QR que abre a página de validação da clínica** (em vez do QR genérico). É **opt-in**: enquanto
+  ninguém liga, nada muda. Faz sentido só em **receitas HTML** (o QR não sai em DOCX). Pode ser ligado
+  **um a um** (no editor do corpo) ou **em lote** — "ligar em **todos** os documentos que usam
+  `{{ qr_code }}`" — de uma vez.
+
 **Modelos de sistema**
 - **Orçamento** e **TCLE**: os dois modelos **globais** (admin-only) que fogem do catálogo de design.
   Versionados e publicáveis, mas com caminho próprio. Cuidam da **fôrma** (como o papel fica).
@@ -202,6 +227,17 @@ Algumas ideias sustentam tudo:
   efeito**. Devolve um **link temporário** do preview (não o arquivo embutido) — **repasse o link ao
   usuário** para ele abrir/baixar. Regra de ouro: **simule sempre antes** de publicar ou ativar.
 - **Publicar a versão oficial** → ferramenta que **publica**. Alcance amplo → **exige confirmação humana**.
+
+**Validação por QR na receita (ligar/desligar em lote)**
+- **Ligar/desligar a validação por QR** — o QR próprio da clínica na receita — em **lote** ou em
+  corpos específicos → ferramenta que **gerencia a validação por QR**. O caso típico é "**ligar a
+  validação por QR em todos os documentos que usam `{{ qr_code }}`**": ela seleciona os corpos pela
+  **variável** (default `qr_code`; genérico — dá para outra variável) ou por **ids** específicos.
+  Tem uma ação de **listar** (preview read-only: quais corpos usam a variável e o estado atual) e as
+  ações **ligar**/**desligar**. Roda em **pré-visualização por padrão** (mostra o que **mudaria** sem
+  gravar); grava só ao confirmar. Só afeta **corpos HTML** e considera versões **publicadas**.
+  ⚠️ Ligar não faz o QR "aparecer" sozinho: o modelo precisa **usar `{{ qr_code }}`** no HTML — por
+  isso a seleção é justamente "os que usam a variável".
 
 **Montar o catálogo (tipo novo)**
 - **Criar/editar tipo, definir/editar a estrutura de dados, vincular tipo↔template, ativar/desativar** →
@@ -352,6 +388,15 @@ Algumas ideias sustentam tudo:
 6. ⚠️ Não confunda com a **fôrma**: se o que muda é o *layout do papel* (cabeçalho, logo), isso é o
    **template de sistema do TCLE/Orçamento**, não o termo. O **texto** do consentimento é o termo.
 
+### Ligar a validação por QR em todas as receitas que usam `{{ qr_code }}`
+1. **Liste** (preview) os corpos que usam `{{ qr_code }}` — confira que são as receitas esperadas.
+2. **Ligue em lote** em pré-visualização primeiro (vê quantos mudariam), depois **confirme** para gravar.
+3. Só corpos **HTML** e versões **publicadas** entram. Documentos já emitidos **não** mudam (o QR é
+   definido na emissão). Para uma receita específica, dá para ligar/desligar só nela (por id) ou no
+   editor do corpo.
+4. Se uma receita deveria ter QR e **não** aparece na lista, é porque o HTML dela **não usa
+   `{{ qr_code }}`** — inclua a variável no modelo (rascunho → simular → publicar) e ligue de novo.
+
 ### Conferir se o documento de um atendimento saiu
 1. **Liste os documentos do atendimento** → veja se a receita/atestado/orçamento está lá (nome, data).
 2. Para **abrir/baixar**, vá à Central — o link de arquivo não trafega por aqui.
@@ -381,6 +426,9 @@ tipo/modelo aplicável → ler a versão atual → **rascunho** com a mudança �
 - **Leia um asset antes de sobrescrevê-lo** — o envio com sobrescrita substitui às cegas; para editar um
   estilo/CSS ou SVG, leia o conteúdo vigente primeiro e proponha a mudança sobre ele (texto vem à mão,
   binário vem como referência).
+- **Validação por QR é opt-in e por corpo HTML** — ligar o interruptor **não cria** o QR; o modelo
+  precisa **usar `{{ qr_code }}`**. Vale só p/ receitas HTML; documentos já emitidos não mudam. Pode
+  ligar/desligar em **lote** (todos que usam a variável) ou por corpo.
 - **Leitura de documento do paciente é só listagem** — nunca link de download; abrir é pela Central.
 - **Ler ≠ desenhar ≠ publicar** — cada nível exige mais alçada; a execução depende de autorização.
 

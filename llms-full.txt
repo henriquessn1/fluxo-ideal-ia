@@ -2885,11 +2885,11 @@ conversão, TMA, taxa de retorno). É por onde começar um panorama.
 
 ---
 name: jornada
-description: A Jornada de Cuidado (Episódio de Cuidado) do Fluxo Ideal — o caso longo do paciente (cirurgia/procedimento com etapas pré e pós) que dura semanas e não cabe no atendimento do dia. Cobre configurar o modelo de uma jornada (fases, etapas, marcos), acompanhar onde cada paciente está (fase atual, quem travou) e operar a jornada de um paciente. Use para "montar a jornada da catarata", "onde estão meus pacientes de cirurgia?", "quem travou?", "abrir a jornada da Maria".
+description: A Jornada de Cuidado (Episódio de Cuidado) do Fluxo Ideal — o caso longo do paciente (cirurgia/procedimento com etapas pré e pós) que dura semanas e não cabe no atendimento do dia. Cobre configurar o modelo de uma jornada (fases, etapas, marcos, marcas), acompanhar onde cada paciente está (fase atual, quem travou), preencher/filtrar marcas (ex.: data da cirurgia, confirmado) e operar a jornada de um paciente. Use para "montar a jornada da catarata", "onde estão meus pacientes de cirurgia?", "quem travou?", "abrir a jornada da Maria", "marcar a data da cirurgia da Maria", "quais cirurgias são desta semana?".
 audience: [ia, humano]
 depends_on: [jornada-cuidado, tarefas, atendimento-clinico]
-version: 0.1.0
-updated: 2026-07-17
+version: 0.2.0
+updated: 2026-09-28
 ---
 
 # Jornada de Cuidado
@@ -2954,6 +2954,13 @@ Pense em três verbos:
   de conclusão).
 - **Pendência de SLA:** um caso **parado** (sem movimento há dias) ou com um **requisito obrigatório
   vencido** — a fila proativa de "quem precisa de atenção".
+- **Marca:** um **campo customizável** que a clínica define **por tipo de jornada** — uma **data**
+  (ex.: data da cirurgia), um **sim/não** (ex.: confirmado), uma **seleção** (ex.: lado OD/OE), um
+  **texto** ou **número**. É configuração do MODELO. Cada marca pode ser usada como **filtro** e/ou
+  como **raia (swimlane)** no quadro. É distinta da **fase** (a marca é um dado que você preenche; a
+  fase é derivada dos marcos).
+- **Valor de marca:** o que você preenche numa jornada específica para uma marca (ex.: "data da
+  cirurgia = 15/10"). Vive na jornada do paciente; editável a qualquer momento.
 
 ## Ferramentas (tarefa → ferramenta)
 > A skill diz **o que existe e por quê**; as ações reais vêm das ferramentas autorizadas do MCP. Toda
@@ -2961,19 +2968,27 @@ Pense em três verbos:
 
 **Configurar o modelo:**
 - Ver os tipos de jornada já configurados (e o resumo de cada um) → ferramenta de listagem/leitura de tipos.
-- Montar/editar um modelo (fases, etapas, marcos, regra de derivação) → ferramenta de gravação do
-  tipo. A gravação é **precedida de validação** e só grava com confirmação.
+- Montar/editar um modelo (fases, etapas, marcos, regra de derivação **e marcas**) → ferramenta de
+  gravação do tipo. A gravação é **precedida de validação** e só grava com confirmação.
+- Definir as **marcas** do tipo (os campos customizáveis: data/sim-não/seleção/texto/número, e se
+  cada uma serve de filtro e/ou raia) → faz parte do mesmo modelo (o resumo do tipo já conta quantas
+  marcas ele tem).
 - Conferir a coerência de um modelo antes de salvar → ferramenta de **validação** (aponta referências
-  quebradas antes que virem um quadro sem fase/etapa).
+  quebradas — e marcas malformadas, ex.: seleção sem opções — antes que virem um quadro quebrado).
 
 **Acompanhar:**
 - Listar/buscar jornadas (por paciente, status, tipo ou fase) → ferramenta de busca de jornadas.
-- Ver o detalhe de uma jornada (fase atual, o que falta, próxima fase) → ferramenta de contexto da jornada.
+- **Filtrar por marca** (ex.: "cirurgias desta semana", "confirmados = sim") → a busca de jornadas
+  aceita filtro por valor de marca (faixa de datas / opção / sim-não).
+- Ver o detalhe de uma jornada (fase atual, o que falta, próxima fase **e os valores das marcas**) →
+  ferramenta de contexto da jornada.
 - Ver a fila de pendências (parados / requisito vencido) → ferramenta de pendências de SLA.
 
 **Operar uma jornada:**
 - Abrir a jornada de um paciente (já com os marcos do molde) → ferramenta de criação.
-- Atualizar dados (título/tipo/profissional/convênio) → ferramenta de edição.
+- Atualizar dados (título/tipo/profissional/convênio) **ou preencher/alterar valores de marca**
+  (ex.: setar a data da cirurgia, marcar "confirmado") → ferramenta de edição. Preencha só as marcas
+  que mudaram; deixe em branco (vazio) para limpar uma marca. Editável a qualquer momento.
 - Encerrar (concluir) ou cancelar → ferramenta de mudança de estado.
 - Ligar um atendimento à jornada → ferramenta de vínculo.
 - Recalcular a fase (após mover marcos) → ferramenta de recálculo.
@@ -2990,6 +3005,9 @@ Pense em três verbos:
 - **A IA não apaga** modelo nem jornada — exclusão é ação da plataforma, não da IA.
 - **Sem dado clínico** — a jornada carrega referências e progresso; o conteúdo clínico vive no
   atendimento/prontuário (fora deste papel).
+- **Marca ≠ fase.** A marca é um **dado que você preenche** (data da cirurgia, confirmado); a fase é
+  **derivada dos marcos**. Preencher uma marca **não** move a fase. As marcas de um tipo existem só
+  se a clínica as configurou naquele modelo (nem todo tipo tem marcas).
 
 
 # ============================================================

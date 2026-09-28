@@ -1349,8 +1349,8 @@ name: designer-documentos
 description: O sistema de documentos do Fluxo Ideal — como se desenha, versiona, previsualiza e publica o MODELO de um documento (receita, atestado, laudo, orçamento, TCLE…) e como esses modelos viram documentos gerados por paciente. Cobre BLOCOS REUTILIZÁVEIS (cabeçalho/rodapé/assinatura/cláusula incluídos em vários modelos — sempre reaproveitar em vez de duplicar HTML), nascer um corpo do zero (inclusive migrar DOCX→HTML, herdando as habilitações do legado pra o documento não sumir do picker), GERIR HABILITAÇÕES (quem pode emitir cada documento) e os TEMPLATES DE TERMOS (o texto legal versionado de aceite/intercorrências/itens não inclusos/TCLE que entra nos orçamentos) — o CONTEÚDO, distinto da fôrma HTML. Use para entender "como esse documento fica", para criar/editar/publicar um template com segurança, reaproveitar blocos e redigir/versionar os termos.
 audience: [ia, humano]
 depends_on: [documentos-clinicos, templates, catalogo-documentos, termos-orcamento]
-version: 0.6.0
-updated: 2026-09-25
+version: 0.7.0
+updated: 2026-09-28
 ---
 
 # Designer de Documentos
@@ -1401,13 +1401,20 @@ no modelo sem estragar o que já está sendo usado:
                      │   rascunho ──edita──► rascunho ──publica──► VERSÃO OFICIAL
                      │   (preview a qualquer momento, com dados fictícios)
                      ▼
-         geração real ──► DOCUMENTO por paciente (fica no atendimento)
+         geração real ──► DOCUMENTO por paciente (dado DO PACIENTE — MS Clientes)
 ```
 
 Algumas ideias sustentam tudo:
 
 - **Modelo ≠ documento gerado.** O template é a fôrma; o documento do paciente é o que sai da fôrma
   numa emissão. Mudar o template **não** reescreve documentos já gerados.
+- **O documento gerado é DADO DO PACIENTE (dono = MS Clientes), não do Documentos** (épico #1822).
+  O Documentos é o **motor** (renderiza/assina/guarda o arquivo no S3); a *instância* do documento
+  (os dados preenchidos + arquivos + estado) vive no **Clientes**, ligada ao paciente (`cliente_id`),
+  com o atendimento como **vínculo opcional** (não dono). Cada documento tem um **estado**:
+  `rascunho` → `gerado_sem_assinatura` → `assinado` — o que permite a **secretária preencher/gerar sem
+  assinar** e o **profissional validar e assinar depois**. Antes de criar um documento avulso, dá pra
+  **checar se o paciente já tem um igual** (dedup por cliente+modelo) e abrir o existente em vez de duplicar.
 - **Conteúdo é versionado — rascunho vs. publicado.** Você edita **rascunhos** à vontade (reversível);
   só a **publicação** vira a versão **oficial** usada na geração real. Versão já publicada **não se
   edita** — cria-se um rascunho novo. Publicar é a ação de **maior alcance** (blast radius): confirme
@@ -1545,8 +1552,9 @@ Algumas ideias sustentam tudo:
 
 **Documentos gerados**
 - **Documento do paciente**: o arquivo que saiu de uma emissão real (receita/atestado/laudo/orçamento/
-  TCLE…), guardado no **atendimento**. A leitura aqui lista **quais** existem (nome, tamanho, data, tipo)
-  — sem baixar o arquivo.
+  TCLE…). A instância é **dado do paciente (MS Clientes)** — o arquivo em si fica no S3 do Documentos.
+  A leitura aqui lista **quais** existem (nome, tamanho, data, tipo, e o **estado** rascunho/gerado/
+  assinado) — sem baixar o arquivo.
 - **Modelos habilitados por profissional**: dentre os tipos ativos, quais **este** profissional pode emitir.
 - **Habilitação (quem pode emitir)**: o vínculo **profissional ↔ tipo-template** que faz um documento
   aparecer no **picker de emissão** daquele profissional. Um tipo-template ativo mas **sem habilitação**

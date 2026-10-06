@@ -3,8 +3,8 @@ name: secretaria
 description: O papel de recepção do Fluxo Ideal — cadastrar e encontrar pacientes, agendar/remarcar/cancelar, ler a agenda do dia e a disponibilidade de horários, e acompanhar o histórico de relacionamento. Use para "quem é esse paciente?", "tem horário quinta?", "marca o retorno da Maria", "quem faltou hoje?".
 audience: [ia, humano]
 depends_on: [cadastro-paciente, agenda, conversas]
-version: 0.3.3
-updated: 2026-07-17
+version: 0.4.0
+updated: 2026-10-06
 ---
 
 # Secretária
@@ -77,6 +77,10 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 - **Estados do agendamento**: **confirmado** (paciente confirmou presença), **chegou** (check-in
   na recepção), **faltou** (no-show), **finalizado**, **cancelado**. Remarcar move data/horário
   (e conta como reagendamento).
+- **Risco de falta**: probabilidade (0 a 1) de o paciente faltar, estimada por um modelo estatístico
+  treinado **só com o histórico desta clínica** e recalculada todo dia. Vem junto de cada agendamento
+  nas listagens, com a data em que foi calculada. **Vazio = ainda sem previsão** (pouco histórico) —
+  não é "risco zero". É um **sinal para priorizar**, não um veredito sobre o paciente.
 
 **Retorno** (importa na hora de marcar)
 - **Retorno**: consulta de acompanhamento, muitas vezes um direito já concedido (não se recobra).
@@ -122,6 +126,12 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 - Detalhe de UM agendamento → ferramenta de contexto do agendamento. A **trajetória** dele (quem
   confirmou, por que cancelou) → ferramenta de histórico do agendamento.
 - Minhas pendências (sem confirmação, atrasados) → ferramenta de pendências.
+- "Quem tem mais chance de faltar amanhã?" → as listagens de agenda já trazem o **risco de falta** de
+  cada agendamento; ordene/destaque os de risco alto para **reforçar a confirmação** primeiro.
+- "Dá pra encaixar alguém no dia X?" / "quantos extras cabem?" → ferramenta de **sugestão de encaixe**
+  (overbooking): soma o risco de falta do dia e diz quantos horários extras cabem com segurança (estimativa
+  conservadora). **Só sugere** — encaixar de fato é a ferramenta de agenda extra / criar agendamento, com
+  confirmação. Se o dia não tiver previsão de risco, ela avisa que não há base — não force encaixe.
 - Números do período (ocupação, no-show, confirmação) → ferramenta de resumo/KPIs.
 
 **Agenda — agir** (confirmam antes)
@@ -188,6 +198,8 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 2. Conforme os pacientes chegam, mova o estado: **chegou** no check-in; **faltou** para o no-show;
    **confirmado** quando o paciente confirma por telefone.
 3. Precisa de números (ocupação, faltas, confirmação)? Use o **resumo/KPIs** do período.
+4. Para **prevenir** falta: veja os agendamentos de **risco alto** de amanhã e priorize a confirmação
+   deles (ou acione a lista de espera); se o dia tem muito risco somado, consulte a **sugestão de encaixe**.
 
 ### Cadastrar sem criar duplicata
 1. **Busque** por nome, e depois por CPF/telefone — variações de nome e o 9º dígito do celular
@@ -214,6 +226,8 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 - **Remarcar não é grátis**: conta reagendamento; não é a mesma coisa que "corrigir um erro de
   digitação".
 - **Retorno não se recobra** quando já é um direito concedido — reconheça o caso certo ao marcar.
+- **Risco de falta é estimativa, não rótulo.** Use para priorizar confirmação/encaixe; nunca o comunique
+  ao paciente nem o trate como certeza. Encaixe sugerido não é encaixe feito.
 - **Autorização é do MCP**: a skill ensina a intenção; o acesso efetivo depende da permissão do
   usuário. Recepção e médico veem escopos diferentes da agenda.
 

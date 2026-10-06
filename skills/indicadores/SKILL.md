@@ -3,8 +3,8 @@ name: indicadores
 description: A visão de GESTÃO/BI da clínica no Fluxo Ideal — o dashboard executivo que cruza agenda, comercial, atendimento, financeiro e satisfação num lugar só: ler os KPIs, abrir as quebras (drill-down por profissional/convênio/procedimento), comparar com o período anterior e ver a evolução no tempo. Ensina o que cada indicador significa em NEGÓCIO (ocupação, no-show, conversão, ticket médio, produção, DSO, inadimplência, TMA, NPS). Exportar a base crua é papel à parte (backup/DPO). Use para "como está a clínica?", "quero um panorama", "abre por profissional", "compara com o mês passado".
 audience: [ia, humano]
 depends_on: [indicadores, gestao, exportacao]
-version: 0.2.1
-updated: 2026-07-13
+version: 0.3.0
+updated: 2026-10-06
 ---
 
 # Indicadores
@@ -95,8 +95,15 @@ conversão, TMA, taxa de retorno). É por onde começar um panorama.
 **Comercial** (fonte: vendas)
 - **Produção (R$)**: quanto a clínica **vendeu** no período (volume de negócio fechado).
 - **Ticket médio (R$)**: valor médio por venda — sobe com upsell/pacotes, cai com muita venda pequena.
-- **Conversão de orçamentos (%)**: dos orçamentos feitos, quantos viraram venda. Mede a eficácia
-  comercial (proposta → fechamento). Conversão baixa com muitos orçamentos = oportunidade escapando.
+- **Conversão de orçamentos (%)**: dos orçamentos feitos, quantos **viraram venda** de fato. Mede a
+  eficácia comercial (proposta → fechamento). Conversão baixa com muitos orçamentos = oportunidade
+  escapando. ⚠️ Orçamento só **aprovado** internamente (ainda sem venda) **não conta** — ele aparece à
+  parte, como "aprovados em aberto" no aprofundamento. Muitos aprovados sem venda = fechamento travado
+  (o paciente disse sim, mas a venda não foi registrada/paga).
+- **Projeção de faturamento (R$)**: a receita **estimada** para os próximos meses, calculada por um
+  modelo estatístico treinado **só com o histórico da própria clínica**. É **estimativa, não receita
+  realizada** — apresente sempre como projeção ("a tendência indica…"). Sem histórico suficiente ela
+  simplesmente não existe ainda (diga isso; não invente).
 - **Margem de contribuição (R$ e %)**: o que sobra de cada venda depois dos custos diretos, para
   cobrir os custos fixos. É a base do ponto de equilíbrio (ver `financeiro`).
 - **Carteira a receber (R$)**: total que os pacientes ainda devem (parcelas em aberto). O detalhe
@@ -146,6 +153,12 @@ conversão, TMA, taxa de retorno). É por onde começar um panorama.
   procedimento / profissional / convênio; a carteira **por faixa de atraso** (aging) e o DSO **a prazo ×
   total**; os **recebíveis de convênio** e a **reconciliação de convênio**; o TMA de **retorno × 1ª
   consulta** → a ferramenta de **drill-down** do painel.
+
+**Olhar para a frente (projeção)**
+- "Quanto devemos faturar nos próximos meses?" / "a tendência é de alta?" → a ferramenta de **projeção
+  de faturamento**. Devolve a receita projetada mês a mês + o total. Se vier **indisponível**, repasse o
+  motivo (normalmente: modelo ainda sem histórico suficiente). Para o que **já** entrou, use o painel / a
+  série temporal — projeção e realizado não se misturam.
 
 **Comparar períodos**
 - "Este período × o anterior" — a **variação** de cada KPI (em % e absoluta), já com o **sentido** (se
@@ -209,6 +222,8 @@ conversão, TMA, taxa de retorno). É por onde começar um panorama.
 - **Export é papel à parte e protege o dado:** disparar a base crua é permissão **separada** (backup/DPO),
   fora do BI. A senha é **do humano** (a IA não inventa nem guarda) e o **link não é repassado pela IA**
   (vai por notificação ao disparador). Perder a senha = perder o acesso ao arquivo.
+- **Projeção é estimativa.** Nunca a some ao realizado nem a apresente como fato; diga de onde vem
+  (histórico da própria clínica) e quando foi atualizada.
 - **Indicadores é leitura.** Nada aqui altera agenda, venda, caixa ou paciente (o export é um backup
   de saída, não uma mutação). Ação/operação é nas skills de domínio.
 

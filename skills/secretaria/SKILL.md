@@ -3,7 +3,7 @@ name: secretaria
 description: O papel de recepção do Fluxo Ideal — cadastrar e encontrar pacientes, agendar/remarcar/cancelar, ler a agenda do dia e a disponibilidade de horários, e acompanhar o histórico de relacionamento. Use para "quem é esse paciente?", "tem horário quinta?", "marca o retorno da Maria", "quem faltou hoje?".
 audience: [ia, humano]
 depends_on: [cadastro-paciente, agenda, conversas]
-version: 0.4.0
+version: 0.5.0
 updated: 2026-10-06
 ---
 
@@ -81,6 +81,11 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
   treinado **só com o histórico desta clínica** e recalculada todo dia. Vem junto de cada agendamento
   nas listagens, com a data em que foi calculada. **Vazio = ainda sem previsão** (pouco histórico) —
   não é "risco zero". É um **sinal para priorizar**, não um veredito sobre o paciente.
+- **Risco de cancelamento em cima da hora** e **risco de vagar**: quando a clínica liga a previsão de
+  desfecho, cada agendamento traz também a chance de o paciente **cancelar na véspera** (janela da clínica,
+  em geral 24h). **Risco de vagar = falta + cancelamento em cima da hora** — é o que a agenda mostra no selo.
+  Vazio = a clínica só prevê falta. É **apoio à decisão**: nunca motivo para recusar agendamento nem para
+  tratar um paciente (ou um grupo) de forma diferente.
 
 **Retorno** (importa na hora de marcar)
 - **Retorno**: consulta de acompanhamento, muitas vezes um direito já concedido (não se recobra).
@@ -128,8 +133,12 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 - Minhas pendências (sem confirmação, atrasados) → ferramenta de pendências.
 - "Quem tem mais chance de faltar amanhã?" → as listagens de agenda já trazem o **risco de falta** de
   cada agendamento; ordene/destaque os de risco alto para **reforçar a confirmação** primeiro.
+- "Quais horários de amanhã podem vagar?" → some **falta + cancelamento em cima da hora** de cada
+  agendamento (quando houver o segundo) e diga **de onde vem** o risco: falta pede reforço de confirmação;
+  cancelamento pede ter a **lista de espera** pronta.
 - "Dá pra encaixar alguém no dia X?" / "quantos extras cabem?" → ferramenta de **sugestão de encaixe**
-  (overbooking): soma o risco de falta do dia e diz quantos horários extras cabem com segurança (estimativa
+  (overbooking): soma o risco de **vagar** do dia (falta + cancelamento em cima da hora, com a quebra das
+  duas parcelas) e diz quantos horários extras cabem com segurança (estimativa
   conservadora). **Só sugere** — encaixar de fato é a ferramenta de agenda extra / criar agendamento, com
   confirmação. Se o dia não tiver previsão de risco, ela avisa que não há base — não force encaixe.
 - Números do período (ocupação, no-show, confirmação) → ferramenta de resumo/KPIs.
@@ -226,8 +235,9 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 - **Remarcar não é grátis**: conta reagendamento; não é a mesma coisa que "corrigir um erro de
   digitação".
 - **Retorno não se recobra** quando já é um direito concedido — reconheça o caso certo ao marcar.
-- **Risco de falta é estimativa, não rótulo.** Use para priorizar confirmação/encaixe; nunca o comunique
-  ao paciente nem o trate como certeza. Encaixe sugerido não é encaixe feito.
+- **Risco de falta (ou de vagar) é estimativa, não rótulo.** Use para priorizar confirmação/encaixe; nunca o
+  comunique ao paciente, nunca o use para recusar agendamento ou tratar alguém de forma diferente, nem o
+  trate como certeza. Encaixe sugerido não é encaixe feito.
 - **Autorização é do MCP**: a skill ensina a intenção; o acesso efetivo depende da permissão do
   usuário. Recepção e médico veem escopos diferentes da agenda.
 

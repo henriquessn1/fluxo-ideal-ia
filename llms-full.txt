@@ -1072,8 +1072,8 @@ name: designer-agentes
 description: Como se DESENHA o comportamento de um agente de IA no Fluxo Ideal — o que é um agente aqui, sua persona/instrução, as capacidades (capabilities nomeadas) que ele pode acionar, os gatilhos que o acordam e a escolha entre raciocínio (LLM) e roteiro determinístico. Antes de criar, checar o REGISTRO público de times prontos para reusar. Princípio central: comportamento de agente é configuração (dado), nunca código. Use para reusar, montar, ajustar ou explicar um agente sem cair em detalhe de implementação.
 audience: [ia, humano]
 depends_on: [automacao-ia, comportamento, gatilhos]
-version: 0.4.4
-updated: 2026-07-22
+version: 0.5.0
+updated: 2026-10-06
 ---
 
 # Designer de agentes
@@ -1162,8 +1162,16 @@ Cinco verdades operacionais:
   - **Script** — o agente segue um **roteiro determinístico** (regras fixas, sem julgamento). Bom
     quando a decisão é clara e você quer 100% de previsibilidade (ex.: "botão X → confirma; botão Y →
     manda pra recepção; qualquer outra coisa → escala pra IA").
+  - **Aprendizado de máquina (ML)** — o agente **aprende padrões do histórico da própria clínica** e
+    produz uma **previsão numérica**, sem linguagem e sem LLM (custo de token zero, nenhuma chave de
+    provedor). Dois perfis: **preditor** (classifica — ex.: a chance de cada agendamento virar falta) e
+    **projetor** (série no tempo — ex.: a receita dos próximos meses). Ele **re-treina** e **prevê**
+    sozinho em cadências configuráveis (no horário da clínica) e grava o resultado no domínio (a agenda
+    mostra o risco; o painel mostra a projeção). Sem histórico suficiente ele não publica nada — a tela
+    segue normal. Não tem persona nem modelo de LLM para escolher.
   - Regra prática: **determinístico quando dá; LLM só onde há ambiguidade real.** Muitos fluxos são
-    um script rápido que, no caso duvidoso, **escala** para um agente LLM.
+    um script rápido que, no caso duvidoso, **escala** para um agente LLM. **Previsão a partir de
+    histórico numérico** (quem vai faltar, quanto vamos faturar) é **ML**, não LLM.
 - **Perfil**: o "tipo de produto" do agente (ex.: um mensageiro), uma dimensão separada do modo de
   decisão. O perfil define **quais campos de configuração** o agente expõe (renderizados na tela,
   validados no salvamento).
@@ -1304,6 +1312,9 @@ pessoa **aplica** — quem cria acesso é sempre o humano.
 - **LLM** quando: a entrada é linguagem natural ambígua e o agente precisa **compreender e julgar**.
   Sempre com uma saída **estruturada** e a regra "na dúvida, escala".
 - **Combinação** (recomendado para triagem): script na frente, LLM atrás (só o resíduo ambíguo).
+- **ML** quando: a pergunta é "o que **provavelmente** vai acontecer?" e a resposta sai de **números do
+  passado da clínica** (faltas, faturamento). Não interpreta texto nem age: só publica a previsão para
+  telas e outros agentes usarem. Os dados ficam na clínica — nada é agregado entre clínicas.
 
 ## Regras e invariantes
 - **Reuse antes de criar.** Cheque o registro; instalar um time pronto (colar um link) é preferível a
@@ -2667,8 +2678,8 @@ name: indicadores
 description: A visão de GESTÃO/BI da clínica no Fluxo Ideal — o dashboard executivo que cruza agenda, comercial, atendimento, financeiro e satisfação num lugar só: ler os KPIs, abrir as quebras (drill-down por profissional/convênio/procedimento), comparar com o período anterior e ver a evolução no tempo. Ensina o que cada indicador significa em NEGÓCIO (ocupação, no-show, conversão, ticket médio, produção, DSO, inadimplência, TMA, NPS). Exportar a base crua é papel à parte (backup/DPO). Use para "como está a clínica?", "quero um panorama", "abre por profissional", "compara com o mês passado".
 audience: [ia, humano]
 depends_on: [indicadores, gestao, exportacao]
-version: 0.2.1
-updated: 2026-07-13
+version: 0.3.0
+updated: 2026-10-06
 ---
 
 # Indicadores
@@ -2759,8 +2770,15 @@ conversão, TMA, taxa de retorno). É por onde começar um panorama.
 **Comercial** (fonte: vendas)
 - **Produção (R$)**: quanto a clínica **vendeu** no período (volume de negócio fechado).
 - **Ticket médio (R$)**: valor médio por venda — sobe com upsell/pacotes, cai com muita venda pequena.
-- **Conversão de orçamentos (%)**: dos orçamentos feitos, quantos viraram venda. Mede a eficácia
-  comercial (proposta → fechamento). Conversão baixa com muitos orçamentos = oportunidade escapando.
+- **Conversão de orçamentos (%)**: dos orçamentos feitos, quantos **viraram venda** de fato. Mede a
+  eficácia comercial (proposta → fechamento). Conversão baixa com muitos orçamentos = oportunidade
+  escapando. ⚠️ Orçamento só **aprovado** internamente (ainda sem venda) **não conta** — ele aparece à
+  parte, como "aprovados em aberto" no aprofundamento. Muitos aprovados sem venda = fechamento travado
+  (o paciente disse sim, mas a venda não foi registrada/paga).
+- **Projeção de faturamento (R$)**: a receita **estimada** para os próximos meses, calculada por um
+  modelo estatístico treinado **só com o histórico da própria clínica**. É **estimativa, não receita
+  realizada** — apresente sempre como projeção ("a tendência indica…"). Sem histórico suficiente ela
+  simplesmente não existe ainda (diga isso; não invente).
 - **Margem de contribuição (R$ e %)**: o que sobra de cada venda depois dos custos diretos, para
   cobrir os custos fixos. É a base do ponto de equilíbrio (ver `financeiro`).
 - **Carteira a receber (R$)**: total que os pacientes ainda devem (parcelas em aberto). O detalhe
@@ -2810,6 +2828,12 @@ conversão, TMA, taxa de retorno). É por onde começar um panorama.
   procedimento / profissional / convênio; a carteira **por faixa de atraso** (aging) e o DSO **a prazo ×
   total**; os **recebíveis de convênio** e a **reconciliação de convênio**; o TMA de **retorno × 1ª
   consulta** → a ferramenta de **drill-down** do painel.
+
+**Olhar para a frente (projeção)**
+- "Quanto devemos faturar nos próximos meses?" / "a tendência é de alta?" → a ferramenta de **projeção
+  de faturamento**. Devolve a receita projetada mês a mês + o total. Se vier **indisponível**, repasse o
+  motivo (normalmente: modelo ainda sem histórico suficiente). Para o que **já** entrou, use o painel / a
+  série temporal — projeção e realizado não se misturam.
 
 **Comparar períodos**
 - "Este período × o anterior" — a **variação** de cada KPI (em % e absoluta), já com o **sentido** (se
@@ -2873,6 +2897,8 @@ conversão, TMA, taxa de retorno). É por onde começar um panorama.
 - **Export é papel à parte e protege o dado:** disparar a base crua é permissão **separada** (backup/DPO),
   fora do BI. A senha é **do humano** (a IA não inventa nem guarda) e o **link não é repassado pela IA**
   (vai por notificação ao disparador). Perder a senha = perder o acesso ao arquivo.
+- **Projeção é estimativa.** Nunca a some ao realizado nem a apresente como fato; diga de onde vem
+  (histórico da própria clínica) e quando foi atualizada.
 - **Indicadores é leitura.** Nada aqui altera agenda, venda, caixa ou paciente (o export é um backup
   de saída, não uma mutação). Ação/operação é nas skills de domínio.
 
@@ -3027,8 +3053,8 @@ name: medico
 description: O papel médico assistido por IA no Fluxo Ideal — conduzir e DOCUMENTAR o atendimento (adendo write-only) sem que a IA jamais leia o prontuário. Use para registrar evolução, mover o atendimento e ver a fila, com o clínico protegido.
 audience: [ia, humano]
 depends_on: [atendimento-clinico, evolucao-write-only]
-version: 0.2.0
-updated: 2026-07-12
+version: 0.2.1
+updated: 2026-10-06
 ---
 
 # Médico
@@ -3076,7 +3102,9 @@ Escrever ≠ ler. Toda a proteção vem daí: a documentação flui numa via de 
 - Mover a etapa do atendimento (em atendimento / finalizar) → ferramenta de mudança de estado.
 - Anotar recado operacional da equipe → ferramenta de comentário (não é prontuário).
 - Ver minhas pendências (contagens/refs, sem conteúdo) e métricas → ferramentas de pendências/métricas.
-- Ver a fila/agenda do meu dia → ferramentas de agenda/atendimento do dia.
+- Ver a fila/agenda do meu dia → ferramentas de agenda/atendimento do dia. Cada agendamento traz o
+  **risco de falta** estimado (histórico da própria clínica; vazio = sem previsão) — útil para saber onde
+  cabe um encaixe; a **sugestão de encaixe** do dia diz quantos extras cabem com segurança (só sugere).
 
 **Hoje, por ferramenta — documentação (write-only):**
 - Anexar um **adendo/evolução** ao atendimento → ferramenta de adendo **write-only**: você dita/registra
@@ -3675,8 +3703,8 @@ name: secretaria
 description: O papel de recepção do Fluxo Ideal — cadastrar e encontrar pacientes, agendar/remarcar/cancelar, ler a agenda do dia e a disponibilidade de horários, e acompanhar o histórico de relacionamento. Use para "quem é esse paciente?", "tem horário quinta?", "marca o retorno da Maria", "quem faltou hoje?".
 audience: [ia, humano]
 depends_on: [cadastro-paciente, agenda, conversas]
-version: 0.3.3
-updated: 2026-07-17
+version: 0.4.0
+updated: 2026-10-06
 ---
 
 # Secretária
@@ -3749,6 +3777,10 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 - **Estados do agendamento**: **confirmado** (paciente confirmou presença), **chegou** (check-in
   na recepção), **faltou** (no-show), **finalizado**, **cancelado**. Remarcar move data/horário
   (e conta como reagendamento).
+- **Risco de falta**: probabilidade (0 a 1) de o paciente faltar, estimada por um modelo estatístico
+  treinado **só com o histórico desta clínica** e recalculada todo dia. Vem junto de cada agendamento
+  nas listagens, com a data em que foi calculada. **Vazio = ainda sem previsão** (pouco histórico) —
+  não é "risco zero". É um **sinal para priorizar**, não um veredito sobre o paciente.
 
 **Retorno** (importa na hora de marcar)
 - **Retorno**: consulta de acompanhamento, muitas vezes um direito já concedido (não se recobra).
@@ -3794,6 +3826,12 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 - Detalhe de UM agendamento → ferramenta de contexto do agendamento. A **trajetória** dele (quem
   confirmou, por que cancelou) → ferramenta de histórico do agendamento.
 - Minhas pendências (sem confirmação, atrasados) → ferramenta de pendências.
+- "Quem tem mais chance de faltar amanhã?" → as listagens de agenda já trazem o **risco de falta** de
+  cada agendamento; ordene/destaque os de risco alto para **reforçar a confirmação** primeiro.
+- "Dá pra encaixar alguém no dia X?" / "quantos extras cabem?" → ferramenta de **sugestão de encaixe**
+  (overbooking): soma o risco de falta do dia e diz quantos horários extras cabem com segurança (estimativa
+  conservadora). **Só sugere** — encaixar de fato é a ferramenta de agenda extra / criar agendamento, com
+  confirmação. Se o dia não tiver previsão de risco, ela avisa que não há base — não force encaixe.
 - Números do período (ocupação, no-show, confirmação) → ferramenta de resumo/KPIs.
 
 **Agenda — agir** (confirmam antes)
@@ -3860,6 +3898,8 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 2. Conforme os pacientes chegam, mova o estado: **chegou** no check-in; **faltou** para o no-show;
    **confirmado** quando o paciente confirma por telefone.
 3. Precisa de números (ocupação, faltas, confirmação)? Use o **resumo/KPIs** do período.
+4. Para **prevenir** falta: veja os agendamentos de **risco alto** de amanhã e priorize a confirmação
+   deles (ou acione a lista de espera); se o dia tem muito risco somado, consulte a **sugestão de encaixe**.
 
 ### Cadastrar sem criar duplicata
 1. **Busque** por nome, e depois por CPF/telefone — variações de nome e o 9º dígito do celular
@@ -3886,6 +3926,8 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 - **Remarcar não é grátis**: conta reagendamento; não é a mesma coisa que "corrigir um erro de
   digitação".
 - **Retorno não se recobra** quando já é um direito concedido — reconheça o caso certo ao marcar.
+- **Risco de falta é estimativa, não rótulo.** Use para priorizar confirmação/encaixe; nunca o comunique
+  ao paciente nem o trate como certeza. Encaixe sugerido não é encaixe feito.
 - **Autorização é do MCP**: a skill ensina a intenção; o acesso efetivo depende da permissão do
   usuário. Recepção e médico veem escopos diferentes da agenda.
 

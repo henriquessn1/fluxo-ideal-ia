@@ -3,7 +3,7 @@ name: designer-agentes
 description: Como se DESENHA o comportamento de um agente de IA no Fluxo Ideal — o que é um agente aqui, sua persona/instrução, as capacidades (capabilities nomeadas) que ele pode acionar, os gatilhos que o acordam e a escolha entre raciocínio (LLM) e roteiro determinístico. Antes de criar, checar o REGISTRO público de times prontos para reusar. Princípio central: comportamento de agente é configuração (dado), nunca código. Use para reusar, montar, ajustar ou explicar um agente sem cair em detalhe de implementação.
 audience: [ia, humano]
 depends_on: [automacao-ia, comportamento, gatilhos]
-version: 0.5.0
+version: 0.6.0
 updated: 2026-10-06
 ---
 
@@ -95,14 +95,19 @@ Cinco verdades operacionais:
     manda pra recepção; qualquer outra coisa → escala pra IA").
   - **Aprendizado de máquina (ML)** — o agente **aprende padrões do histórico da própria clínica** e
     produz uma **previsão numérica**, sem linguagem e sem LLM (custo de token zero, nenhuma chave de
-    provedor). Dois perfis: **preditor** (classifica — ex.: a chance de cada agendamento virar falta) e
-    **projetor** (série no tempo — ex.: a receita dos próximos meses). Ele **re-treina** e **prevê**
+    provedor). Três perfis: **preditor** (classifica — a chance de cada agendamento virar falta; com o
+    ajuste **alvo = desfecho**, também a de cancelar em cima da hora, e a agenda mostra o "risco de
+    vagar"), **projetor** (série no tempo — ex.: a receita dos próximos meses) e **analista de clima**
+    (mede quanto cada condição do tempo muda as faltas e cancelamentos da clínica e **sugere** ajustes nos
+    alertas de clima — a clínica aprova em Configuração › Sistema; ele não muda nenhum alerta sozinho).
+    O perfil é escolhido **na criação** do agente ML. Ele **re-treina** e **prevê**
     sozinho em cadências configuráveis (no horário da clínica) e grava o resultado no domínio (a agenda
     mostra o risco; o painel mostra a projeção). Sem histórico suficiente ele não publica nada — a tela
     segue normal. Não tem persona nem modelo de LLM para escolher.
   - Regra prática: **determinístico quando dá; LLM só onde há ambiguidade real.** Muitos fluxos são
     um script rápido que, no caso duvidoso, **escala** para um agente LLM. **Previsão a partir de
-    histórico numérico** (quem vai faltar, quanto vamos faturar) é **ML**, não LLM.
+    histórico numérico** (quem vai faltar, quanto vamos faturar) é **ML**, não LLM. Trocar o **alvo** do
+    preditor só vale depois do próximo re-treino (o modelo antigo segue pontuando como foi treinado).
 - **Perfil**: o "tipo de produto" do agente (ex.: um mensageiro), uma dimensão separada do modo de
   decisão. O perfil define **quais campos de configuração** o agente expõe (renderizados na tela,
   validados no salvamento).

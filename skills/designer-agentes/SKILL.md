@@ -3,8 +3,8 @@ name: designer-agentes
 description: Como se DESENHA o comportamento de um agente de IA no Fluxo Ideal — o que é um agente aqui, sua persona/instrução, as capacidades (capabilities nomeadas) que ele pode acionar, os gatilhos que o acordam e a escolha entre raciocínio (LLM) e roteiro determinístico. Antes de criar, checar o REGISTRO público de times prontos para reusar. Princípio central: comportamento de agente é configuração (dado), nunca código. Use para reusar, montar, ajustar ou explicar um agente sem cair em detalhe de implementação.
 audience: [ia, humano]
 depends_on: [automacao-ia, comportamento, gatilhos]
-version: 0.4.4
-updated: 2026-07-22
+version: 0.5.0
+updated: 2026-10-06
 ---
 
 # Designer de agentes
@@ -93,8 +93,16 @@ Cinco verdades operacionais:
   - **Script** — o agente segue um **roteiro determinístico** (regras fixas, sem julgamento). Bom
     quando a decisão é clara e você quer 100% de previsibilidade (ex.: "botão X → confirma; botão Y →
     manda pra recepção; qualquer outra coisa → escala pra IA").
+  - **Aprendizado de máquina (ML)** — o agente **aprende padrões do histórico da própria clínica** e
+    produz uma **previsão numérica**, sem linguagem e sem LLM (custo de token zero, nenhuma chave de
+    provedor). Dois perfis: **preditor** (classifica — ex.: a chance de cada agendamento virar falta) e
+    **projetor** (série no tempo — ex.: a receita dos próximos meses). Ele **re-treina** e **prevê**
+    sozinho em cadências configuráveis (no horário da clínica) e grava o resultado no domínio (a agenda
+    mostra o risco; o painel mostra a projeção). Sem histórico suficiente ele não publica nada — a tela
+    segue normal. Não tem persona nem modelo de LLM para escolher.
   - Regra prática: **determinístico quando dá; LLM só onde há ambiguidade real.** Muitos fluxos são
-    um script rápido que, no caso duvidoso, **escala** para um agente LLM.
+    um script rápido que, no caso duvidoso, **escala** para um agente LLM. **Previsão a partir de
+    histórico numérico** (quem vai faltar, quanto vamos faturar) é **ML**, não LLM.
 - **Perfil**: o "tipo de produto" do agente (ex.: um mensageiro), uma dimensão separada do modo de
   decisão. O perfil define **quais campos de configuração** o agente expõe (renderizados na tela,
   validados no salvamento).
@@ -235,6 +243,9 @@ pessoa **aplica** — quem cria acesso é sempre o humano.
 - **LLM** quando: a entrada é linguagem natural ambígua e o agente precisa **compreender e julgar**.
   Sempre com uma saída **estruturada** e a regra "na dúvida, escala".
 - **Combinação** (recomendado para triagem): script na frente, LLM atrás (só o resíduo ambíguo).
+- **ML** quando: a pergunta é "o que **provavelmente** vai acontecer?" e a resposta sai de **números do
+  passado da clínica** (faltas, faturamento). Não interpreta texto nem age: só publica a previsão para
+  telas e outros agentes usarem. Os dados ficam na clínica — nada é agregado entre clínicas.
 
 ## Regras e invariantes
 - **Reuse antes de criar.** Cheque o registro; instalar um time pronto (colar um link) é preferível a

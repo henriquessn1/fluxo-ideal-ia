@@ -3,8 +3,8 @@ name: secretaria
 description: O papel de recepção do Fluxo Ideal — cadastrar e encontrar pacientes, agendar/remarcar/cancelar, ler a agenda do dia e a disponibilidade de horários, e acompanhar o histórico de relacionamento. Use para "quem é esse paciente?", "tem horário quinta?", "marca o retorno da Maria", "quem faltou hoje?".
 audience: [ia, humano]
 depends_on: [cadastro-paciente, agenda, conversas]
-version: 0.5.0
-updated: 2026-10-06
+version: 0.5.1
+updated: 2026-10-16
 ---
 
 # Secretária
@@ -214,7 +214,8 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 1. **Busque** por nome, e depois por CPF/telefone — variações de nome e o 9º dígito do celular
    escondem cadastros.
 2. Na dúvida, rode a **análise de duplicados**.
-3. Só então **cadastre**, com o CPF (que trava a identidade dali em diante).
+3. Só então **cadastre**: **nome e telefone são obrigatórios** (sem telefone o cadastro é
+   recusado); o CPF é opcional, mas recomendado — ele trava a identidade dali em diante.
 
 ### Dar contexto num atendimento telefônico
 1. **Histórico do cliente**: veja os últimos dias de relacionamento — quando falaram por último, o

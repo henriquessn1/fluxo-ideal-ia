@@ -54,8 +54,8 @@ name: administrador-clinica
 description: A "planta baixa" da clínica no Fluxo Ideal — configurar a identidade do estabelecimento (dados, contato, endereço, branding/white-label), cadastrar e gerir os profissionais (especialidades, registros de conselho, grade de horários, vínculos, documentos), os convênios aceitos, o catálogo de especialidades e o site público. Use para "cadastra a Dra. X", "adiciona esse convênio", "quais médicos temos?", "veste a marca da clínica", "monta o estabelecimento novo". Criar login/acesso (IAM) fica FORA.
 audience: [ia, humano]
 depends_on: [identidade-clinica, profissionais, especialidades, convenios, salas-recursos]
-version: 0.2.3
-updated: 2026-08-19
+version: 0.3.0
+updated: 2026-10-17
 ---
 
 # Administrador da clínica
@@ -216,6 +216,10 @@ Ideias que orientam quase tudo:
   textos legais) e o **endereço/contato** → gestão do estabelecimento; e ligar/ajustar o **site
   público** → gestão do site. Ambas **pré-visualizam** antes de gravar e aplicam **parcial** (só o que
   muda) — persiste só após confirmar.
+- **Parâmetros do site:** um dicionário **chave → valor** que o site público lê (convênio padrão, ordem dos
+  convênios, IDs do Google Ads/Tag Manager) → ferramenta de parâmetros do site (listar, criar/atualizar pela
+  chave, remover; prévia antes). Para "deixe a Unimed como padrão", ache o **id** do convênio pelo nome e grave
+  o id. **Tudo ali é público** — qualquer visitante vê; nunca grave senha, token ou chave de API.
 
 **Salas / equipamentos / recursos**
 - **Ler:** listar/filtrar as salas, consultórios e equipamentos (por unidade, tipo, ativo) → ferramenta de
@@ -262,6 +266,7 @@ Ideias que orientam quase tudo:
    áreas próprias — este papel entrega o alicerce.
 
 ## Regras e invariantes
+- **Parâmetro do site é público.** Nada de segredo ali — o serviço recusa chaves com cara de segredo.
 - **Estabelecimento é identidade, não operação.** Aqui não se marca consulta, não se cobra, não se
   atende — só se define quem a clínica é.
 - **CPF é write-only.** Pode ser informado ao cadastrar/editar um profissional, mas a **leitura nunca
@@ -3058,8 +3063,8 @@ name: medico
 description: O papel médico assistido por IA no Fluxo Ideal — conduzir e DOCUMENTAR o atendimento (adendo write-only) sem que a IA jamais leia o prontuário. Use para registrar evolução, mover o atendimento e ver a fila, com o clínico protegido.
 audience: [ia, humano]
 depends_on: [atendimento-clinico, evolucao-write-only]
-version: 0.2.1
-updated: 2026-10-06
+version: 0.3.0
+updated: 2026-10-16
 ---
 
 # Médico
@@ -3108,7 +3113,8 @@ Escrever ≠ ler. Toda a proteção vem daí: a documentação flui numa via de 
 - Anotar recado operacional da equipe → ferramenta de comentário (não é prontuário).
 - Ver minhas pendências (contagens/refs, sem conteúdo) e métricas → ferramentas de pendências/métricas.
 - Ver a fila/agenda do meu dia → ferramentas de agenda/atendimento do dia. Cada agendamento traz o
-  **risco de falta** estimado (histórico da própria clínica; vazio = sem previsão) — útil para saber onde
+  **risco de falta** estimado (histórico da própria clínica; vazio = sem previsão) e a **porcentagem de
+  vagar** pronta, igual ao selo da agenda (ao falar em %, use essa) — útil para saber onde
   cabe um encaixe; a **sugestão de encaixe** do dia diz quantos extras cabem com segurança (só sugere).
 
 **Hoje, por ferramenta — documentação (write-only):**
@@ -3116,6 +3122,10 @@ Escrever ≠ ler. Toda a proteção vem daí: a documentação flui numa via de 
   e ela devolve **só a confirmação** (id/status), **nunca o conteúdo** — nem o que você acabou de escrever.
 - Registrar o **desfecho** do atendimento (**alta / retorno / encaminhamento** a especialidade/exame)
   → ferramenta de desfecho (estruturado, validado por tipo). A **autoria é sua**, cravada do login.
+- O desfecho **retorno** registra a **decisão**, não o direito. Para o paciente marcar depois com a recepção,
+  crie também a **pendência de retorno** (data sugerida + validade + recado não-clínico para a recepção) →
+  ferramenta de retorno pendente, com prévia antes. Se o paciente já sai com o horário escolhido, agende o
+  retorno direto, ligado ao atendimento.
 
 **Nunca (por desenho):** ler prontuário, evolução, diagnóstico, resultado de exame ou qualquer
 síntese clínica.
@@ -3413,8 +3423,8 @@ name: precificador
 description: O sistema de precificação do Fluxo Ideal — como se configura preço (catálogo, tabelas, condições e formas de pagamento, favoritos) e como isso converge em orçamento e venda. Use para entender "quanto custa", como montar um orçamento e por que os valores são o que são.
 audience: [ia, humano]
 depends_on: [precos, catalogo, convenios, condicoes-pagamento, orcamentos, termos-orcamento]
-version: 0.4.4
-updated: 2026-08-04
+version: 0.5.0
+updated: 2026-10-16
 ---
 
 # Precificador
@@ -3481,6 +3491,11 @@ Três ideias que sustentam tudo:
 - **Termo do orçamento**: o **texto legal** que acompanha o orçamento — declaração de aceite, intercorrências, itens não inclusos, **TCLE** (consentimento) ou outros. O orçamento **seleciona** um template de termo por tipo (há um **padrão** por tipo). Você **escolhe** qual termo entra; **redigir/versionar o texto** dos termos é da skill `designer-documentos` (tela **Templates de Termos**, nas configurações).
 - **Venda**: orçamento aprovado/confirmado, pronto para o ciclo de pagamento.
 - **Desconto / cortesia**: redução dentro do limite da tabela / item incluído sem custo (isenção comercial).
+- **Política de desconto (alçada)**: até quanto cada **papel** (e/ou cada tabela) concede sozinho, até quanto
+  vai **com aprovação** e, acima disso, **negado**. Quando várias políticas casam, vale a mais específica
+  (papel + tabela) e depois a de maior prioridade. Sem política configurada = sem restrição.
+- **Margem**: o que sobra do preço depois do **custo** do procedimento, da **comissão** do profissional e do
+  custo de terceiros. **Markup** é a mesma folga vista sobre o custo.
 - **No-show**: falta pode gerar **multa configurável** (confirmável, perdoável ou ajustável por quem tem alçada).
 - **Retorno**: direito de retorno já incluído (ex.: num pacote) — **não se recobra**.
 
@@ -3515,9 +3530,22 @@ Três ideias que sustentam tudo:
 - Fazer o split de coparticipação e ancorar a autorização de convênio no item → ferramentas de pagador/autorização.
 - Listar retornos pendentes → ferramenta de retornos.
 
-**Feito na plataforma (ainda não por ferramenta):** **registrar** o aceite do cliente e a **edição do orçamento via simulação**, os **favoritos** do profissional e a **revisão de no-show**. A IA raciocina sobre isso, mas a **ação** hoje passa pela plataforma. (⚠️ apenas **registrar** o aceite é da plataforma — **consultar** se/quando o cliente aceitou já vem no detalhe do orçamento, acima.)
+**Análise e ajuste de preço (estratégico):**
+- **Comparar tabelas** (particular × convênios × promoção) para um conjunto de procedimentos ou uma categoria,
+  com a diferença em R$ e em % contra uma tabela de referência → ferramenta de comparação de tabelas.
+- **Simular a margem** de um preço antes de defini-lo (custo + comissão → margem e markup; avisa margem
+  negativa) → simulador de margem. Não grava.
+- **Histórico do preço** de um procedimento, ou "quanto cobrávamos na data X" numa tabela → ferramenta de
+  histórico de preço.
+- **Reajuste em massa** por regra (percentual, somar um valor, ou valor novo único; arredondamento; filtro por
+  tabela, categoria ou tipo de tabela) → ferramenta de reajuste. **Sempre mostre a prévia primeiro** (quantos
+  preços casam, quantos mudam e o antes/depois) e só aplique depois do OK explícito. Sem filtro ele atinge
+  **todas as tabelas** — confirme isso à parte.
+- **Política de desconto**: listar as políticas, **perguntar ao motor de alçada** se um desconto pode ser
+  dado (por quem pergunta ou simulando outro papel) e criar/editar/desativar políticas → ferramentas de
+  política de desconto. A escrita mostra a prévia antes.
 
-> Análise estratégica (reajuste em massa, histórico de preço, comparador de tabelas, simulador de margem, política de desconto) já existe no backend e está **a caminho** como ferramenta.
+**Feito na plataforma (ainda não por ferramenta):** **registrar** o aceite do cliente e a **edição do orçamento via simulação**, os **favoritos** do profissional e a **revisão de no-show**. A IA raciocina sobre isso, mas a **ação** hoje passa pela plataforma. (⚠️ apenas **registrar** o aceite é da plataforma — **consultar** se/quando o cliente aceitou já vem no detalhe do orçamento, acima.)
 
 **Ordem mental para "quanto custa":** tabela aplicável → preço do item nela → cobertura (particular / coberto / coparticipação) → desconto → condição de pagamento → total no orçamento.
 
@@ -3529,6 +3557,8 @@ Três ideias que sustentam tudo:
 - **Coparticipação preserva o valor cheio** — muda o rateio, não o preço do item.
 - **Cobertura ≠ desconto** — R$ 0 ao paciente ainda gera receita (do convênio).
 - **Autorização é pré-condição, não preço.**
+- **Reajuste em massa só depois da prévia aprovada** — e o histórico de preço guarda cada versão.
+- **Desconto acima da alçada não se concede por fora** — o motor diz se exige aprovação; respeite.
 
 ## Limites
 - Não cobre o **ciclo do dinheiro** (registrar/confirmar pagamento, parcelas, contas a receber, caixa) → `financeiro`; **faturamento/glosa TISS** → `faturamento-convenio`.
@@ -3708,7 +3738,7 @@ name: secretaria
 description: O papel de recepção do Fluxo Ideal — cadastrar e encontrar pacientes, agendar/remarcar/cancelar, ler a agenda do dia e a disponibilidade de horários, e acompanhar o histórico de relacionamento. Use para "quem é esse paciente?", "tem horário quinta?", "marca o retorno da Maria", "quem faltou hoje?".
 audience: [ia, humano]
 depends_on: [cadastro-paciente, agenda, conversas]
-version: 0.5.1
+version: 0.6.0
 updated: 2026-10-16
 ---
 
@@ -3789,6 +3819,8 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 - **Risco de cancelamento em cima da hora** e **risco de vagar**: quando a clínica liga a previsão de
   desfecho, cada agendamento traz também a chance de o paciente **cancelar na véspera** (janela da clínica,
   em geral 24h). **Risco de vagar = falta + cancelamento em cima da hora** — é o que a agenda mostra no selo.
+  Cada agendamento já traz a **porcentagem pronta**, igual à do selo: ao falar em %, use essa — não some nem
+  arredonde as probabilidades por conta própria (a soma crua pode dar 1 ponto de diferença do que a tela mostra).
   Vazio = a clínica só prevê falta. É **apoio à decisão**: nunca motivo para recusar agendamento nem para
   tratar um paciente (ou um grupo) de forma diferente.
 
@@ -3797,6 +3829,9 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
   Ao marcar, existem três situações: (1) há uma **pendência de retorno** aberta para o paciente;
   (2) o retorno se liga a um **atendimento anterior desta clínica**; (3) é retorno de **outra
   clínica**. A ferramenta de agendar sabe lidar com os três — o importante é reconhecer qual é.
+- **Retorno pendente** (o direito) × **retorno agendado** (o horário): quando o médico decide o retorno mas o
+  paciente ainda não escolheu data, cria-se a **pendência de retorno** — ela entra na lista de retornos para a
+  recepção marcar depois. Se o paciente já sai com o horário, agenda-se direto ligado ao atendimento.
 
 **Relacionamento**
 - **Histórico / linha do tempo**: tudo que já aconteceu com o paciente, agrupado por dia
@@ -3838,9 +3873,9 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 - Minhas pendências (sem confirmação, atrasados) → ferramenta de pendências.
 - "Quem tem mais chance de faltar amanhã?" → as listagens de agenda já trazem o **risco de falta** de
   cada agendamento; ordene/destaque os de risco alto para **reforçar a confirmação** primeiro.
-- "Quais horários de amanhã podem vagar?" → some **falta + cancelamento em cima da hora** de cada
-  agendamento (quando houver o segundo) e diga **de onde vem** o risco: falta pede reforço de confirmação;
-  cancelamento pede ter a **lista de espera** pronta.
+- "Quais horários de amanhã podem vagar?" → use a **porcentagem de vagar** de cada agendamento (a mesma do
+  selo da agenda) e diga **de onde vem** o risco: falta pede reforço de confirmação; cancelamento pede ter a
+  **lista de espera** pronta.
 - "Dá pra encaixar alguém no dia X?" / "quantos extras cabem?" → ferramenta de **sugestão de encaixe**
   (overbooking): soma o risco de **vagar** do dia (falta + cancelamento em cima da hora, com a quebra das
   duas parcelas) e diz quantos horários extras cabem com segurança (estimativa
@@ -3880,6 +3915,8 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 - Ver a **visão do dia** consolidada de toda a clínica (todos os profissionais; contagens/agregados, sem
   PII) → ferramenta de visão do dia.
 - Ver a **fila de retornos vencidos** (aging + KPIs) → ferramenta de retornos vencidos.
+- **Criar a pendência de retorno** (o paciente vai marcar depois: data sugerida, validade e recado para a
+  recepção) → ferramenta de retorno pendente. Mostra a prévia primeiro; só cria depois do OK.
 
 **Comunicação & briefing**
 - **Enviar ao paciente** uma confirmação/lembrete **governado** (por template — a recepção também

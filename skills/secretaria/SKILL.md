@@ -3,8 +3,8 @@ name: secretaria
 description: O papel de recepção do Fluxo Ideal — cadastrar e encontrar pacientes, agendar/remarcar/cancelar, ler a agenda do dia e a disponibilidade de horários, e acompanhar o histórico de relacionamento. Use para "quem é esse paciente?", "tem horário quinta?", "marca o retorno da Maria", "quem faltou hoje?".
 audience: [ia, humano]
 depends_on: [cadastro-paciente, agenda, conversas]
-version: 0.6.0
-updated: 2026-10-16
+version: 0.7.0
+updated: 2026-10-17
 ---
 
 # Secretária
@@ -184,6 +184,11 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
   recepção) → ferramenta de retorno pendente. Mostra a prévia primeiro; só cria depois do OK.
 
 **Comunicação & briefing**
+- **Mandar ao paciente, por e-mail, um documento dele** (laudo, receita, atestado já emitidos) → liste os
+  documentos do paciente e use a ferramenta de **envio de documento**: prévia com o destinatário (e-mail do
+  cadastro, mascarado), quem assina o envio e os arquivos; **só envia depois do OK**. Documento protegido de
+  outro profissional só sai com a permissão de enviar em nome dele. Por **WhatsApp**, só pela plataforma, na
+  conversa aberta.
 - **Enviar ao paciente** uma confirmação/lembrete **governado** (por template — a recepção também
   dispara) → ver a skill `comunicacao-paciente` para o **como** (envio agora vs intenção governada).
 - Deixar um **briefing não-clínico** para o profissional ler antes do atendimento (contexto/

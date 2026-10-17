@@ -3,8 +3,8 @@ name: medico
 description: O papel médico assistido por IA no Fluxo Ideal — conduzir e DOCUMENTAR o atendimento (adendo write-only) sem que a IA jamais leia o prontuário. Use para registrar evolução, mover o atendimento e ver a fila, com o clínico protegido.
 audience: [ia, humano]
 depends_on: [atendimento-clinico, evolucao-write-only]
-version: 0.3.0
-updated: 2026-10-16
+version: 0.4.0
+updated: 2026-10-17
 ---
 
 # Médico
@@ -66,6 +66,14 @@ Escrever ≠ ler. Toda a proteção vem daí: a documentação flui numa via de 
   crie também a **pendência de retorno** (data sugerida + validade + recado não-clínico para a recepção) →
   ferramenta de retorno pendente, com prévia antes. Se o paciente já sai com o horário escolhido, agende o
   retorno direto, ligado ao atendimento.
+
+**Hoje, por ferramenta — documentos do paciente:**
+- **Mandar ao paciente, por e-mail, um documento já emitido** ("envia o laudo de topografia para a Olívia")
+  → liste os documentos do paciente (vêm com um **nome legível**) e use a ferramenta de **envio de
+  documento**: ela mostra antes **para quem vai** (o e-mail do cadastro, mascarado), **quem assina o envio**
+  (você ou, se o documento é de outro profissional, o autor) e os arquivos — **só envia depois do OK**.
+  Nunca digite um e-mail: o destinatário é sempre o do cadastro. Por **WhatsApp**, só pela plataforma,
+  na conversa aberta.
 
 **Nunca (por desenho):** ler prontuário, evolução, diagnóstico, resultado de exame ou qualquer
 síntese clínica.

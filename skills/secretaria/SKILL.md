@@ -3,7 +3,7 @@ name: secretaria
 description: O papel de recepção do Fluxo Ideal — cadastrar e encontrar pacientes, agendar/remarcar/cancelar, ler a agenda do dia e a disponibilidade de horários, e acompanhar o histórico de relacionamento. Use para "quem é esse paciente?", "tem horário quinta?", "marca o retorno da Maria", "quem faltou hoje?".
 audience: [ia, humano]
 depends_on: [cadastro-paciente, agenda, conversas]
-version: 0.5.1
+version: 0.6.0
 updated: 2026-10-16
 ---
 
@@ -84,6 +84,8 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 - **Risco de cancelamento em cima da hora** e **risco de vagar**: quando a clínica liga a previsão de
   desfecho, cada agendamento traz também a chance de o paciente **cancelar na véspera** (janela da clínica,
   em geral 24h). **Risco de vagar = falta + cancelamento em cima da hora** — é o que a agenda mostra no selo.
+  Cada agendamento já traz a **porcentagem pronta**, igual à do selo: ao falar em %, use essa — não some nem
+  arredonde as probabilidades por conta própria (a soma crua pode dar 1 ponto de diferença do que a tela mostra).
   Vazio = a clínica só prevê falta. É **apoio à decisão**: nunca motivo para recusar agendamento nem para
   tratar um paciente (ou um grupo) de forma diferente.
 
@@ -92,6 +94,9 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
   Ao marcar, existem três situações: (1) há uma **pendência de retorno** aberta para o paciente;
   (2) o retorno se liga a um **atendimento anterior desta clínica**; (3) é retorno de **outra
   clínica**. A ferramenta de agendar sabe lidar com os três — o importante é reconhecer qual é.
+- **Retorno pendente** (o direito) × **retorno agendado** (o horário): quando o médico decide o retorno mas o
+  paciente ainda não escolheu data, cria-se a **pendência de retorno** — ela entra na lista de retornos para a
+  recepção marcar depois. Se o paciente já sai com o horário, agenda-se direto ligado ao atendimento.
 
 **Relacionamento**
 - **Histórico / linha do tempo**: tudo que já aconteceu com o paciente, agrupado por dia
@@ -133,9 +138,9 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 - Minhas pendências (sem confirmação, atrasados) → ferramenta de pendências.
 - "Quem tem mais chance de faltar amanhã?" → as listagens de agenda já trazem o **risco de falta** de
   cada agendamento; ordene/destaque os de risco alto para **reforçar a confirmação** primeiro.
-- "Quais horários de amanhã podem vagar?" → some **falta + cancelamento em cima da hora** de cada
-  agendamento (quando houver o segundo) e diga **de onde vem** o risco: falta pede reforço de confirmação;
-  cancelamento pede ter a **lista de espera** pronta.
+- "Quais horários de amanhã podem vagar?" → use a **porcentagem de vagar** de cada agendamento (a mesma do
+  selo da agenda) e diga **de onde vem** o risco: falta pede reforço de confirmação; cancelamento pede ter a
+  **lista de espera** pronta.
 - "Dá pra encaixar alguém no dia X?" / "quantos extras cabem?" → ferramenta de **sugestão de encaixe**
   (overbooking): soma o risco de **vagar** do dia (falta + cancelamento em cima da hora, com a quebra das
   duas parcelas) e diz quantos horários extras cabem com segurança (estimativa
@@ -175,6 +180,8 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 - Ver a **visão do dia** consolidada de toda a clínica (todos os profissionais; contagens/agregados, sem
   PII) → ferramenta de visão do dia.
 - Ver a **fila de retornos vencidos** (aging + KPIs) → ferramenta de retornos vencidos.
+- **Criar a pendência de retorno** (o paciente vai marcar depois: data sugerida, validade e recado para a
+  recepção) → ferramenta de retorno pendente. Mostra a prévia primeiro; só cria depois do OK.
 
 **Comunicação & briefing**
 - **Enviar ao paciente** uma confirmação/lembrete **governado** (por template — a recepção também

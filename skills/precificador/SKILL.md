@@ -3,8 +3,8 @@ name: precificador
 description: O sistema de precificação do Fluxo Ideal — como se configura preço (catálogo, tabelas, condições e formas de pagamento, favoritos) e como isso converge em orçamento e venda. Use para entender "quanto custa", como montar um orçamento e por que os valores são o que são.
 audience: [ia, humano]
 depends_on: [precos, catalogo, convenios, condicoes-pagamento, orcamentos, termos-orcamento]
-version: 0.4.4
-updated: 2026-08-04
+version: 0.5.0
+updated: 2026-10-16
 ---
 
 # Precificador
@@ -71,6 +71,11 @@ Três ideias que sustentam tudo:
 - **Termo do orçamento**: o **texto legal** que acompanha o orçamento — declaração de aceite, intercorrências, itens não inclusos, **TCLE** (consentimento) ou outros. O orçamento **seleciona** um template de termo por tipo (há um **padrão** por tipo). Você **escolhe** qual termo entra; **redigir/versionar o texto** dos termos é da skill `designer-documentos` (tela **Templates de Termos**, nas configurações).
 - **Venda**: orçamento aprovado/confirmado, pronto para o ciclo de pagamento.
 - **Desconto / cortesia**: redução dentro do limite da tabela / item incluído sem custo (isenção comercial).
+- **Política de desconto (alçada)**: até quanto cada **papel** (e/ou cada tabela) concede sozinho, até quanto
+  vai **com aprovação** e, acima disso, **negado**. Quando várias políticas casam, vale a mais específica
+  (papel + tabela) e depois a de maior prioridade. Sem política configurada = sem restrição.
+- **Margem**: o que sobra do preço depois do **custo** do procedimento, da **comissão** do profissional e do
+  custo de terceiros. **Markup** é a mesma folga vista sobre o custo.
 - **No-show**: falta pode gerar **multa configurável** (confirmável, perdoável ou ajustável por quem tem alçada).
 - **Retorno**: direito de retorno já incluído (ex.: num pacote) — **não se recobra**.
 
@@ -105,9 +110,22 @@ Três ideias que sustentam tudo:
 - Fazer o split de coparticipação e ancorar a autorização de convênio no item → ferramentas de pagador/autorização.
 - Listar retornos pendentes → ferramenta de retornos.
 
-**Feito na plataforma (ainda não por ferramenta):** **registrar** o aceite do cliente e a **edição do orçamento via simulação**, os **favoritos** do profissional e a **revisão de no-show**. A IA raciocina sobre isso, mas a **ação** hoje passa pela plataforma. (⚠️ apenas **registrar** o aceite é da plataforma — **consultar** se/quando o cliente aceitou já vem no detalhe do orçamento, acima.)
+**Análise e ajuste de preço (estratégico):**
+- **Comparar tabelas** (particular × convênios × promoção) para um conjunto de procedimentos ou uma categoria,
+  com a diferença em R$ e em % contra uma tabela de referência → ferramenta de comparação de tabelas.
+- **Simular a margem** de um preço antes de defini-lo (custo + comissão → margem e markup; avisa margem
+  negativa) → simulador de margem. Não grava.
+- **Histórico do preço** de um procedimento, ou "quanto cobrávamos na data X" numa tabela → ferramenta de
+  histórico de preço.
+- **Reajuste em massa** por regra (percentual, somar um valor, ou valor novo único; arredondamento; filtro por
+  tabela, categoria ou tipo de tabela) → ferramenta de reajuste. **Sempre mostre a prévia primeiro** (quantos
+  preços casam, quantos mudam e o antes/depois) e só aplique depois do OK explícito. Sem filtro ele atinge
+  **todas as tabelas** — confirme isso à parte.
+- **Política de desconto**: listar as políticas, **perguntar ao motor de alçada** se um desconto pode ser
+  dado (por quem pergunta ou simulando outro papel) e criar/editar/desativar políticas → ferramentas de
+  política de desconto. A escrita mostra a prévia antes.
 
-> Análise estratégica (reajuste em massa, histórico de preço, comparador de tabelas, simulador de margem, política de desconto) já existe no backend e está **a caminho** como ferramenta.
+**Feito na plataforma (ainda não por ferramenta):** **registrar** o aceite do cliente e a **edição do orçamento via simulação**, os **favoritos** do profissional e a **revisão de no-show**. A IA raciocina sobre isso, mas a **ação** hoje passa pela plataforma. (⚠️ apenas **registrar** o aceite é da plataforma — **consultar** se/quando o cliente aceitou já vem no detalhe do orçamento, acima.)
 
 **Ordem mental para "quanto custa":** tabela aplicável → preço do item nela → cobertura (particular / coberto / coparticipação) → desconto → condição de pagamento → total no orçamento.
 
@@ -119,6 +137,8 @@ Três ideias que sustentam tudo:
 - **Coparticipação preserva o valor cheio** — muda o rateio, não o preço do item.
 - **Cobertura ≠ desconto** — R$ 0 ao paciente ainda gera receita (do convênio).
 - **Autorização é pré-condição, não preço.**
+- **Reajuste em massa só depois da prévia aprovada** — e o histórico de preço guarda cada versão.
+- **Desconto acima da alçada não se concede por fora** — o motor diz se exige aprovação; respeite.
 
 ## Limites
 - Não cobre o **ciclo do dinheiro** (registrar/confirmar pagamento, parcelas, contas a receber, caixa) → `financeiro`; **faturamento/glosa TISS** → `faturamento-convenio`.

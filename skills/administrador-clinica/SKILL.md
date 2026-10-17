@@ -3,8 +3,8 @@ name: administrador-clinica
 description: A "planta baixa" da clínica no Fluxo Ideal — configurar a identidade do estabelecimento (dados, contato, endereço, branding/white-label), cadastrar e gerir os profissionais (especialidades, registros de conselho, grade de horários, vínculos, documentos), os convênios aceitos, o catálogo de especialidades e o site público. Use para "cadastra a Dra. X", "adiciona esse convênio", "quais médicos temos?", "veste a marca da clínica", "monta o estabelecimento novo". Criar login/acesso (IAM) fica FORA.
 audience: [ia, humano]
 depends_on: [identidade-clinica, profissionais, especialidades, convenios, salas-recursos]
-version: 0.2.3
-updated: 2026-08-19
+version: 0.3.0
+updated: 2026-10-17
 ---
 
 # Administrador da clínica
@@ -165,6 +165,10 @@ Ideias que orientam quase tudo:
   textos legais) e o **endereço/contato** → gestão do estabelecimento; e ligar/ajustar o **site
   público** → gestão do site. Ambas **pré-visualizam** antes de gravar e aplicam **parcial** (só o que
   muda) — persiste só após confirmar.
+- **Parâmetros do site:** um dicionário **chave → valor** que o site público lê (convênio padrão, ordem dos
+  convênios, IDs do Google Ads/Tag Manager) → ferramenta de parâmetros do site (listar, criar/atualizar pela
+  chave, remover; prévia antes). Para "deixe a Unimed como padrão", ache o **id** do convênio pelo nome e grave
+  o id. **Tudo ali é público** — qualquer visitante vê; nunca grave senha, token ou chave de API.
 
 **Salas / equipamentos / recursos**
 - **Ler:** listar/filtrar as salas, consultórios e equipamentos (por unidade, tipo, ativo) → ferramenta de
@@ -211,6 +215,7 @@ Ideias que orientam quase tudo:
    áreas próprias — este papel entrega o alicerce.
 
 ## Regras e invariantes
+- **Parâmetro do site é público.** Nada de segredo ali — o serviço recusa chaves com cara de segredo.
 - **Estabelecimento é identidade, não operação.** Aqui não se marca consulta, não se cobra, não se
   atende — só se define quem a clínica é.
 - **CPF é write-only.** Pode ser informado ao cadastrar/editar um profissional, mas a **leitura nunca

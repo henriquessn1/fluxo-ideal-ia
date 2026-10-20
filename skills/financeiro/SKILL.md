@@ -3,8 +3,8 @@ name: financeiro
 description: O ciclo do DINHEIRO depois da venda no Fluxo Ideal — receber (parcelas, contas a receber, aging/DSO/inadimplência), pagar (despesas, fornecedores, recorrências), o caixa (saldo, conferência, frente de caixa) e a saúde financeira (fluxo de caixa projetado, ponto de equilíbrio). Use para responder "quanto entrou / quanto a clínica deve / tem dinheiro em caixa / vai empatar?".
 audience: [ia, humano]
 depends_on: [pagamentos, contas-receber, contas-pagar, caixa, indicadores-financeiros]
-version: 0.3.3
-updated: 2026-09-14
+version: 0.4.0
+updated: 2026-10-20
 ---
 
 # Financeiro
@@ -178,6 +178,22 @@ Três ideias sustentam tudo:
 - **Emitir** uma NFS-e → ferramenta de **emissão de nota fiscal**, **gated por confirmação** (é ato
   fiscal); dinheiro em modo revisão cai na **fila de revisão** (gate humano). *Cancelar/revisar/dispensar
   ficam com o humano.*
+- **Por que a nota não saiu**: a nota rejeitada traz o **motivo real do fisco** (código + descrição, ex.
+  "E0617 Não é permitido informar alíquota…") — leia e explique em linguagem simples. Nota parada por
+  **configuração fiscal incompleta** não chegou ao fisco: falta um dado da clínica (abaixo); completado o
+  dado, ela sai sozinha. **Emissor indisponível** = o sistema nacional estava fora; é re-tentado.
+
+**Configuração fiscal da clínica (o que toda nota usa)**
+- **Consultar** a configuração fiscal → ferramenta de **configuração fiscal**: CNPJ/inscrição municipal,
+  regime, código do serviço (item da lista / código nacional) e, desde **01/10/2026**, o que o **emissor
+  nacional** exige — **código NBS**, classificação do **IBS/CBS** (CST, classificação tributária, indicador
+  da operação, consumidor final) e a **carga aproximada de tributos** (Lei da Transparência: % federal,
+  estadual e municipal, impressa na nota). Ela já diz **o que está faltando** para emitir.
+- **Ajustar a classificação fiscal** → ferramenta de **ajuste da configuração fiscal**, **gated por
+  confirmação** (mostra o antes→depois e só grava confirmado). Os **valores vêm do contador** da clínica —
+  **não invente nem "sugira de cabeça" código fiscal ou percentual**; se o usuário não souber, peça que
+  confirme com o contador. *Ambiente (homologação × produção), emissor, CNPJ, série e ativação ficam com o
+  humano na tela da clínica.*
 
 **Assinatura (ponte com as vendas)**
 - Documentos que **aguardam assinatura** do paciente (orçamento/TCLE) e **enviar/revogar** o link →
@@ -243,8 +259,9 @@ faturando o suficiente?).
   custos recorrentes** ("o aluguel subiu, edita"; "taxa nova, adiciona") — com **confirmação**, porque é
   **cadastro** (reversível, interno; não toca paciente nem o caixa) — hoje **por ferramenta, com
   confirmação**, incluindo o **fornecedor**. Mas **MOVIMENTAR** dinheiro de fato — **pagar** a despesa (sai do caixa), registrar/confirmar recebimento,
-  **estorno**, **frente de caixa** (sangria/fechamento) — é **humano**. A única escrita **fiscal** é a
-  **NFS-e**, e mesmo essa é **gated**.
+  **estorno**, **frente de caixa** (sangria/fechamento) — é **humano**. As escritas **fiscais** são a
+  **NFS-e** e o **ajuste da classificação fiscal da clínica** — ambas **gated por confirmação**, e a
+  classificação só com valores do contador.
 
 ## Limites / o que esta skill NÃO cobre
 - **Antes** do dinheiro circular (preço, tabela, condição/forma de pagamento, orçamento,

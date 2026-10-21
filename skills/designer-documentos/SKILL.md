@@ -3,7 +3,7 @@ name: designer-documentos
 description: O sistema de documentos do Fluxo Ideal — como se desenha, versiona, previsualiza e publica o MODELO de um documento (receita, atestado, laudo, orçamento, TCLE…) e como esses modelos viram documentos gerados por paciente. Cobre BLOCOS REUTILIZÁVEIS (cabeçalho/rodapé/assinatura/cláusula incluídos em vários modelos — sempre reaproveitar em vez de duplicar HTML), nascer um corpo do zero (inclusive migrar DOCX→HTML, herdando as habilitações do legado pra o documento não sumir do picker), GERIR HABILITAÇÕES (quem pode emitir cada documento) e os TEMPLATES DE TERMOS (o texto legal versionado de aceite/intercorrências/itens não inclusos/TCLE que entra nos orçamentos) — o CONTEÚDO, distinto da fôrma HTML. Use para entender "como esse documento fica", para criar/editar/publicar um template com segurança, reaproveitar blocos e redigir/versionar os termos.
 audience: [ia, humano]
 depends_on: [documentos-clinicos, templates, catalogo-documentos, termos-orcamento]
-version: 0.7.0
+version: 0.8.0
 updated: 2026-09-28
 ---
 
@@ -287,6 +287,11 @@ conhecidas do sistema (ex.: `medico`, `atendente`, `cliente`) — não invente.
 - **Previsualizar antes de publicar** → ferramenta que **simula** o modelo com dados fictícios. **Sem
   efeito**. Devolve um **link temporário** do preview (não o arquivo embutido) — **repasse o link ao
   usuário** para ele abrir/baixar. Regra de ouro: **simule sempre antes** de publicar ou ativar.
+- **Os dados da prévia são sempre fictícios.** Paciente e acompanhante com nomes genéricos; **nunca** o nome
+  ou o registro de quem está logado nem de uma pessoa real — quem desenha o modelo pode ser um designer.
+  O nome, o CRM/RQE e a assinatura do profissional **não** se passam na prévia: ela sempre mostra os de
+  exemplo (**"Dra. Médica Exemplo · CRM/SC 00000 · RQE 0000"**). No documento real eles saem do
+  **cadastro do profissional do documento** (o do atendimento), nunca do login.
 - **Publicar a versão oficial** → ferramenta que **publica**. Alcance amplo → **exige confirmação humana**.
 
 **Validação por QR na receita (ligar/desligar em lote)**

@@ -3,7 +3,7 @@ name: gestor-tarefas
 description: As TAREFAS INTERNAS da equipe da clínica no Fluxo Ideal — o quadro de afazeres da operação (ligar pro fornecedor, revisar o convênio, imprimir formulários) e, cada vez mais, o TECIDO que conecta a operação: a tarefa virou cidadã de primeira classe e aparece no contexto (na agenda do dia, no check-in, na ficha do paciente/atendimento/agendamento), além do quadro próprio. Criar/editar uma tarefa, atribuir, movê-la pelo quadro, gerir vínculos e impedimentos (resolver o impedimento destrava a conclusão), comentar/ver a atividade, privatizar/arquivar, o board agregado e "minhas pendências". Use para "cria uma tarefa pra…", "o que eu tenho pra fazer?", "passa pro Fulano", "resolve o impedimento e conclui", "que tarefas tem esse paciente/agendamento?", "como está o quadro?".
 audience: [ia, humano]
 depends_on: [tarefas-internas]
-version: 0.3.1
+version: 0.4.0
 updated: 2026-07-17
 ---
 
@@ -156,6 +156,10 @@ Ideias que sustentam o domínio:
 - **Editar** os campos de uma tarefa (título, descrição, prioridade, prazo…) → ferramenta de **editar tarefa**.
 - **Atribuir / trocar / tirar o dono** → ferramenta de **atribuir tarefa**. Tirar o dono é **explícito**
   (anti-acidente); confirme antes de reatribuir tarefa de terceiro.
+- **Atribuir a um grupo** ("pra recepção", "pros médicos") = atribuir a um **papel**, pelo **nome técnico
+  do papel na clínica** — não pelo apelido. No padrão do sistema a **recepção é `atendente`** (não existe
+  "recepcao"). A ferramenta confere o papel: se o nome não existir, ela recusa e **lista os papéis
+  válidos** — use um deles. Papel errado faria a tarefa sumir das pendências de todo mundo.
 - **Mover pelo quadro** (a fazer ↔ em andamento ↔ concluída) → ferramenta de **mudar estado**. Concluir
   **com impedimento aberto falha** — **resolva o impedimento** (abaixo) e conclua. Voltar de concluída reabre.
 - **Gerir impedimentos** — abrir (bloqueada/aguardando) ou **resolver** (⭐ resolver **destrava** a

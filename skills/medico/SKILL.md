@@ -3,7 +3,7 @@ name: medico
 description: O papel médico assistido por IA no Fluxo Ideal — conduzir e DOCUMENTAR o atendimento (adendo write-only) sem que a IA jamais leia o prontuário. Use para registrar evolução, mover o atendimento e ver a fila, com o clínico protegido.
 audience: [ia, humano]
 depends_on: [atendimento-clinico, evolucao-write-only]
-version: 0.4.0
+version: 0.5.0
 updated: 2026-10-17
 ---
 
@@ -62,10 +62,11 @@ Escrever ≠ ler. Toda a proteção vem daí: a documentação flui numa via de 
   e ela devolve **só a confirmação** (id/status), **nunca o conteúdo** — nem o que você acabou de escrever.
 - Registrar o **desfecho** do atendimento (**alta / retorno / encaminhamento** a especialidade/exame)
   → ferramenta de desfecho (estruturado, validado por tipo). A **autoria é sua**, cravada do login.
-- O desfecho **retorno** registra a **decisão**, não o direito. Para o paciente marcar depois com a recepção,
-  crie também a **pendência de retorno** (data sugerida + validade + recado não-clínico para a recepção) →
-  ferramenta de retorno pendente, com prévia antes. Se o paciente já sai com o horário escolhido, agende o
-  retorno direto, ligado ao atendimento.
+- O desfecho **retorno** registra a **decisão**, não o direito. Crie **sempre** também a **pendência de
+  retorno** ligada a este atendimento (data sugerida + validade + recado não-clínico para a recepção) →
+  ferramenta de retorno pendente, com prévia antes. Se o paciente já sai com o horário escolhido, marque o
+  retorno **usando essa pendência** (e o procedimento de retorno) — assim a aba **Retornos** do atendimento
+  mostra o retorno como agendado. Marcar ligado só ao atendimento, sem a pendência, deixa essa aba vazia.
 
 **Hoje, por ferramenta — documentos do paciente:**
 - **Mandar ao paciente, por e-mail, um documento já emitido** ("envia o laudo de topografia para a Olívia")

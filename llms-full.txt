@@ -2194,8 +2194,8 @@ name: financeiro
 description: O ciclo do DINHEIRO depois da venda no Fluxo Ideal — receber (parcelas, contas a receber, aging/DSO/inadimplência), pagar (despesas, fornecedores, recorrências), o caixa (saldo, conferência, frente de caixa) e a saúde financeira (fluxo de caixa projetado, ponto de equilíbrio). Use para responder "quanto entrou / quanto a clínica deve / tem dinheiro em caixa / vai empatar?".
 audience: [ia, humano]
 depends_on: [pagamentos, contas-receber, contas-pagar, caixa, indicadores-financeiros]
-version: 0.4.0
-updated: 2026-10-20
+version: 0.5.0
+updated: 2026-10-21
 ---
 
 # Financeiro
@@ -2314,6 +2314,12 @@ Três ideias sustentam tudo:
 **Nota fiscal (NFS-e)**
 - **NFS-e**: a nota fiscal de serviço emitida ao fisco. Vive numa **fila** (pendente → transmitindo →
   autorizada / rejeitada); a transmissão é **assíncrona**. **Emitir** e **reenviar** são atos fiscais.
+- **DANFSe**: o **PDF** da nota (documento auxiliar, no modelo oficial, com QR code da consulta pública); o
+  **XML** é o arquivo oficial que o fisco devolveu. Existem só para nota **autorizada** ou **cancelada** (a
+  cancelada sai com a marca "CANCELADA"); nota do ambiente de testes sai com "SEM VALIDADE JURÍDICA".
+- **A nota é de quem pagou (o tomador)**: ela fica nos documentos do paciente, mas só aparece no **portal do
+  paciente** quando foi **ele** quem pagou (mesmo CPF). Se outra pessoa pagou (pai, mãe, responsável), só a
+  equipe vê — quem pagou recebe a nota pela clínica.
 
 ## Ferramentas (tarefa → ferramenta)
 > A execução depende de **autorização** — o MCP aplica permissão; a skill só ensina a
@@ -2364,6 +2370,11 @@ Três ideias sustentam tudo:
 
 **Nota fiscal (NFS-e)**
 - **Consultar** a fila de notas fiscais e seus estados → ferramenta de **notas fiscais**.
+- **Ver ou baixar a nota** (PDF e XML) → ferramenta de **notas fiscais**, visão de **arquivos** (uma nota;
+  só autorizada/cancelada — na listagem/detalhe, "tem XML" indica que há arquivos). Ela devolve **links
+  temporários** (valem ~10 minutos): **entregue o link** a quem pediu e diga que expira; **não tente ler nem
+  resumir o conteúdo** (o XML traz os dados de quem pagou). Se o PDF "não pôde ser gerado agora", é
+  passageiro — tente de novo em instantes.
 - **Reenviar** uma NFS-e que falhou/foi rejeitada (re-transmite uma nota já criada — baixo risco) →
   ferramenta de **reenvio de nota fiscal**.
 - **Emitir** uma NFS-e → ferramenta de **emissão de nota fiscal**, **gated por confirmação** (é ato
@@ -2425,6 +2436,14 @@ faturando o suficiente?).
    por competência) ÷ margem de contribuição.
 2. Se a margem estiver indisponível (fonte de vendas fora), **não estime** — reporte a
    indisponibilidade. Margem ≤ 0 é break-even **indefinido** (diferente de indisponível).
+
+### "O paciente (ou quem pagou) pediu a nota fiscal"
+1. Ache a nota na fila (filtre pelo paciente) e confira o estado: só **autorizada/cancelada** tem arquivos.
+2. Peça os **arquivos** da nota e entregue o **link do PDF** (e o do XML, se pedirem — o contador costuma
+   querer o XML). Avise que o link expira em ~10 minutos.
+3. Se foi o **próprio paciente** quem pagou, lembre que a nota também está no **portal** dele. Se quem pagou
+   foi **outra pessoa**, a nota não aparece no portal do paciente — o envio a quem pagou é pela clínica.
+4. Nota ainda na fila, rejeitada ou com falha não tem PDF: explique o estado e o motivo (acima).
 
 ### "Vou devolver dinheiro a um paciente"
 1. É um **estorno**. Pode devolver tudo ou **reter** parte (custo já incorrido / multa).

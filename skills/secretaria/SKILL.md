@@ -3,7 +3,7 @@ name: secretaria
 description: O papel de recepção do Fluxo Ideal — cadastrar e encontrar pacientes, agendar/remarcar/cancelar, ler a agenda do dia e a disponibilidade de horários, e acompanhar o histórico de relacionamento. Use para "quem é esse paciente?", "tem horário quinta?", "marca o retorno da Maria", "quem faltou hoje?".
 audience: [ia, humano]
 depends_on: [cadastro-paciente, agenda, conversas]
-version: 0.7.0
+version: 0.8.0
 updated: 2026-10-17
 ---
 
@@ -91,12 +91,16 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 
 **Retorno** (importa na hora de marcar)
 - **Retorno**: consulta de acompanhamento, muitas vezes um direito já concedido (não se recobra).
-  Ao marcar, existem três situações: (1) há uma **pendência de retorno** aberta para o paciente;
-  (2) o retorno se liga a um **atendimento anterior desta clínica**; (3) é retorno de **outra
-  clínica**. A ferramenta de agendar sabe lidar com os três — o importante é reconhecer qual é.
+  Ao marcar, existem três situações: (1) há uma **pendência de retorno** aberta para o paciente —
+  inclusive a que nasce **agora**, quando o médico finaliza a consulta com retorno: cria-se a pendência
+  ligada ao atendimento e marca-se **por ela** (é o que faz a aba Retornos do atendimento mostrar o
+  retorno como agendado); (2) o retorno se liga a um **atendimento antigo desta clínica** que nunca gerou
+  a pendência; (3) é retorno de **outra clínica**. Nos três, o agendamento leva o **procedimento de
+  retorno**. A ferramenta de agendar sabe lidar com os três — o importante é reconhecer qual é.
 - **Retorno pendente** (o direito) × **retorno agendado** (o horário): quando o médico decide o retorno mas o
   paciente ainda não escolheu data, cria-se a **pendência de retorno** — ela entra na lista de retornos para a
-  recepção marcar depois. Se o paciente já sai com o horário, agenda-se direto ligado ao atendimento.
+  recepção marcar depois. Se o paciente já sai com o horário, a pendência é criada do mesmo jeito e o
+  retorno é marcado por ela.
 
 **Relacionamento**
 - **Histórico / linha do tempo**: tudo que já aconteceu com o paciente, agrupado por dia
@@ -149,8 +153,11 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 - Números do período (ocupação, no-show, confirmação) → ferramenta de resumo/KPIs.
 
 **Agenda — agir** (confirmam antes)
-- Marcar → ferramenta de criar agendamento. Ela **pré-valida** se o profissional atende aquilo
-  naquele lugar antes de gravar; se não puder, avisa **sem criar**. Trata os três casos de retorno.
+- Marcar → ferramenta de criar agendamento. **Todo agendamento tem venda**: informe sempre o
+  **procedimento** (consulta, exame, retorno…) — é ele que gera a venda; sem ele a ferramenta recusa
+  (e um agendamento sem venda dá problema no check-in, na tela e na cobrança). Não sabe qual é? Pergunte
+  ou busque no catálogo de procedimentos. Ela **pré-valida** se o profissional atende aquilo naquele
+  lugar antes de gravar; se não puder, avisa **sem criar**. Trata os três casos de retorno.
 - Remarcar (trocar data/hora, e opcionalmente profissional) → ferramenta de remarcação. **Não é
   reversível de graça** (conta reagendamento) — confirme com o usuário.
 - Confirmar / registrar chegada / registrar falta / finalizar → ferramenta de mudança de estado.

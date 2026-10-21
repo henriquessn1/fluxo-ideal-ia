@@ -3,7 +3,7 @@ name: financeiro
 description: O ciclo do DINHEIRO depois da venda no Fluxo Ideal — receber (parcelas, contas a receber, aging/DSO/inadimplência), pagar (despesas, fornecedores, recorrências), o caixa (saldo, conferência, frente de caixa) e a saúde financeira (fluxo de caixa projetado, ponto de equilíbrio). Use para responder "quanto entrou / quanto a clínica deve / tem dinheiro em caixa / vai empatar?".
 audience: [ia, humano]
 depends_on: [pagamentos, contas-receber, contas-pagar, caixa, indicadores-financeiros]
-version: 0.5.0
+version: 0.6.0
 updated: 2026-10-21
 ---
 
@@ -129,6 +129,10 @@ Três ideias sustentam tudo:
 - **A nota é de quem pagou (o tomador)**: ela fica nos documentos do paciente, mas só aparece no **portal do
   paciente** quando foi **ele** quem pagou (mesmo CPF). Se outra pessoa pagou (pai, mãe, responsável), só a
   equipe vê — quem pagou recebe a nota pela clínica.
+- **Enviar a nota**: a clínica manda a nota **por e-mail a quem pagou** (o **tomador**), com o PDF e, se
+  quiser, o XML. O remetente é **a clínica** (não um profissional). Cada envio fica **registrado na nota**
+  (quando, para quem, por quem). Se uma nota já enviada for **cancelada**, quem a recebeu ganha um **aviso
+  automático** com o PDF marcado "CANCELADA" — ninguém precisa reenviar.
 
 ## Ferramentas (tarefa → ferramenta)
 > A execução depende de **autorização** — o MCP aplica permissão; a skill só ensina a
@@ -184,8 +188,14 @@ Três ideias sustentam tudo:
   temporários** (valem ~10 minutos): **entregue o link** a quem pediu e diga que expira; **não tente ler nem
   resumir o conteúdo** (o XML traz os dados de quem pagou). Se o PDF "não pôde ser gerado agora", é
   passageiro — tente de novo em instantes.
-- **Reenviar** uma NFS-e que falhou/foi rejeitada (re-transmite uma nota já criada — baixo risco) →
-  ferramenta de **reenvio de nota fiscal**.
+- **Enviar a nota por e-mail a quem pagou** → ferramenta de **envio de nota fiscal**, **gated por
+  confirmação** (sai e-mail para fora da clínica). Primeiro a **prévia** (sem enviar): mostra se a nota pode
+  ir, para quem (o e-mail da nota ou, se quem pagou é o paciente, o do cadastro), os anexos e os envios
+  anteriores. Mostre a prévia, **confirme com o usuário** e só então envie. Só nota **autorizada com PDF
+  pronto**; sem e-mail sugerido, **peça o e-mail** a quem pediu (não invente). Para nota fiscal **não use**
+  o envio genérico de documentos — ele recusa e aponta para esta ferramenta.
+- **Reenviar** uma NFS-e que falhou/foi rejeitada (re-transmite **ao fisco** uma nota já criada — baixo
+  risco; **não é** mandar e-mail) → ferramenta de **reenvio de nota fiscal**.
 - **Emitir** uma NFS-e → ferramenta de **emissão de nota fiscal**, **gated por confirmação** (é ato
   fiscal); dinheiro em modo revisão cai na **fila de revisão** (gate humano). *Cancelar/revisar/dispensar
   ficam com o humano.*
@@ -250,9 +260,12 @@ faturando o suficiente?).
 1. Ache a nota na fila (filtre pelo paciente) e confira o estado: só **autorizada/cancelada** tem arquivos.
 2. Peça os **arquivos** da nota e entregue o **link do PDF** (e o do XML, se pedirem — o contador costuma
    querer o XML). Avise que o link expira em ~10 minutos.
-3. Se foi o **próprio paciente** quem pagou, lembre que a nota também está no **portal** dele. Se quem pagou
+3. Se pedirem que a clínica **mande** a nota: use o **envio de nota fiscal** — prévia, confirmação, envio.
+   O destino é **quem pagou**; se quem pede quer em outro e-mail, use o informado. Veja nos envios
+   anteriores se já não foi mandada (evita e-mail repetido).
+4. Se foi o **próprio paciente** quem pagou, lembre que a nota também está no **portal** dele. Se quem pagou
    foi **outra pessoa**, a nota não aparece no portal do paciente — o envio a quem pagou é pela clínica.
-4. Nota ainda na fila, rejeitada ou com falha não tem PDF: explique o estado e o motivo (acima).
+5. Nota ainda na fila, rejeitada ou com falha não tem PDF: explique o estado e o motivo (acima).
 
 ### "Vou devolver dinheiro a um paciente"
 1. É um **estorno**. Pode devolver tudo ou **reter** parte (custo já incorrido / multa).
@@ -280,7 +293,7 @@ faturando o suficiente?).
   confirmação**, incluindo o **fornecedor**. Mas **MOVIMENTAR** dinheiro de fato — **pagar** a despesa (sai do caixa), registrar/confirmar recebimento,
   **estorno**, **frente de caixa** (sangria/fechamento) — é **humano**. As escritas **fiscais** são a
   **NFS-e** e o **ajuste da classificação fiscal da clínica** — ambas **gated por confirmação**, e a
-  classificação só com valores do contador.
+  classificação só com valores do contador. **Enviar a nota por e-mail** também é com confirmação.
 
 ## Limites / o que esta skill NÃO cobre
 - **Antes** do dinheiro circular (preço, tabela, condição/forma de pagamento, orçamento,

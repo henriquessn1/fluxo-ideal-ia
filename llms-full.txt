@@ -1370,7 +1370,7 @@ name: designer-documentos
 description: O sistema de documentos do Fluxo Ideal — como se desenha, versiona, previsualiza e publica o MODELO de um documento (receita, atestado, laudo, orçamento, TCLE…) e como esses modelos viram documentos gerados por paciente. Cobre BLOCOS REUTILIZÁVEIS (cabeçalho/rodapé/assinatura/cláusula incluídos em vários modelos — sempre reaproveitar em vez de duplicar HTML), nascer um corpo do zero (inclusive migrar DOCX→HTML, herdando as habilitações do legado pra o documento não sumir do picker), GERIR HABILITAÇÕES (quem pode emitir cada documento) e os TEMPLATES DE TERMOS (o texto legal versionado de aceite/intercorrências/itens não inclusos/TCLE que entra nos orçamentos) — o CONTEÚDO, distinto da fôrma HTML. Use para entender "como esse documento fica", para criar/editar/publicar um template com segurança, reaproveitar blocos e redigir/versionar os termos.
 audience: [ia, humano]
 depends_on: [documentos-clinicos, templates, catalogo-documentos, termos-orcamento]
-version: 0.7.0
+version: 0.8.0
 updated: 2026-09-28
 ---
 
@@ -1654,6 +1654,11 @@ conhecidas do sistema (ex.: `medico`, `atendente`, `cliente`) — não invente.
 - **Previsualizar antes de publicar** → ferramenta que **simula** o modelo com dados fictícios. **Sem
   efeito**. Devolve um **link temporário** do preview (não o arquivo embutido) — **repasse o link ao
   usuário** para ele abrir/baixar. Regra de ouro: **simule sempre antes** de publicar ou ativar.
+- **Os dados da prévia são sempre fictícios.** Paciente e acompanhante com nomes genéricos; **nunca** o nome
+  ou o registro de quem está logado nem de uma pessoa real — quem desenha o modelo pode ser um designer.
+  O nome, o CRM/RQE e a assinatura do profissional **não** se passam na prévia: ela sempre mostra os de
+  exemplo (**"Dra. Médica Exemplo · CRM/SC 00000 · RQE 0000"**). No documento real eles saem do
+  **cadastro do profissional do documento** (o do atendimento), nunca do login.
 - **Publicar a versão oficial** → ferramenta que **publica**. Alcance amplo → **exige confirmação humana**.
 
 **Validação por QR na receita (ligar/desligar em lote)**
@@ -2470,7 +2475,7 @@ name: gestor-tarefas
 description: As TAREFAS INTERNAS da equipe da clínica no Fluxo Ideal — o quadro de afazeres da operação (ligar pro fornecedor, revisar o convênio, imprimir formulários) e, cada vez mais, o TECIDO que conecta a operação: a tarefa virou cidadã de primeira classe e aparece no contexto (na agenda do dia, no check-in, na ficha do paciente/atendimento/agendamento), além do quadro próprio. Criar/editar uma tarefa, atribuir, movê-la pelo quadro, gerir vínculos e impedimentos (resolver o impedimento destrava a conclusão), comentar/ver a atividade, privatizar/arquivar, o board agregado e "minhas pendências". Use para "cria uma tarefa pra…", "o que eu tenho pra fazer?", "passa pro Fulano", "resolve o impedimento e conclui", "que tarefas tem esse paciente/agendamento?", "como está o quadro?".
 audience: [ia, humano]
 depends_on: [tarefas-internas]
-version: 0.3.1
+version: 0.4.0
 updated: 2026-07-17
 ---
 
@@ -2623,6 +2628,10 @@ Ideias que sustentam o domínio:
 - **Editar** os campos de uma tarefa (título, descrição, prioridade, prazo…) → ferramenta de **editar tarefa**.
 - **Atribuir / trocar / tirar o dono** → ferramenta de **atribuir tarefa**. Tirar o dono é **explícito**
   (anti-acidente); confirme antes de reatribuir tarefa de terceiro.
+- **Atribuir a um grupo** ("pra recepção", "pros médicos") = atribuir a um **papel**, pelo **nome técnico
+  do papel na clínica** — não pelo apelido. No padrão do sistema a **recepção é `atendente`** (não existe
+  "recepcao"). A ferramenta confere o papel: se o nome não existir, ela recusa e **lista os papéis
+  válidos** — use um deles. Papel errado faria a tarefa sumir das pendências de todo mundo.
 - **Mover pelo quadro** (a fazer ↔ em andamento ↔ concluída) → ferramenta de **mudar estado**. Concluir
   **com impedimento aberto falha** — **resolva o impedimento** (abaixo) e conclua. Voltar de concluída reabre.
 - **Gerir impedimentos** — abrir (bloqueada/aguardando) ou **resolver** (⭐ resolver **destrava** a
@@ -3080,7 +3089,7 @@ name: medico
 description: O papel médico assistido por IA no Fluxo Ideal — conduzir e DOCUMENTAR o atendimento (adendo write-only) sem que a IA jamais leia o prontuário. Use para registrar evolução, mover o atendimento e ver a fila, com o clínico protegido.
 audience: [ia, humano]
 depends_on: [atendimento-clinico, evolucao-write-only]
-version: 0.4.0
+version: 0.5.0
 updated: 2026-10-17
 ---
 
@@ -3139,10 +3148,11 @@ Escrever ≠ ler. Toda a proteção vem daí: a documentação flui numa via de 
   e ela devolve **só a confirmação** (id/status), **nunca o conteúdo** — nem o que você acabou de escrever.
 - Registrar o **desfecho** do atendimento (**alta / retorno / encaminhamento** a especialidade/exame)
   → ferramenta de desfecho (estruturado, validado por tipo). A **autoria é sua**, cravada do login.
-- O desfecho **retorno** registra a **decisão**, não o direito. Para o paciente marcar depois com a recepção,
-  crie também a **pendência de retorno** (data sugerida + validade + recado não-clínico para a recepção) →
-  ferramenta de retorno pendente, com prévia antes. Se o paciente já sai com o horário escolhido, agende o
-  retorno direto, ligado ao atendimento.
+- O desfecho **retorno** registra a **decisão**, não o direito. Crie **sempre** também a **pendência de
+  retorno** ligada a este atendimento (data sugerida + validade + recado não-clínico para a recepção) →
+  ferramenta de retorno pendente, com prévia antes. Se o paciente já sai com o horário escolhido, marque o
+  retorno **usando essa pendência** (e o procedimento de retorno) — assim a aba **Retornos** do atendimento
+  mostra o retorno como agendado. Marcar ligado só ao atendimento, sem a pendência, deixa essa aba vazia.
 
 **Hoje, por ferramenta — documentos do paciente:**
 - **Mandar ao paciente, por e-mail, um documento já emitido** ("envia o laudo de topografia para a Olívia")
@@ -3763,7 +3773,7 @@ name: secretaria
 description: O papel de recepção do Fluxo Ideal — cadastrar e encontrar pacientes, agendar/remarcar/cancelar, ler a agenda do dia e a disponibilidade de horários, e acompanhar o histórico de relacionamento. Use para "quem é esse paciente?", "tem horário quinta?", "marca o retorno da Maria", "quem faltou hoje?".
 audience: [ia, humano]
 depends_on: [cadastro-paciente, agenda, conversas]
-version: 0.7.0
+version: 0.8.0
 updated: 2026-10-17
 ---
 
@@ -3851,12 +3861,16 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 
 **Retorno** (importa na hora de marcar)
 - **Retorno**: consulta de acompanhamento, muitas vezes um direito já concedido (não se recobra).
-  Ao marcar, existem três situações: (1) há uma **pendência de retorno** aberta para o paciente;
-  (2) o retorno se liga a um **atendimento anterior desta clínica**; (3) é retorno de **outra
-  clínica**. A ferramenta de agendar sabe lidar com os três — o importante é reconhecer qual é.
+  Ao marcar, existem três situações: (1) há uma **pendência de retorno** aberta para o paciente —
+  inclusive a que nasce **agora**, quando o médico finaliza a consulta com retorno: cria-se a pendência
+  ligada ao atendimento e marca-se **por ela** (é o que faz a aba Retornos do atendimento mostrar o
+  retorno como agendado); (2) o retorno se liga a um **atendimento antigo desta clínica** que nunca gerou
+  a pendência; (3) é retorno de **outra clínica**. Nos três, o agendamento leva o **procedimento de
+  retorno**. A ferramenta de agendar sabe lidar com os três — o importante é reconhecer qual é.
 - **Retorno pendente** (o direito) × **retorno agendado** (o horário): quando o médico decide o retorno mas o
   paciente ainda não escolheu data, cria-se a **pendência de retorno** — ela entra na lista de retornos para a
-  recepção marcar depois. Se o paciente já sai com o horário, agenda-se direto ligado ao atendimento.
+  recepção marcar depois. Se o paciente já sai com o horário, a pendência é criada do mesmo jeito e o
+  retorno é marcado por ela.
 
 **Relacionamento**
 - **Histórico / linha do tempo**: tudo que já aconteceu com o paciente, agrupado por dia
@@ -3909,8 +3923,11 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 - Números do período (ocupação, no-show, confirmação) → ferramenta de resumo/KPIs.
 
 **Agenda — agir** (confirmam antes)
-- Marcar → ferramenta de criar agendamento. Ela **pré-valida** se o profissional atende aquilo
-  naquele lugar antes de gravar; se não puder, avisa **sem criar**. Trata os três casos de retorno.
+- Marcar → ferramenta de criar agendamento. **Todo agendamento tem venda**: informe sempre o
+  **procedimento** (consulta, exame, retorno…) — é ele que gera a venda; sem ele a ferramenta recusa
+  (e um agendamento sem venda dá problema no check-in, na tela e na cobrança). Não sabe qual é? Pergunte
+  ou busque no catálogo de procedimentos. Ela **pré-valida** se o profissional atende aquilo naquele
+  lugar antes de gravar; se não puder, avisa **sem criar**. Trata os três casos de retorno.
 - Remarcar (trocar data/hora, e opcionalmente profissional) → ferramenta de remarcação. **Não é
   reversível de graça** (conta reagendamento) — confirme com o usuário.
 - Confirmar / registrar chegada / registrar falta / finalizar → ferramenta de mudança de estado.

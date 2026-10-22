@@ -73,6 +73,7 @@ privilégio). Detalhes e charter em [`agents/README.md`](agents/README.md).
 | [confirmacao-presenca](agents/confirmacao-presenca/) | Confirma presença por WhatsApp e triage a resposta | 3 (2 script + 1 IA) | médio |
 | [jornada-cuidado](agents/jornada-cuidado/) | Vincula tarefas à jornada e avança/fecha fases | 2 (script) | médio |
 | [jornada-avisos](agents/jornada-avisos/) | Avisa a equipe sobre pendências de SLA da jornada | 1 (script) | médio |
+| [notas-fiscais](agents/times/notas-fiscais/) | Emite a NFS-e do serviço feito no nome de quem pagou e envia por e-mail, por tabelas de regras da clínica | 4 (script) | alto |
 
 > Estes são os times **oficiais/verificados**. Um tier aberto a **terceiros/não-verificados** (com
 > assinatura e travas próprias) ainda não está habilitado.

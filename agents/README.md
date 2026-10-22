@@ -56,6 +56,7 @@ E **NÃO contém** (por design):
 | [confirmacao-diaria](./times/confirmacao-diaria/) | Varre 1×/dia os agendamentos não confirmados (hoje+amanhã) e convida à confirmação por WhatsApp | 1 (script) | médio |
 | [jornada-cuidado](./times/jornada-cuidado/) | Vincula tarefas à jornada e avança/fecha fases | 2 (script) | médio |
 | [jornada-avisos](./times/jornada-avisos/) | Avisa a equipe sobre pendências de SLA da jornada | 1 (script) | médio |
+| [notas-fiscais](./times/notas-fiscais/) | Emite a NFS-e do serviço feito no nome de quem pagou (prevista → em formação → Revisar/governo) e envia por e-mail, por tabelas de regras da clínica | 4 (script) | alto |
 
 Cada pasta tem o `manifest.json` (para importar) e um `README.md` (o que faz, o que pede, o risco).
 

@@ -1,0 +1,486 @@
+{
+  "chave": "notas-fiscais",
+  "versao": "1.6",
+  "escopo": "por-tenant",
+  "roles": [
+    {
+      "nome": "botfn-nfse-registrador",
+      "grants": [
+        "nota_fiscal:registrar_prevista",
+        "nota_fiscal:read",
+        "pagador:read",
+        "venda:read"
+      ]
+    },
+    {
+      "nome": "botfn-nfse-confirmador",
+      "grants": [
+        "nota_fiscal:emitir_automatico",
+        "nota_fiscal:read",
+        "venda:read"
+      ]
+    },
+    {
+      "nome": "botfn-nfse-vigia",
+      "grants": [
+        "nota_fiscal:read",
+        "notificacao:enviar"
+      ]
+    },
+    {
+      "nome": "botfn-nfse-enviador",
+      "grants": [
+        "nota_fiscal:enviar_automatico",
+        "nota_fiscal:read"
+      ]
+    }
+  ],
+  "knobs": [
+    {
+      "chave": "regras_registro",
+      "tipo": "tabela",
+      "rotulo": "Quando registrar a nota prevista",
+      "descricao": "A cada pagamento, a primeira regra que bate decide se nasce a nota prevista (o saldo de quem pagou, emitida quando o serviço for feito).",
+      "colunas": [
+        {
+          "nome": "formas",
+          "tipo": "lista",
+          "rotulo": "Formas de pagamento",
+          "fonte": "formas_pagamento",
+          "descricao": "Formas usadas por quem pagou nesta venda."
+        },
+        {
+          "nome": "valor",
+          "tipo": "faixa",
+          "rotulo": "Valor pago (R$)"
+        },
+        {
+          "nome": "profissional",
+          "tipo": "lista",
+          "rotulo": "Profissional",
+          "fonte": "profissionais"
+        },
+        {
+          "nome": "procedimento",
+          "tipo": "lista",
+          "rotulo": "Procedimento",
+          "fonte": "procedimentos"
+        },
+        {
+          "nome": "quem_pagou",
+          "tipo": "enum",
+          "rotulo": "Quem pagou",
+          "opcoes": [
+            {
+              "valor": "paciente",
+              "rotulo": "O paciente"
+            },
+            {
+              "valor": "outro",
+              "rotulo": "Outra pessoa"
+            }
+          ]
+        },
+        {
+          "nome": "tem_cpf",
+          "tipo": "bool",
+          "rotulo": "Tem CPF/CNPJ"
+        },
+        {
+          "nome": "tipo_venda",
+          "tipo": "enum",
+          "rotulo": "Particular ou convênio",
+          "opcoes": [
+            {
+              "valor": "particular",
+              "rotulo": "Particular"
+            },
+            {
+              "valor": "convenio",
+              "rotulo": "Convênio"
+            }
+          ]
+        },
+        {
+          "nome": "cobre_venda",
+          "tipo": "bool",
+          "rotulo": "Pagamentos cobrem a venda inteira"
+        }
+      ],
+      "saidas": [
+        {
+          "valor": "gerar_prevista",
+          "rotulo": "Gerar nota prevista"
+        },
+        {
+          "valor": "nao_gerar",
+          "rotulo": "Não gerar nota"
+        }
+      ],
+      "default": [
+        {
+          "quando": {},
+          "saida": "gerar_prevista"
+        }
+      ]
+    },
+    {
+      "chave": "agrupar_por",
+      "tipo": "enum",
+      "rotulo": "Agrupar a nota por",
+      "descricao": "Uma nota por pagador e por dia de execução (padrão) ou por mês. Use o mesmo valor no Confirmador.",
+      "opcoes": [
+        {
+          "valor": "dia",
+          "rotulo": "Dia"
+        },
+        {
+          "valor": "mes",
+          "rotulo": "Mês"
+        }
+      ],
+      "default": "dia"
+    },
+    {
+      "chave": "regras_confirmacao",
+      "tipo": "tabela",
+      "rotulo": "Quando a nota vai direto ao governo",
+      "descricao": "No fim do período (dia ou mês), cada nota formada vai para Revisar ou é transmitida. A primeira regra que bate decide. Nota com pendência vai sempre para Revisar.",
+      "colunas": [
+        {
+          "nome": "valor",
+          "tipo": "faixa",
+          "rotulo": "Valor da nota (R$)"
+        },
+        {
+          "nome": "formas",
+          "tipo": "lista",
+          "rotulo": "Formas de pagamento",
+          "fonte": "formas_pagamento"
+        },
+        {
+          "nome": "profissional",
+          "tipo": "lista",
+          "rotulo": "Profissional",
+          "fonte": "profissionais"
+        },
+        {
+          "nome": "procedimento",
+          "tipo": "lista",
+          "rotulo": "Procedimento",
+          "fonte": "procedimentos"
+        },
+        {
+          "nome": "tem_cpf",
+          "tipo": "bool",
+          "rotulo": "Tem CPF/CNPJ"
+        },
+        {
+          "nome": "mais_de_um_pagador",
+          "tipo": "bool",
+          "rotulo": "Venda com mais de um pagador"
+        },
+        {
+          "nome": "pago_em_mes_diferente",
+          "tipo": "bool",
+          "rotulo": "Pago em mês diferente do serviço"
+        },
+        {
+          "nome": "atendimento_cancelado",
+          "tipo": "bool",
+          "rotulo": "Atendimento cancelado na venda"
+        },
+        {
+          "nome": "tem_pendencia",
+          "tipo": "bool",
+          "rotulo": "Tem pendência",
+          "descricao": "Valor a revisar ou saldo insuficiente: o financeiro manda para Revisar de qualquer jeito."
+        }
+      ],
+      "saidas": [
+        {
+          "valor": "revisar",
+          "rotulo": "Mandar para Revisar"
+        },
+        {
+          "valor": "transmitir",
+          "rotulo": "Transmitir ao governo"
+        }
+      ],
+      "default": [
+        {
+          "quando": {},
+          "saida": "revisar"
+        }
+      ]
+    },
+    {
+      "chave": "dias_parada",
+      "tipo": "int",
+      "rotulo": "Avisar previstas paradas há (dias)",
+      "default": 15,
+      "descricao": "O Vigia avisa uma vez por dia as notas previstas (pagas, sem serviço feito) paradas há mais que isso."
+    },
+    {
+      "chave": "alvo_papel",
+      "tipo": "string",
+      "rotulo": "Papel que recebe o aviso do Vigia",
+      "default": "administrador"
+    },
+    {
+      "chave": "regras_envio",
+      "tipo": "tabela",
+      "rotulo": "Quando enviar a nota por e-mail",
+      "descricao": "Nota autorizada vai para o e-mail de quem pagou. A primeira regra que bate decide.",
+      "colunas": [
+        {
+          "nome": "origem",
+          "tipo": "enum",
+          "rotulo": "Como a nota nasceu",
+          "opcoes": [
+            {
+              "valor": "agente",
+              "rotulo": "Pelos agentes"
+            },
+            {
+              "valor": "venda",
+              "rotulo": "Na venda"
+            },
+            {
+              "valor": "manual",
+              "rotulo": "Manual"
+            }
+          ]
+        },
+        {
+          "nome": "tem_email",
+          "tipo": "bool",
+          "rotulo": "Quem pagou tem e-mail"
+        },
+        {
+          "nome": "valor",
+          "tipo": "faixa",
+          "rotulo": "Valor da nota (R$)"
+        }
+      ],
+      "saidas": [
+        {
+          "valor": "enviar",
+          "rotulo": "Enviar por e-mail"
+        },
+        {
+          "valor": "nao_enviar",
+          "rotulo": "Não enviar"
+        }
+      ],
+      "default": [
+        {
+          "quando": {
+            "tem_email": true
+          },
+          "saida": "enviar"
+        },
+        {
+          "quando": {},
+          "saida": "nao_enviar"
+        }
+      ]
+    },
+    {
+      "chave": "esperar_antes",
+      "tipo": "bool",
+      "rotulo": "Esperar antes de enviar",
+      "default": false,
+      "descricao": "Desligado: envia assim que a nota é autorizada. Ligado: o envio sai na varredura a cada 15 minutos, depois da espera."
+    },
+    {
+      "chave": "esperar_minutos",
+      "tipo": "int",
+      "rotulo": "Minutos de espera",
+      "default": 30,
+      "descricao": "Só vale com Esperar antes de enviar ligado."
+    }
+  ],
+  "agentes": [
+    {
+      "chave": "registrador_notas",
+      "nome": "Registrador de notas",
+      "tipo": "script",
+      "roles": [
+        "botfn-nfse-registrador"
+      ],
+      "triggers": [
+        {
+          "event_type": "vendas.pagamento_recebido",
+          "enabled": true
+        },
+        {
+          "event_type": "vendas.parcela_paga",
+          "enabled": true
+        },
+        {
+          "event_type": "vendas.pagamento_estornado",
+          "enabled": true
+        },
+        {
+          "event_type": "vendas.pagamento_estornado_direto",
+          "enabled": true
+        },
+        {
+          "event_type": "vendas.pagamento_atualizado",
+          "enabled": true
+        }
+      ],
+      "config": {
+        "script": "// Registrador de notas (épico #2268) — acorda a cada pagamento; a tabela de regras decide se\n// nasce a nota PREVISTA (saldo de quem pagou). O financeiro relê valores e pagador no vendas e\n// reconcilia a venda inteira: aqui só se decide e se chama a rota certa. Nunca devolve CPF.\nvar et = event.event_type || '';\nvar sub = event.subject || {};\nvar vendaId = sub.venda_id;\nvar pagId = sub.pagamento_id;\nvar agente = String(context.agente || 'registrador_notas').slice(0, 80);\nvar agrupar = config.agrupar_por || 'dia';\n\nfunction fim(saida, extra) {\n  var r = { saida: saida, evento: et };\n  extra = extra || {};\n  for (var k in extra) r[k] = extra[k];\n  result(r);\n  return r;\n}\nfunction corpo(r) { return (r && r.body) || {}; }\n\nif (!vendaId || !pagId) return fim('ignorado', { motivo: 'evento sem venda ou pagamento' });\n\nif (et === 'vendas.pagamento_estornado' || et === 'vendas.pagamento_estornado_direto') {\n  var e = call('pagamento_estornado', { pagamento_id: pagId, venda_id: vendaId, agente: agente, regra: 'estorno', agrupar_por: agrupar });\n  return fim('estorno', { ok: e.ok, status: e.status_code, resultado: corpo(e).resultado });\n}\nif (et === 'vendas.pagamento_atualizado') {\n  var a = call('pagamento_atualizado', { pagamento_id: pagId, venda_id: vendaId, agente: agente, regra: 'troca de pagador', agrupar_por: agrupar });\n  return fim('pagador_trocado', { ok: a.ok, status: a.status_code, resultado: corpo(a).resultado });\n}\n\n// pagamento recebido / parcela paga → monta a entrada da tabela\nvar pg = call('listar_pagadores', { venda_id: vendaId });\nif (!pg.ok) return fim('erro', { etapa: 'pagadores', status: pg.status_code });\nvar pags = corpo(pg).pagadores || [];\nvar meu = null;\nfor (var i = 0; i < pags.length; i++) if (String(pags[i].pagamento_id) === String(pagId)) meu = pags[i];\nif (!meu) return fim('ignorado', { motivo: 'pagamento fora da venda' });\n\nfunction chave(p) {\n  return p.pagador_tipo + ':' + (p.pagador_documento || (p.pagador_tipo === 'paciente' ? 'paciente' : (p.pagador_nome || '')));\n}\nvar formas = [], valor = 0, total = 0;\nfor (var j = 0; j < pags.length; j++) {\n  var v = Number(pags[j].valor_rateio || 0);\n  total += v;\n  if (chave(pags[j]) === chave(meu)) {\n    valor += v;\n    if (formas.indexOf(pags[j].forma_pagamento) < 0) formas.push(pags[j].forma_pagamento);\n  }\n}\n\nvar vr = call('buscar_venda', { venda_id: vendaId });\nvar venda = vr.ok ? corpo(vr) : {};\nvar procs = [];\n(venda.itens || []).forEach(function (it) { if (it.procedimento_id && procs.indexOf(it.procedimento_id) < 0) procs.push(it.procedimento_id); });\n\nvar entrada = {\n  formas: formas,\n  valor: Math.round(valor * 100) / 100,\n  profissional: venda.profissional_id ? [venda.profissional_id] : [],\n  procedimento: procs,\n  quem_pagou: meu.pagador_tipo || 'paciente',\n  tem_cpf: !!meu.pagador_documento,\n  tipo_venda: (Number(venda.valor_convenio || 0) > 0 || venda.convenio_codigo) ? 'convenio' : 'particular',\n  cobre_venda: vr.ok ? total + 0.005 >= Number(venda.valor_total || 0) : false\n};\n\nvar d = regras.avaliar(config.regras_registro, entrada, 'regras_registro');\nif (d.saida !== 'gerar_prevista') return fim(d.saida || 'sem_regra', { regra: d.linha });\n\nvar r = call('registrar_prevista', {\n  venda_id: vendaId, pagamento_id: pagId, regra: 'linha ' + d.linha, agente: agente, agrupar_por: agrupar\n});\nreturn fim('gerar_prevista', { regra: d.linha, ok: r.ok, status: r.status_code, resultado: corpo(r).resultado });\n",
+        "regras_registro": "{{knob.regras_registro}}",
+        "agrupar_por": "{{knob.agrupar_por}}",
+        "acoes": [
+          {
+            "nome": "listar_pagadores",
+            "capability": "vendas.listar_pagadores"
+          },
+          {
+            "nome": "buscar_venda",
+            "capability": "vendas.buscar_venda"
+          },
+          {
+            "nome": "registrar_prevista",
+            "capability": "financeiro.registrar_prevista"
+          },
+          {
+            "nome": "pagamento_atualizado",
+            "capability": "financeiro.pagamento_atualizado"
+          },
+          {
+            "nome": "pagamento_estornado",
+            "capability": "financeiro.pagamento_estornado"
+          },
+          {
+            "nome": "situacao_venda",
+            "capability": "financeiro.situacao_venda"
+          }
+        ]
+      }
+    },
+    {
+      "chave": "confirmador_notas",
+      "nome": "Confirmador de notas",
+      "tipo": "script",
+      "roles": [
+        "botfn-nfse-confirmador"
+      ],
+      "triggers": [
+        {
+          "event_type": "vendas.item_executado",
+          "enabled": true
+        },
+        {
+          "event_type": "vendas.item_cancelado",
+          "enabled": true
+        },
+        {
+          "cron": "10 0 * * *",
+          "tz": "America/Sao_Paulo",
+          "enabled": true
+        }
+      ],
+      "config": {
+        "script": "// Confirmador de notas (épico #2268) — item executado/cancelado forma a nota (o financeiro reconcilia a venda\n// inteira); no horário de fechamento, cada nota cujo período acabou vai para Revisar ou é transmitida, pela\n// tabela de regras. Pendência aberta o financeiro manda sempre para a revisão. Nunca devolve CPF.\nvar et = event.event_type || '';\nvar agente = String(context.agente || 'confirmador_notas').slice(0, 80);\nvar agrupar = config.agrupar_por || 'dia';\n\nfunction fim(saida, extra) {\n  var r = { saida: saida, evento: et || event.origem || '' };\n  extra = extra || {};\n  for (var k in extra) r[k] = extra[k];\n  result(r);\n  return r;\n}\nfunction corpo(r) { return (r && r.body) || {}; }\nfunction unicos(lista) {\n  var out = [];\n  lista.forEach(function (x) { if (x && out.indexOf(x) < 0) out.push(x); });\n  return out;\n}\n\n// 1) item executado / cancelado → nota em formação (dia ou mês, por venda + pagador)\nif (et === 'vendas.item_executado' || et === 'vendas.item_cancelado') {\n  var sub = event.subject || {};\n  if (!sub.venda_id) return fim('ignorado', { motivo: 'evento sem venda' });\n  var cancelado = et === 'vendas.item_cancelado';\n  var r = call('item_executado', {\n    venda_id: sub.venda_id, venda_item_id: sub.venda_item_id, agrupar_por: agrupar, agente: agente,\n    regra: cancelado ? 'item cancelado' : 'item executado',\n    evento: cancelado ? 'item_cancelado' : 'item_executado'\n  });\n  var b = corpo(r);\n  return fim(et === 'vendas.item_cancelado' ? 'item_cancelado' : 'item_executado', {\n    ok: r.ok, status: r.status_code, resultado: b.resultado, notas_em_formacao: (b.notas_formadas || []).length\n  });\n}\nif (event.origem !== 'cron') return fim('ignorado', { motivo: 'gatilho desconhecido' });\n\n// 2) fechamento por horário\nvar lista = call('notas_para_fechar', { agrupar_por: agrupar });\nif (!lista.ok) return fim('erro', { etapa: 'notas_para_fechar', status: lista.status_code });\nvar notas = corpo(lista).notas || [];\nvar cacheVenda = {}, cachePagadores = {};\nvar conta = { notas: notas.length, revisar: 0, transmitir: 0, forcadas_revisao: 0, erros: 0 };\n\nfunction venda(id) {\n  if (!id) return {};\n  if (cacheVenda[id] === undefined) { var v = call('buscar_venda', { venda_id: id }); cacheVenda[id] = v.ok ? corpo(v) : {}; }\n  return cacheVenda[id];\n}\nfunction pagadoresDaVenda(id) {\n  if (!id) return 0;\n  if (cachePagadores[id] === undefined) {\n    var s = call('situacao_venda', { venda_id: id });\n    var chaves = (corpo(s).notas || [])\n      .filter(function (n) { return ['dispensada', 'cancelada'].indexOf(n.status) < 0; })\n      .map(function (n) { return (n.tomador_nome || '') + '|' + (n.tem_documento ? 1 : 0); });\n    cachePagadores[id] = unicos(chaves).length;\n  }\n  return cachePagadores[id];\n}\n\nnotas.forEach(function (n) {\n  var v = venda(n.venda_id);\n  var itensNota = (n.itens || []).filter(function (i) { return i.ativo !== false; }).map(function (i) { return i.venda_item_id; });\n  var itensVenda = (v.itens || []).filter(function (i) { return itensNota.indexOf(i.id) >= 0; });\n  // `entradas` vem pronta do financeiro (v0.0.40); sem ela (Vendas falhou para a venda), calcula aqui.\n  var e = n.entradas || null;\n  var entrada = {\n    valor: e && e.valor != null ? Number(e.valor) : Number(n.valor_servico || 0),\n    formas: e && e.formas_pagamento ? e.formas_pagamento\n      : unicos((n.pagamentos || []).filter(function (p) { return p.ativo !== false; }).map(function (p) { return p.forma_pagamento; })),\n    profissional: unicos([v.profissional_id].concat(itensVenda.map(function (i) { return i.profissional_executor_id; }))),\n    procedimento: unicos(itensVenda.map(function (i) { return i.procedimento_id; })),\n    tem_cpf: !!n.tem_documento,\n    tem_pendencia: e ? !!e.tem_pendencia : !!n.acao_pendente,\n    mais_de_um_pagador: e ? !!e.mais_de_um_pagador : pagadoresDaVenda(n.venda_id) > 1,\n    pago_em_mes_diferente: e ? !!e.pago_em_mes_diferente : false,\n    atendimento_cancelado: e ? !!e.atendimento_cancelado : false\n  };\n  var d = regras.avaliar(config.regras_confirmacao, entrada, 'regras_confirmacao');\n  var decisao = d.saida === 'transmitir' ? 'transmitir' : 'revisar';\n  var f = call('fechar_nota', { nota_id: n.id, decisao: decisao, regra: 'linha ' + d.linha, agente: agente });\n  if (!f.ok) { conta.erros++; return; }\n  var fb = corpo(f);\n  if (fb.forcada_revisao) conta.forcadas_revisao++;\n  conta[fb.forcada_revisao ? 'revisar' : decisao]++;\n});\nreturn fim('fechamento', conta);\n",
+        "regras_confirmacao": "{{knob.regras_confirmacao}}",
+        "agrupar_por": "{{knob.agrupar_por}}",
+        "acoes": [
+          {
+            "nome": "item_executado",
+            "capability": "financeiro.item_executado"
+          },
+          {
+            "nome": "notas_para_fechar",
+            "capability": "financeiro.notas_para_fechar"
+          },
+          {
+            "nome": "fechar_nota",
+            "capability": "financeiro.fechar_nota"
+          },
+          {
+            "nome": "situacao_venda",
+            "capability": "financeiro.situacao_venda"
+          },
+          {
+            "nome": "buscar_venda",
+            "capability": "vendas.buscar_venda"
+          }
+        ]
+      }
+    },
+    {
+      "chave": "vigia_notas",
+      "nome": "Vigia de notas previstas",
+      "tipo": "script",
+      "roles": [
+        "botfn-nfse-vigia"
+      ],
+      "triggers": [
+        {
+          "cron": "0 8 * * 1-5",
+          "tz": "America/Sao_Paulo",
+          "enabled": true
+        }
+      ],
+      "config": {
+        "script": "// Vigia de notas (épico #2268, opcional) — uma vez por dia aponta as notas previstas paradas há mais de N dias\n// (pagas e sem serviço feito). Avisa a equipe sem dado de paciente: só quantidade e valor.\nvar dias = (config.dias_parada === undefined || config.dias_parada === null || config.dias_parada === '') ? 15 : Number(config.dias_parada);\nvar papel = String(config.alvo_papel || 'administrador');\n\nfunction fim(saida, extra) {\n  var r = { saida: saida };\n  extra = extra || {};\n  for (var k in extra) r[k] = extra[k];\n  result(r);\n  return r;\n}\nfunction brl(n) {\n  var s = (Math.round(n * 100) / 100).toFixed(2).split('.');\n  return 'R$ ' + s[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.') + ',' + s[1];\n}\n\nvar r = call('listar_notas', { status: 'prevista', origem: 'agente', limit: 500 });\nif (!r.ok) return fim('erro', { etapa: 'listar_notas', status: r.status_code });\nvar previstas = (r.body && r.body.items) || [];\nvar limite = Date.now() - dias * 86400000;\nvar paradas = previstas.filter(function (n) {\n  var t = Date.parse(n.updated_at || n.created_at);\n  return !isNaN(t) && t < limite;\n});\nif (!paradas.length) return fim('nada_parado', { previstas: previstas.length, dias: dias });\n\nvar total = paradas.reduce(function (s, n) { return s + Number(n.valor_servico || 0); }, 0);\nvar texto = paradas.length + (paradas.length === 1 ? ' nota prevista parada' : ' notas previstas paradas') +\n  ' há mais de ' + dias + ' dias (' + brl(total) + '): pagas e sem o serviço feito. Veja em Notas fiscais › Previstas.';\nvar a = call('notificar_grupo', {\n  type: 'mensagem', group_id: papel,\n  message: { type: 'aviso', title: 'Notas previstas paradas', text: texto, icon: 'receipt' }\n});\nreturn fim('avisou', { paradas: paradas.length, ok: a.ok, status: a.status_code });\n",
+        "dias_parada": "{{knob.dias_parada}}",
+        "alvo_papel": "{{knob.alvo_papel}}",
+        "acoes": [
+          {
+            "nome": "listar_notas",
+            "capability": "financeiro.listar_notas"
+          },
+          {
+            "nome": "notificar_grupo",
+            "capability": "notificacao.notificar_grupo"
+          }
+        ]
+      }
+    },
+    {
+      "chave": "enviador_notas",
+      "nome": "Enviador de notas",
+      "tipo": "script",
+      "roles": [
+        "botfn-nfse-enviador"
+      ],
+      "triggers": [
+        {
+          "event_type": "financeiro.nota_autorizada",
+          "enabled": true
+        },
+        {
+          "cron": "*/15 * * * *",
+          "tz": "America/Sao_Paulo",
+          "enabled": true
+        }
+      ],
+      "config": {
+        "script": "// Enviador de notas (épico #2268 / #2241) — nota autorizada → e-mail para quem pagou, pela tabela de regras.\n// É o MESMO envio do botão (remetente da clínica, limites, registro). O e-mail nunca sai no resultado nem no log.\n// O evento tenta na hora; a varredura (a cada 15 min) pega as autorizadas ainda sem envio — a que chegou antes do PDF\n// ficar pronto, ou todas, se a clínica ligou \"esperar antes de enviar\" (aí o evento não envia e a varredura respeita N\n// minutos).\nvar et = event.event_type || '';\nvar agente = String(context.agente || 'enviador_notas').slice(0, 80);\nvar esperar = config.esperar_antes === true ? Math.max(1, Number(config.esperar_minutos || 0)) : 0;\n\nfunction fim(saida, extra) {\n  var r = { saida: saida, evento: et || event.origem || '' };\n  extra = extra || {};\n  for (var k in extra) r[k] = extra[k];\n  result(r);\n  return r;\n}\nfunction corpo(r) { return (r && r.body) || {}; }\n\n// decide e envia UMA nota; devolve a saída (texto curto, sem PII)\nfunction processar(notaId, origem, valor, temEmail) {\n  var d = regras.avaliar(config.regras_envio, { origem: origem, tem_email: !!temEmail, valor: valor }, 'regras_envio');\n  if (d.saida !== 'enviar') return { saida: d.saida || 'sem_regra', regra: d.linha };\n  var info = call('envio_info', { nota_id: notaId });\n  if (!info.ok) return { saida: 'erro', etapa: 'envio_info', status: info.status_code, regra: d.linha };\n  var i = corpo(info);\n  if (!i.pode_enviar) return { saida: 'nao_pode', motivo: String(i.motivo || '').slice(0, 120), regra: d.linha };\n  var email = i.destinatario_sugerido && i.destinatario_sugerido.email;\n  if (!email) return { saida: 'sem_email', regra: d.linha };\n  var r = call('enviar_nota', { nota_id: notaId, destinatario_email: email, incluir_xml: config.incluir_xml !== false });\n  return { saida: r.ok ? 'enviada' : 'erro', etapa: r.ok ? undefined : 'enviar', status: r.status_code, regra: d.linha };\n}\n\nif (et === 'financeiro.nota_autorizada') {\n  if (esperar > 0) return fim('aguardando', { minutos: esperar });\n  var sub = event.subject || {}, ps = event.payload_safe || {};\n  if (!sub.nota_fiscal_id) return fim('ignorado', { motivo: 'evento sem nota' });\n  var res = processar(sub.nota_fiscal_id, ps.origem, Number(ps.valor_servico || 0), ps.tem_email);\n  return fim(res.saida, res);\n}\n\nif (event.origem === 'cron') {\n  // sem espera, 2 min de folga para o PDF; janela de 3 dias (nota mais velha sem envio = decisão de não enviar)\n  var agora = Date.now(), limite = agora - Math.max(esperar, 2) * 60000, janela = agora - 3 * 86400000;\n  var conta = { candidatas: 0, enviadas: 0, outras: 0 };\n  var falhou = null;\n  ['agente', 'venda'].forEach(function (origem) {\n    var lista = call('listar_notas', { status: 'autorizada', origem: origem, limit: 200 });\n    if (!lista.ok) { falhou = lista.status_code; return; }\n    (corpo(lista).items || []).forEach(function (n) {\n      var t = Date.parse(n.updated_at || n.created_at);\n      if (isNaN(t) || t > limite || t < janela || Number(n.envios_total || 0) > 0) return;\n      conta.candidatas++;\n      var r = processar(n.id, n.origem, Number(n.valor_servico || 0), true);\n      if (r.saida === 'enviada') conta.enviadas++; else conta.outras++;\n    });\n  });\n  if (falhou) conta.erro_listar = falhou;\n  return fim('varredura', conta);\n}\nreturn fim('ignorado', { motivo: 'gatilho desconhecido', agente: agente });\n",
+        "esperar_antes": "{{knob.esperar_antes}}",
+        "regras_envio": "{{knob.regras_envio}}",
+        "esperar_minutos": "{{knob.esperar_minutos}}",
+        "acoes": [
+          {
+            "nome": "envio_info",
+            "capability": "financeiro.envio_info"
+          },
+          {
+            "nome": "enviar_nota",
+            "capability": "financeiro.enviar_nota"
+          },
+          {
+            "nome": "listar_notas",
+            "capability": "financeiro.listar_notas"
+          }
+        ]
+      }
+    }
+  ]
+}

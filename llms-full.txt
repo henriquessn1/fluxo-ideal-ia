@@ -2194,8 +2194,8 @@ name: financeiro
 description: O ciclo do DINHEIRO depois da venda no Fluxo Ideal — receber (parcelas, contas a receber, aging/DSO/inadimplência), pagar (despesas, fornecedores, recorrências), o caixa (saldo, conferência, frente de caixa) e a saúde financeira (fluxo de caixa projetado, ponto de equilíbrio). Use para responder "quanto entrou / quanto a clínica deve / tem dinheiro em caixa / vai empatar?".
 audience: [ia, humano]
 depends_on: [pagamentos, contas-receber, contas-pagar, caixa, indicadores-financeiros]
-version: 0.6.0
-updated: 2026-10-21
+version: 0.7.0
+updated: 2026-10-22
 ---
 
 # Financeiro
@@ -2272,6 +2272,10 @@ Três ideias sustentam tudo:
   faixas configuráveis.
 - **DSO** (prazo médio de recebimento): quantos dias, em média, a clínica leva para receber.
 - **Inadimplência**: proporção da carteira em atraso vs o total.
+- **Quem pagou (pagador)**: em todo pagamento fica registrado **quem pagou** — por padrão o **paciente da
+  venda** (os dados vêm do cadastro dele), ou **outra pessoa** (pai, mãe, empresa) com nome, CPF/CNPJ e
+  e-mail. É em nome de quem pagou que a nota fiscal sai. Opcionalmente o pagamento marca os **itens que
+  cobre**; sem isso, o valor de cada item é **dividido entre os pagadores** na proporção do que cada um pagou.
 - **Estorno / devolução**: devolver valor ao paciente. Pode **reter** parte (cobre custo já
   incorrido / multa). A **natureza** muda conforme o serviço já foi executado ou não —
   devolver adiantamento de algo não-feito é neutro no resultado; devolver algo já realizado
@@ -2314,6 +2318,15 @@ Três ideias sustentam tudo:
 **Nota fiscal (NFS-e)**
 - **NFS-e**: a nota fiscal de serviço emitida ao fisco. Vive numa **fila** (pendente → transmitindo →
   autorizada / rejeitada); a transmissão é **assíncrona**. **Emitir** e **reenviar** são atos fiscais.
+- **Notas criadas pelos agentes**: a clínica pode deixar a nota **nascer sozinha** — um time de agentes
+  acompanha os pagamentos e a execução dos serviços. Estados próprios, antes da fila do fisco:
+  **prevista** (o saldo pago ainda sem serviço feito — não é nota de verdade), **em formação** (somando os
+  serviços executados no período, por venda e por quem pagou), **consumida** (a prevista que já virou nota).
+  A nota diz **qual agente e qual regra** a criaram. Uma nota **parcial** saiu por menos do que quem pagou
+  deve pelos itens dela. **Pendência** = algo que pede decisão humana (ex.: "cancelar ou substituir?" depois
+  de um estorno).
+- **O que não vira NFS-e**: **produto** (venda de mercadoria) e **multa/taxa de não comparecimento**
+  (no-show) — multa é indenização, não é serviço prestado. Aparecem como "itens fora da NFS-e".
 - **DANFSe**: o **PDF** da nota (documento auxiliar, no modelo oficial, com QR code da consulta pública); o
   **XML** é o arquivo oficial que o fisco devolveu. Existem só para nota **autorizada** ou **cancelada** (a
   cancelada sai com a marca "CANCELADA"); nota do ambiente de testes sai com "SEM VALIDADE JURÍDICA".
@@ -2371,6 +2384,13 @@ Três ideias sustentam tudo:
   vencimento** — é o que alimenta a projeção de fluxo de caixa com as entradas no dia certo.
 - **Pagamentos e parcelas** (pendências, parcelas vencidas, situação) → ferramenta de **pagamentos**; o
   **status de conciliação** (lançamentos × extrato) → ferramenta de **conciliação**. Ambas leitura.
+- **Quem pagou cada pagamento de uma venda** (nome, CPF/CNPJ e e-mail **mascarados**, itens que cada um
+  cobre, e a divisão do valor dos itens já executados) → ferramenta de **pagamentos**, visão de **pagadores**.
+  Mostre os dados como vierem — **nunca peça nem repita o CPF inteiro**.
+- **Trocar quem pagou** (ex.: "quem pagou foi a mãe, CPF tal") ou **os itens que um pagamento cobre** →
+  ferramenta de **edição do pagador**, com **prévia + confirmação**. Não move dinheiro — só diz em nome de
+  quem sai a nota. Depois que a nota daquele pagamento **foi para transmissão**, a troca é **recusada**: aí
+  o caminho é humano (cancelar/substituir a nota).
 
 **Nota fiscal (NFS-e)**
 - **Consultar** a fila de notas fiscais e seus estados → ferramenta de **notas fiscais**.
@@ -2390,6 +2410,16 @@ Três ideias sustentam tudo:
 - **Emitir** uma NFS-e → ferramenta de **emissão de nota fiscal**, **gated por confirmação** (é ato
   fiscal); dinheiro em modo revisão cai na **fila de revisão** (gate humano). *Cancelar/revisar/dispensar
   ficam com o humano.*
+- **Notas dos agentes** → ferramenta de **notas fiscais**: nos números da fila aparecem **previstas**, **em
+  formação**, **consumidas** e **com pendência**; na lista dá para filtrar **só as com pendência** e **só as
+  parciais**, e cada nota mostra o **período**, há quantos dias está parada e quanto quem pagou deve.
+  - **Comparativo** de uma nota (visão própria): valor da nota × quanto quem pagou deve pelos itens
+    ("valor total" ou "parcial"), os pagamentos da venda com quem pagou (documento mascarado), os itens
+    dentro e fora da nota, **quanto da venda está sem nota**, as outras notas e com quais dá para **juntar**.
+  - **Histórico** de uma nota (visão própria): cada mudança de estado e de valor, **quem** fez e **por quê**
+    — quando foi um agente, **qual agente e qual regra**. O detalhe da nota já diz "criada pelo agente X,
+    regra N".
+  - **Juntar, ajustar valor e resolver pendências** ficam com o **humano** na Mesa de Notas.
 - **Por que a nota não saiu**: a nota rejeitada traz o **motivo real do fisco** (código + descrição, ex.
   "E0617 Não é permitido informar alíquota…") — leia e explique em linguagem simples. Nota parada por
   **configuração fiscal incompleta** não chegou ao fisco: falta um dado da clínica (abaixo); completado o
@@ -2457,6 +2487,20 @@ faturando o suficiente?).
 4. Se foi o **próprio paciente** quem pagou, lembre que a nota também está no **portal** dele. Se quem pagou
    foi **outra pessoa**, a nota não aparece no portal do paciente — o envio a quem pagou é pela clínica.
 5. Nota ainda na fila, rejeitada ou com falha não tem PDF: explique o estado e o motivo (acima).
+
+### "Por que esta nota saiu por esse valor / quem criou?"
+1. Abra o **detalhe** da nota: a origem diz se foi um **agente** (e qual, e qual regra) ou uma pessoa.
+2. Peça o **comparativo**: se a nota é **parcial**, mostre quanto quem pagou deve pelos itens, quanto ficou
+   **sem nota** na venda e se há outra nota com que dê para **juntar**.
+3. Peça o **histórico** para contar a sequência (prevista → em formação → revisão → fila → autorizada) e os
+   motivos de cada passo.
+4. Ajustar, juntar ou cancelar é **humano** na Mesa de Notas — oriente, não faça.
+
+### "A nota saiu no nome errado"
+1. Veja **quem pagou** na venda (visão de pagadores). Se a nota **ainda não foi para transmissão**, troque
+   o pagador (prévia + confirmação) — a próxima nota já sai certa.
+2. Se a nota **já foi transmitida/autorizada**, a troca é recusada: é preciso **cancelar ou substituir** a
+   nota — decisão humana.
 
 ### "Vou devolver dinheiro a um paciente"
 1. É um **estorno**. Pode devolver tudo ou **reter** parte (custo já incorrido / multa).

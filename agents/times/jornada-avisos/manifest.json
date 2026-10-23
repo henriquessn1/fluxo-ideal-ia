@@ -1,6 +1,8 @@
 {
   "chave": "jornada-avisos",
-  "versao": "1.0",
+  "versao": "1.1",
+  "nome": "Avisos da jornada",
+  "descricao": "Avisa a equipe quando uma etapa da jornada do paciente passa do prazo.",
   "escopo": "por-tenant",
   "roles": [
     {
@@ -15,6 +17,7 @@
   "agentes": [
     {
       "chave": "jornada_avisos",
+      "descricao": "De hora em hora e quando a fase da jornada muda, procura etapas fora do prazo e avisa o responsável ou o grupo.",
       "tipo": "script",
       "roles": [
         "botfn-jornada-avisos"

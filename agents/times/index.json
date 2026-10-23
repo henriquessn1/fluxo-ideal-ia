@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "times": [
+    {
+      "chave": "briefing",
+      "nome": "Briefing do atendimento",
+      "descricao": "Monta o cartão de contexto do paciente para a equipe ler antes do atendimento.",
+      "versao": "1.2",
+      "agentes": 1,
+      "tipos": [
+        "llm"
+      ],
+      "manifesto": "agents/times/briefing/manifest.json"
+    },
+    {
+      "chave": "confirmacao-diaria",
+      "nome": "Confirmação diária",
+      "descricao": "Uma vez por dia, convida pelo WhatsApp quem ainda não confirmou a consulta de hoje ou de amanhã.",
+      "versao": "1.6",
+      "agentes": 1,
+      "tipos": [
+        "script"
+      ],
+      "manifesto": "agents/times/confirmacao-diaria/manifest.json"
+    },
+    {
+      "chave": "confirmacao-presenca",
+      "nome": "Confirmação de presença",
+      "descricao": "Confirma a presença pelo WhatsApp e encaminha à recepção as respostas que precisam de uma pessoa.",
+      "versao": "1.3",
+      "agentes": 3,
+      "tipos": [
+        "llm",
+        "script"
+      ],
+      "manifesto": "agents/times/confirmacao-presenca/manifest.json"
+    },
+    {
+      "chave": "jornada-avisos",
+      "nome": "Avisos da jornada",
+      "descricao": "Avisa a equipe quando uma etapa da jornada do paciente passa do prazo.",
+      "versao": "1.1",
+      "agentes": 1,
+      "tipos": [
+        "script"
+      ],
+      "manifesto": "agents/times/jornada-avisos/manifest.json"
+    },
+    {
+      "chave": "jornada-cuidado",
+      "nome": "Jornada de cuidado",
+      "descricao": "Liga as tarefas à jornada do paciente e avança ou fecha as fases conforme as coisas acontecem.",
+      "versao": "1.2",
+      "agentes": 2,
+      "tipos": [
+        "script"
+      ],
+      "manifesto": "agents/times/jornada-cuidado/manifest.json"
+    },
+    {
+      "chave": "notas-fiscais",
+      "nome": "Notas fiscais",
+      "descricao": "Emite a nota fiscal de serviço no nome de quem pagou, seguindo as regras da clínica, e envia por e-mail.",
+      "versao": "1.7",
+      "agentes": 4,
+      "tipos": [
+        "script"
+      ],
+      "manifesto": "agents/times/notas-fiscais/manifest.json"
+    }
+  ]
+}

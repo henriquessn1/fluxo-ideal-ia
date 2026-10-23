@@ -49,6 +49,10 @@ E **NÃO contém** (por design):
 
 ## Times produtivos disponíveis
 
+> O catálogo que a Central mostra na tela de importar vem de [`times/index.json`](./times/index.json) —
+> **derivado** dos manifestos. Mudou um time? Rode `python scripts/build-agents-index.py` e commite o
+> `index.json` junto.
+
 | Time | O que faz | Agentes | Risco |
 |------|-----------|---------|-------|
 | [briefing](./times/briefing/) | Cartão de contexto do paciente antes do atendimento | 1 (IA) | médio |

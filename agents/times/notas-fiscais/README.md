@@ -42,6 +42,8 @@ Cada tabela é lida de cima para baixo: a primeira linha que bate decide. A últ
 Outros ajustes:
 - `agrupar_por`: `dia` (padrão) ou `mes`, a nota por dia de atendimento ou por mês.
 - Vigia: `avisar_na_hora` (`true`), `alvo_papel` (`administrador`), `dias_revisao_parada` (`2`) e `dias_parada` (`15`).
+  `alvo_papel` aceita um ou mais papéis da equipe separados por vírgula (ex.: `administrador,financeiro`); cada papel
+  recebe o mesmo aviso no sino da Central. Na Central, a variável abre um seletor de papéis.
 - `esperar_antes` (`false`) e `esperar_minutos` (`30`) do Enviador, para dar tempo de revisar antes do e-mail.
 
 Exemplo de regra do Confirmador para transmitir direto, a combinar com o contador da clínica:

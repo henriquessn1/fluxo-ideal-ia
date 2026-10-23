@@ -19,7 +19,7 @@ código.
 | **Registrador de notas** | a cada pagamento recebido, parcela paga, estorno ou troca de quem pagou | decide pela tabela se nasce a **nota prevista** (o saldo de quem pagou) e mantém esse saldo em dia |
 | **Confirmador de notas** | quando um serviço é feito ou cancelado, e todo dia às **00:10** | o serviço feito vira **nota em formação** (por venda + quem pagou + dia ou mês); no fechamento, a tabela decide entre **Revisar** e **transmitir ao governo** |
 | **Enviador de notas** | quando a nota é autorizada, com repescagem a cada 15 min | decide pela tabela se **envia a nota por e-mail** a quem pagou (o mesmo envio do botão da tela) |
-| **Vigia de notas previstas** | dias úteis às 8h | avisa a equipe sobre notas previstas paradas há N dias (pagamento sem serviço feito) |
+| **Vigia de notas previstas** | **na hora** em que o governo recusa uma nota ou a transmissão para, e dias úteis às 8h | avisa a equipe no sino da Central: a recusa ou falha no minuto em que acontece, e um resumo diário das recusadas, com falha, paradas em Revisar e previstas paradas |
 
 Regras que o sistema garante, independentemente das tabelas:
 - Nota com **pendência** sempre vai para Revisar. São pendências: valor a revisar, saldo
@@ -41,7 +41,7 @@ Cada tabela é lida de cima para baixo: a primeira linha que bate decide. A últ
 
 Outros ajustes:
 - `agrupar_por`: `dia` (padrão) ou `mes`, a nota por dia de atendimento ou por mês.
-- `dias_parada` (`15`) e `alvo_papel` (`administrador`) do Vigia.
+- Vigia: `avisar_na_hora` (`true`), `alvo_papel` (`administrador`), `dias_revisao_parada` (`2`) e `dias_parada` (`15`).
 - `esperar_antes` (`false`) e `esperar_minutos` (`30`) do Enviador, para dar tempo de revisar antes do e-mail.
 
 Exemplo de regra do Confirmador para transmitir direto, a combinar com o contador da clínica:
@@ -54,7 +54,7 @@ Exemplo de regra do Confirmador para transmitir direto, a combinar com o contado
 | `botfn-nfse-registrador` | `nota_fiscal:registrar_prevista`, `nota_fiscal:read`, `pagador:read`, `venda:read` | criar e manter a nota prevista a partir dos pagamentos |
 | `botfn-nfse-confirmador` | `nota_fiscal:emitir_automatico`, `nota_fiscal:read`, `venda:read` | formar e fechar a nota (Revisar ou transmitir) |
 | `botfn-nfse-enviador` | `nota_fiscal:enviar_automatico`, `nota_fiscal:read` | enviar a nota autorizada por e-mail a quem pagou |
-| `botfn-nfse-vigia` | `nota_fiscal:read`, `notificacao:enviar` | avisar a equipe |
+| `botfn-nfse-vigia` | `nota_fiscal:read`, `notificacao:enviar` | avisar a equipe (recusas na hora e resumo diário) |
 
 ## Capabilities usadas
 
@@ -73,7 +73,7 @@ O endereço real de cada uma é resolvido em privado na instalação.
 - ✉️ **Envia e-mail para fora**: a nota vai a quem pagou, que pode não ser o paciente.
 - 👁️ **Lê dados de quem pagou** (nome, documento, e-mail) para montar a nota. Os agentes não
   devolvem documento no resultado nem no log.
-- ⏰ Age sozinho, nos eventos de pagamento e de serviço e nos horários agendados.
+- ⏰ Age sozinho, nos eventos de pagamento, de serviço e de nota recusada, e nos horários agendados.
 
 ## Antes de instalar
 

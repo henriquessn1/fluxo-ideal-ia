@@ -1,6 +1,8 @@
 {
   "chave": "jornada-cuidado",
-  "versao": "1.1",
+  "versao": "1.2",
+  "nome": "Jornada de cuidado",
+  "descricao": "Liga as tarefas à jornada do paciente e avança ou fecha as fases conforme as coisas acontecem.",
   "escopo": "por-tenant",
   "roles": [
     {
@@ -24,6 +26,7 @@
   "agentes": [
     {
       "chave": "jornada_binder",
+      "descricao": "Quando nasce um termo, um pedido de autorização ou um agendamento, liga as tarefas à jornada do paciente e marca o que está travando.",
       "tipo": "script",
       "roles": [
         "botfn-jornada-binder"
@@ -84,6 +87,7 @@
     },
     {
       "chave": "jornada_closer",
+      "descricao": "Quando um termo é assinado, uma autorização muda, a consulta é marcada ou o procedimento é feito, conclui as tarefas e recalcula a fase da jornada.",
       "tipo": "script",
       "roles": [
         "botfn-jornada-closer"

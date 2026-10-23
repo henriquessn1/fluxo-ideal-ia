@@ -1,6 +1,8 @@
 {
   "chave": "notas-fiscais",
-  "versao": "1.6",
+  "versao": "1.7",
+  "nome": "Notas fiscais",
+  "descricao": "Emite a nota fiscal de serviço no nome de quem pagou, seguindo as regras da clínica, e envia por e-mail.",
   "escopo": "por-tenant",
   "roles": [
     {
@@ -305,6 +307,7 @@
     {
       "chave": "registrador_notas",
       "nome": "Registrador de notas",
+      "descricao": "A cada pagamento recebido, ajustado ou estornado, cria ou ajusta a nota prevista no nome de quem pagou.",
       "tipo": "script",
       "roles": [
         "botfn-nfse-registrador"
@@ -366,6 +369,7 @@
     {
       "chave": "confirmador_notas",
       "nome": "Confirmador de notas",
+      "descricao": "Quando o serviço é feito (ou cancelado), põe a nota em formação; no fim do período manda para Revisar ou para o governo, pelas regras da clínica.",
       "tipo": "script",
       "roles": [
         "botfn-nfse-confirmador"
@@ -416,6 +420,7 @@
     {
       "chave": "vigia_notas",
       "nome": "Vigia de notas previstas",
+      "descricao": "Nos dias úteis, avisa a equipe sobre notas previstas que estão paradas.",
       "tipo": "script",
       "roles": [
         "botfn-nfse-vigia"
@@ -446,6 +451,7 @@
     {
       "chave": "enviador_notas",
       "nome": "Enviador de notas",
+      "descricao": "Quando a nota é autorizada, envia por e-mail a quem pagou; de 15 em 15 minutos tenta de novo o que ficou pendente.",
       "tipo": "script",
       "roles": [
         "botfn-nfse-enviador"

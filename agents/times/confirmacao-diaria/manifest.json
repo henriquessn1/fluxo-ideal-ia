@@ -1,6 +1,8 @@
 {
   "chave": "confirmacao-diaria",
-  "versao": "1.5",
+  "versao": "1.6",
+  "nome": "Confirmação diária",
+  "descricao": "Uma vez por dia, convida pelo WhatsApp quem ainda não confirmou a consulta de hoje ou de amanhã.",
   "escopo": "por-tenant",
   "roles": [
     {
@@ -16,6 +18,7 @@
   "agentes": [
     {
       "chave": "confirmacao_diaria",
+      "descricao": "Procura os agendamentos de hoje e de amanhã sem confirmação e envia o convite para confirmar pelo WhatsApp.",
       "tipo": "script",
       "roles": [
         "botfn-confirmacao-diaria"

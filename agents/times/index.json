@@ -61,7 +61,7 @@
       "chave": "notas-fiscais",
       "nome": "Notas fiscais",
       "descricao": "Emite a nota fiscal de serviço no nome de quem pagou, seguindo as regras da clínica, e envia por e-mail.",
-      "versao": "1.8",
+      "versao": "1.9",
       "agentes": 4,
       "tipos": [
         "script"

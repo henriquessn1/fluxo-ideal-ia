@@ -1,8 +1,6 @@
 {
   "chave": "notas-fiscais",
   "versao": "1.8",
-  "nome": "Notas fiscais",
-  "descricao": "Emite a nota fiscal de serviço no nome de quem pagou, seguindo as regras da clínica, e envia por e-mail.",
   "escopo": "por-tenant",
   "roles": [
     {
@@ -226,17 +224,23 @@
     {
       "chave": "alvo_papel",
       "tipo": "string",
-      "fonte": "papeis",
-      "rotulo": "Papéis que recebem o aviso do Vigia",
+      "rotulo": "Papel que recebe o aviso do Vigia",
       "default": "administrador",
-      "descricao": "Um ou mais perfis da equipe (no sino da Central). Vários: separe por vírgula."
+      "descricao": "Perfil da equipe que recebe os avisos do Vigia (no sino da Central)."
     },
     {
       "chave": "avisar_na_hora",
       "tipo": "bool",
       "rotulo": "Avisar na hora a nota recusada",
       "default": true,
-      "descricao": "O Vigia avisa a equipe no minuto em que o governo recusa uma nota ou a transmissão para sem nova tentativa."
+      "descricao": "O Vigia avisa a equipe no minuto em que o governo recusa uma nota ou a transmissão para sem nova tentativa (cartão na Central para quem está online; a nota fica em Minhas pendências)."
+    },
+    {
+      "chave": "notificacao_do_sistema",
+      "tipo": "bool",
+      "rotulo": "Também como notificação do Windows/navegador",
+      "default": true,
+      "descricao": "Além do cartão na Central, o aviso aparece como notificação do sistema para quem permitiu no navegador."
     },
     {
       "chave": "dias_revisao_parada",
@@ -323,7 +327,6 @@
     {
       "chave": "registrador_notas",
       "nome": "Registrador de notas",
-      "descricao": "A cada pagamento recebido, ajustado ou estornado, cria ou ajusta a nota prevista no nome de quem pagou.",
       "tipo": "script",
       "roles": [
         "botfn-nfse-registrador"
@@ -385,7 +388,6 @@
     {
       "chave": "confirmador_notas",
       "nome": "Confirmador de notas",
-      "descricao": "Quando o serviço é feito (ou cancelado), põe a nota em formação; no fim do período manda para Revisar ou para o governo, pelas regras da clínica.",
       "tipo": "script",
       "roles": [
         "botfn-nfse-confirmador"
@@ -436,7 +438,6 @@
     {
       "chave": "vigia_notas",
       "nome": "Vigia de notas previstas",
-      "descricao": "Avisa a equipe na hora quando o governo recusa uma nota e, nos dias úteis, sobre as notas paradas.",
       "tipo": "script",
       "roles": [
         "botfn-nfse-vigia"
@@ -457,7 +458,7 @@
         }
       ],
       "config": {
-        "script": "// Vigia de notas (épico #2268 + aviso na hora #2331) — avisa a equipe, sem dado de paciente (só quantidade, valor e o\n// motivo do erro):\n//  - NA HORA: o financeiro anuncia a nota recusada pelo governo (financeiro.nota_rejeitada) ou a transmissão parada que\n//    não volta sozinha (financeiro.nota_falhou) → um aviso por nota.\n//  - TODO DIA ÚTIL (cron): resumo das notas previstas paradas (pagas, sem serviço feito), das recusadas/com falha ainda\n//    sem correção e das paradas em Revisar — a rede de segurança se um aviso na hora se perder.\nvar et = event.event_type || '';\n// alvo_papel: um ou mais papéis separados por vírgula (ex.: \"administrador,financeiro\").\nvar papeis = [];\nString(config.alvo_papel || '').split(',').forEach(function (p) {\n  p = p.trim();\n  if (p && papeis.indexOf(p) < 0) papeis.push(p);\n});\nif (!papeis.length) papeis = ['administrador'];\nfunction num(v, padrao) {\n  return (v === undefined || v === null || v === '') ? padrao : Number(v);\n}\nvar diasPrevista = num(config.dias_parada, 15);\nvar diasRevisao = num(config.dias_revisao_parada, 2);\n\nfunction fim(saida, extra) {\n  var r = { saida: saida, evento: et || event.origem || '' };\n  extra = extra || {};\n  for (var k in extra) r[k] = extra[k];\n  result(r);\n  return r;\n}\nfunction brl(n) {\n  var s = (Math.round(n * 100) / 100).toFixed(2).split('.');\n  return 'R$ ' + s[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.') + ',' + s[1];\n}\n// Um aviso por papel, com o mesmo conteúdo. ok só se todos deram certo; status = o do primeiro que falhou (ou o último).\nfunction avisar(titulo, texto) {\n  var res = { ok: true, status_code: null };\n  papeis.forEach(function (papel) {\n    var r = call('notificar_grupo', {\n      type: 'mensagem', group_id: papel,\n      message: { type: 'aviso', title: titulo, text: texto, icon: 'receipt' }\n    }) || {};\n    if (res.ok) res.status_code = r.status_code;\n    if (!r.ok) res.ok = false;\n  });\n  return res;\n}\nfunction corpo(r) { return (r && r.body) || {}; }\n\n// 1) Na hora: nota recusada ou transmissão parada\nif (et === 'financeiro.nota_rejeitada' || et === 'financeiro.nota_falhou') {\n  if (config.avisar_na_hora === false) return fim('desligado');\n  var ps = event.payload_safe || {};\n  var recusa = et === 'financeiro.nota_rejeitada';\n  var valor = Number(ps.valor_servico || 0);\n  var motivo = String(ps.erro_mensagem || ps.erro_codigo || 'sem detalhe').slice(0, 220);\n  var titulo = recusa ? 'Nota fiscal recusada pelo governo' : 'Nota fiscal parada na transmissão';\n  var texto = (recusa ? 'A nota de ' + brl(valor) + ' foi recusada: ' : 'A nota de ' + brl(valor) + ' não foi transmitida: ')\n    + motivo + (ps.sem_revisao ? ' (saiu sem revisão, pela regra automática)' : '')\n    + '. Corrija em Notas fiscais › Corrigir.';\n  var a = avisar(titulo, texto);\n  return fim('avisou', { tipo: recusa ? 'recusada' : 'falha', ok: a.ok, status: a.status_code, erro: ps.erro_codigo || null });\n}\n\n// 2) Resumo diário\nif (event.origem === 'cron') {\n  var agora = Date.now();\n  function lista(status) {\n    var r = call('listar_notas', { status: status, origem: '', limit: 500 });\n    if (!r.ok) return null;\n    return corpo(r).items || [];\n  }\n  function parada(n, dias) {\n    var t = Date.parse(n.updated_at || n.created_at);\n    return !isNaN(t) && t < agora - dias * 86400000;\n  }\n  function soma(ns) { return ns.reduce(function (s, n) { return s + Number(n.valor_servico || 0); }, 0); }\n\n  var previstas = lista('prevista'), recusadas = lista('rejeitada'), falhas = lista('falha'), revisao = lista('revisao_pendente');\n  if (previstas === null || recusadas === null || falhas === null || revisao === null) {\n    return fim('erro', { etapa: 'listar_notas' });\n  }\n  previstas = previstas.filter(function (n) { return n.origem === 'agente' && parada(n, diasPrevista); });\n  revisao = revisao.filter(function (n) { return parada(n, diasRevisao); });\n\n  var linhas = [];\n  if (recusadas.length) linhas.push(recusadas.length + (recusadas.length === 1 ? ' nota recusada' : ' notas recusadas')\n    + ' pelo governo (' + brl(soma(recusadas)) + ')');\n  if (falhas.length) linhas.push(falhas.length + (falhas.length === 1 ? ' nota com falha' : ' notas com falha')\n    + ' na transmissão (' + brl(soma(falhas)) + ')');\n  if (revisao.length) linhas.push(revisao.length + (revisao.length === 1 ? ' nota parada' : ' notas paradas')\n    + ' em Revisar há mais de ' + diasRevisao + ' dias (' + brl(soma(revisao)) + ')');\n  if (previstas.length) linhas.push(previstas.length + (previstas.length === 1 ? ' nota prevista parada' : ' notas previstas paradas')\n    + ' há mais de ' + diasPrevista + ' dias (' + brl(soma(previstas)) + '): pagas e sem o serviço feito');\n  var conta = { recusadas: recusadas.length, falhas: falhas.length, revisao: revisao.length, previstas: previstas.length };\n  if (!linhas.length) return fim('nada_parado', conta);\n  var a2 = avisar('Notas fiscais que precisam de alguém', linhas.join('; ') + '. Veja em Notas fiscais.');\n  conta.ok = a2.ok;\n  conta.status = a2.status_code;\n  return fim('avisou', conta);\n}\nreturn fim('ignorado', { motivo: 'gatilho desconhecido' });\n",
+        "script": "// Vigia de notas (épico #2268 + aviso na hora #2331) — avisa a equipe, sem dado de paciente (só quantidade, valor e o\n// motivo do erro):\n//  - NA HORA: o financeiro anuncia a nota recusada pelo governo (financeiro.nota_rejeitada) ou a transmissão parada que\n//    não volta sozinha (financeiro.nota_falhou) → um aviso por nota.\n//  - TODO DIA ÚTIL (cron): resumo das notas previstas paradas (pagas, sem serviço feito), das recusadas/com falha ainda\n//    sem correção e das paradas em Revisar — a rede de segurança se um aviso na hora se perder.\nvar et = event.event_type || '';\nvar papel = String(config.alvo_papel || 'administrador');\nfunction num(v, padrao) {\n  return (v === undefined || v === null || v === '') ? padrao : Number(v);\n}\nvar diasPrevista = num(config.dias_parada, 15);\nvar diasRevisao = num(config.dias_revisao_parada, 2);\n\nfunction fim(saida, extra) {\n  var r = { saida: saida, evento: et || event.origem || '' };\n  extra = extra || {};\n  for (var k in extra) r[k] = extra[k];\n  result(r);\n  return r;\n}\nfunction brl(n) {\n  var s = (Math.round(n * 100) / 100).toFixed(2).split('.');\n  return 'R$ ' + s[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.') + ',' + s[1];\n}\n// O cartão na Central dura poucos segundos e só aparece para quem está online: o aviso leva o link e pede a\n// notificação do sistema (Windows/navegador, para quem permitiu). O registro que fica é \"Minhas pendências\" (sininho).\nfunction avisar(titulo, texto, url, urgente) {\n  var link = url || '/pendencias';\n  return call('notificar_grupo', {\n    type: 'mensagem', group_id: papel,\n    message: {\n      type: urgente ? 'urgent' : 'alert', title: titulo, text: texto, icon: 'receipt',\n      links: [{ url: link, text: url ? 'Abrir a nota' : 'Ver em Minhas pendências' }],\n      windowsalert: config.notificacao_do_sistema === false ? null : { text: titulo + ': ' + texto, url: link }\n    }\n  });\n}\nfunction corpo(r) { return (r && r.body) || {}; }\n\n// 1) Na hora: nota recusada ou transmissão parada\nif (et === 'financeiro.nota_rejeitada' || et === 'financeiro.nota_falhou') {\n  if (config.avisar_na_hora === false) return fim('desligado');\n  var ps = event.payload_safe || {};\n  var recusa = et === 'financeiro.nota_rejeitada';\n  var valor = Number(ps.valor_servico || 0);\n  var motivo = String(ps.erro_mensagem || ps.erro_codigo || 'sem detalhe').slice(0, 220);\n  var titulo = recusa ? 'Nota fiscal recusada pelo governo' : 'Nota fiscal parada na transmissão';\n  var texto = (recusa ? 'A nota de ' + brl(valor) + ' foi recusada: ' : 'A nota de ' + brl(valor) + ' não foi transmitida: ')\n    + motivo + (ps.sem_revisao ? ' (saiu sem revisão, pela regra automática)' : '')\n    + '. Está em Minhas pendências.';\n  var sub = event.subject || {};\n  var a = avisar(titulo, texto, sub.nota_fiscal_id ? '/financeiro/notas-fiscais?nota=' + sub.nota_fiscal_id : null, true);\n  return fim('avisou', { tipo: recusa ? 'recusada' : 'falha', ok: a.ok, status: a.status_code, erro: ps.erro_codigo || null });\n}\n\n// 2) Resumo diário\nif (event.origem === 'cron') {\n  var agora = Date.now();\n  function lista(status) {\n    var r = call('listar_notas', { status: status, origem: '', limit: 500 });\n    if (!r.ok) return null;\n    return corpo(r).items || [];\n  }\n  function parada(n, dias) {\n    var t = Date.parse(n.updated_at || n.created_at);\n    return !isNaN(t) && t < agora - dias * 86400000;\n  }\n  function soma(ns) { return ns.reduce(function (s, n) { return s + Number(n.valor_servico || 0); }, 0); }\n\n  var previstas = lista('prevista'), recusadas = lista('rejeitada'), falhas = lista('falha'), revisao = lista('revisao_pendente');\n  if (previstas === null || recusadas === null || falhas === null || revisao === null) {\n    return fim('erro', { etapa: 'listar_notas' });\n  }\n  previstas = previstas.filter(function (n) { return n.origem === 'agente' && parada(n, diasPrevista); });\n  revisao = revisao.filter(function (n) { return parada(n, diasRevisao); });\n\n  var linhas = [];\n  if (recusadas.length) linhas.push(recusadas.length + (recusadas.length === 1 ? ' nota recusada' : ' notas recusadas')\n    + ' pelo governo (' + brl(soma(recusadas)) + ')');\n  if (falhas.length) linhas.push(falhas.length + (falhas.length === 1 ? ' nota com falha' : ' notas com falha')\n    + ' na transmissão (' + brl(soma(falhas)) + ')');\n  if (revisao.length) linhas.push(revisao.length + (revisao.length === 1 ? ' nota parada' : ' notas paradas')\n    + ' em Revisar há mais de ' + diasRevisao + ' dias (' + brl(soma(revisao)) + ')');\n  if (previstas.length) linhas.push(previstas.length + (previstas.length === 1 ? ' nota prevista parada' : ' notas previstas paradas')\n    + ' há mais de ' + diasPrevista + ' dias (' + brl(soma(previstas)) + '): pagas e sem o serviço feito');\n  var conta = { recusadas: recusadas.length, falhas: falhas.length, revisao: revisao.length, previstas: previstas.length };\n  if (!linhas.length) return fim('nada_parado', conta);\n  var a2 = avisar('Notas fiscais que precisam de alguém', linhas.join('; ') + '. Veja em Minhas pendências.', null,\n    recusadas.length + falhas.length > 0);\n  conta.ok = a2.ok;\n  conta.status = a2.status_code;\n  return fim('avisou', conta);\n}\nreturn fim('ignorado', { motivo: 'gatilho desconhecido' });\n",
         "dias_parada": "{{knob.dias_parada}}",
         "alvo_papel": "{{knob.alvo_papel}}",
         "acoes": [
@@ -471,13 +472,13 @@
           }
         ],
         "dias_revisao_parada": "{{knob.dias_revisao_parada}}",
-        "avisar_na_hora": "{{knob.avisar_na_hora}}"
+        "avisar_na_hora": "{{knob.avisar_na_hora}}",
+        "notificacao_do_sistema": "{{knob.notificacao_do_sistema}}"
       }
     },
     {
       "chave": "enviador_notas",
       "nome": "Enviador de notas",
-      "descricao": "Quando a nota é autorizada, envia por e-mail a quem pagou; de 15 em 15 minutos tenta de novo o que ficou pendente.",
       "tipo": "script",
       "roles": [
         "botfn-nfse-enviador"

@@ -16,20 +16,20 @@ Substitui o lembrete rápido que hoje mora no orquestrador ([fluxo-ideal#788](ht
 
 - **Horário de envio** = o mais tarde entre *início − `antecedencia_minutos`* e *`hora_minima` do dia da
   consulta*. Ex.: consulta 15:30 → 13:30; consulta 08:30 → 08:00 (nunca antes das 8h).
-- **Quem recebe:** agendamento **público**, fora de status terminal (`Cancelado`/`Falta`/`Atendido`/`Realizado`),
+- **Quem recebe:** agendamento **público**, fora de status terminal (`Cancelado`/`Falta`/`Finalizado`),
   com paciente, que ainda não começou. **Confirmados e não confirmados** recebem.
 - **Quem NÃO recebe (pula):**
   - **marcado em cima da hora** — criado depois do horário de envio (já dentro das 2h);
   - **atrasado** — passou mais de `atraso_max_minutos` do horário de envio (ex.: o agente ficou parado):
     melhor não mandar do que mandar "2h antes" a 20 minutos da consulta.
-- **Sem duplicar:** cada envio leva a chave `lembrete_rapido:<agendamento>:<início>`. Rodar de novo devolve
+- **Sem duplicar:** cada envio leva a chave `lembrete_rapido:<agendamento>:<início em UTC>`. Rodar de novo devolve
   `deduplicado`; **reagendar** muda o início e gera um lembrete novo; **cancelar** antes do envio não envia.
 - **Falha aparece:** se listar falhar, ou o envio voltar com erro (ex.: template ausente) ou com status fora de
   `aceito`/`deduplicado`/`agendado`, a rodada conta como **falha**, loga WARNING e marca `acao_bloqueada` no
   resumo da execução — nunca vira "enviado".
 
 O resumo de cada rodada (Central → Inteligência Artificial → execuções) mostra `candidatos`, `enviados`,
-`deduplicados`, `agendados`, `aguardando`, `pulado_em_cima`, `pulado_atrasado` e `falhas` — sem dado pessoal.
+`deduplicados`, `agendados`, `aguardando`, `pulado_em_cima`, `pulado_atrasado`, `sem_janela` (consulta antes da hora mínima) e `falhas` (+ `truncado` se a lista passar de 20 páginas) — sem dado pessoal.
 
 ## Capabilities que pede (superfície de consentimento)
 

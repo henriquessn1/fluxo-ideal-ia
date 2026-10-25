@@ -1,0 +1,75 @@
+{
+  "chave": "lembrete-rapido",
+  "versao": "1.0",
+  "nome": "Lembrete rápido",
+  "descricao": "Manda pelo WhatsApp um lembrete cerca de 2h antes do agendamento (nunca antes das 8h).",
+  "escopo": "por-tenant",
+  "roles": [
+    {
+      "nome": "botfn-lembrete-rapido",
+      "grants": [
+        "agendamento:list",
+        "mensageria_mensagem:enviar_intencao",
+        "cliente:read:full",
+        "profissionais:read"
+      ]
+    }
+  ],
+  "agentes": [
+    {
+      "chave": "lembrete_rapido",
+      "descricao": "A cada 15 minutos, envia o lembrete pelo WhatsApp para os agendamentos cujo horário de envio (2h antes, nunca antes das 8h) já chegou.",
+      "tipo": "script",
+      "perfil": "mensageiro",
+      "roles": [
+        "botfn-lembrete-rapido"
+      ],
+      "triggers": [
+        {
+          "cron": "*/15 * * * *",
+          "tz": "America/Sao_Paulo",
+          "enabled": true
+        }
+      ],
+      "config": {
+        "canal": "whatsapp",
+        "template": "lembrete_rapido",
+        "antecedencia_minutos": 120,
+        "hora_minima": 8,
+        "atraso_max_minutos": 60,
+        "tz_offset": "-03:00",
+        "status_pular": [
+          "Cancelado",
+          "Falta",
+          "Atendido",
+          "Realizado"
+        ],
+        "per_page": 100,
+        "acoes": [
+          {
+            "nome": "listar_janela",
+            "capability": "agendamento.listar_janela",
+            "kind": "internal"
+          },
+          {
+            "nome": "buscar_cliente",
+            "capability": "clientes.buscar_cliente",
+            "kind": "internal"
+          },
+          {
+            "nome": "buscar_profissional",
+            "capability": "estabelecimento.buscar_profissional",
+            "kind": "internal"
+          },
+          {
+            "nome": "enviar_intencao",
+            "capability": "mensageria.enviar_intencao",
+            "kind": "internal"
+          }
+        ],
+        "script": "// lembrete_rapido — agente `script` (MACRO), perfil `mensageiro`. Comportamento = ESTE arquivo (DADO).\n//\n// A cada rodada do cron (a cada 15 min), manda o LEMBRETE pelo WhatsApp para os agendamentos\n// cujo horário de envio já chegou: `envio_em = max(início − antecedencia_minutos, hora_minima\n// do dia da consulta)`. Ex.: consulta 15:30 → envio 13:30; consulta 08:30 → envio 08:00.\n// Substitui o ponto `lembrete_rapido` do orquestrador (henriquessn1/fluxo-ideal#788).\n//\n// QUEM RECEBE: agendamento público, fora de status terminal, com paciente, que ainda não começou\n// e cujo `envio_em` já passou. Confirmados e não confirmados recebem (paridade com o orquestrador).\n// QUEM NÃO RECEBE (pula):\n//   - marcado em cima da hora: criado DEPOIS do `envio_em` (já dentro da antecedência);\n//   - atrasado: passou mais de `atraso_max_minutos` do `envio_em` (ex.: o agente ficou parado) —\n//     melhor não mandar do que mandar \"2h antes\" a 20 min da consulta.\n//\n// ENVIO: 1 intenção por agendamento na mensageria (`enviar_intencao`), com chave de idempotência\n// `lembrete_rapido:<agendamento_id>:<data_inicio>` — rodar de novo NÃO duplica (deduplicado);\n// REAGENDAR muda o `data_inicio` e gera lembrete novo; CANCELAR antes do envio não envia.\n//\n// FALHA VISÍVEL (anti falso-verde): listar que falha NÃO vira \"0 lembretes\"; envio que volta\n// não-2xx (ex.: 500 de template ausente) ou com status fora de aceito/deduplicado/agendado conta\n// como FALHA, sai com log WARNING e `acao_bloqueada` no resumo — nunca como \"enviado\".\n//\n// O \"agora\" é a janela do cron (`event.window`), não o relógio do worker — a rodada é\n// determinística mesmo se o worker atrasar (e testável).\n//\n// Injetados: event, config, context, call()->{ok,status_code,body}, log(), result().\n\nvar cfg = config || {};\nfunction num(v, d) { return (v !== undefined && v !== null && !isNaN(Number(v))) ? Number(v) : d; }\nvar antecedenciaMin = num(cfg.antecedencia_minutos, 120);\nvar horaMinima = num(cfg.hora_minima, 8);\nvar atrasoMaxMin = num(cfg.atraso_max_minutos, 60);\nvar tzOffset = cfg.tz_offset || '-03:00';\nvar statusPular = cfg.status_pular || ['Cancelado', 'Falta', 'Atendido', 'Realizado'];\nvar perPage = Math.min(num(cfg.per_page, 100), 100); // a API aceita no máximo 100 por página\nvar template = cfg.template || 'lembrete_rapido';\nvar canal = cfg.canal || 'whatsapp';\nvar MAX_PAGINAS = 20;\nvar MIN_MS = 60000;\n\nfunction unwrap(r) {\n  if (!r || !r.ok) return null;\n  var b = r.body;\n  return (b && b.data !== undefined) ? b.data : b;\n}\nfunction offsetMin(s) {\n  var m = /^([+-])(\\d{2}):(\\d{2})$/.exec(String(s));\n  if (!m) return -180;\n  var val = parseInt(m[2], 10) * 60 + parseInt(m[3], 10);\n  return m[1] === '-' ? -val : val;\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\n// Data/hora LOCAL (fuso da clínica) de um instante absoluto.\nfunction partesLocais(ms) {\n  var d = new Date(ms + offsetMin(tzOffset) * MIN_MS);\n  return {\n    data: d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) + '-' + pad(d.getUTCDate()),\n    hh: pad(d.getUTCHours()), mm: pad(d.getUTCMinutes())\n  };\n}\nfunction isoLocal(ms) {\n  var p = partesLocais(ms);\n  var d = new Date(ms + offsetMin(tzOffset) * MIN_MS);\n  return p.data + 'T' + p.hh + ':' + p.mm + ':' + pad(d.getUTCSeconds()) + tzOffset;\n}\n\n// --- enrich: 1º nome do paciente + apelido do profissional (com cache) ---\nfunction primeiroNome(nome) {\n  var s = String(nome || '').trim();\n  if (!s) return null;\n  var i = s.indexOf(' ');\n  var p = i > 0 ? s.substring(0, i) : s;\n  return p.charAt(0).toUpperCase() + p.substring(1).toLowerCase(); // \"CELIRIA\" -> \"Celiria\"\n}\nvar _cliCache = {};\nfunction clienteNome(id) {\n  var k = String(id);\n  if (_cliCache[k] !== undefined) return _cliCache[k];\n  var d = unwrap(call('buscar_cliente', { cliente_id: k }));\n  _cliCache[k] = (d && d.nome) ? primeiroNome(d.nome) : null;\n  return _cliCache[k];\n}\nvar _profCache = {};\nfunction profApelido(id) {\n  if (!id) return null;\n  var k = String(id);\n  if (_profCache[k] !== undefined) return _profCache[k];\n  var d = unwrap(call('buscar_profissional', { id: k }));\n  _profCache[k] = d ? (d.apelido || d.nome || null) : null;\n  return _profCache[k];\n}\n\n// ---- \"agora\" = janela do cron ----\nvar nowMs = Date.parse((event && event.window) || '');\nif (isNaN(nowMs)) nowMs = Date.now();\n\nvar pular = {};\nfor (var s = 0; s < statusPular.length; s++) pular[String(statusPular[s]).toLowerCase()] = true;\n\n// Quem pode precisar do lembrete AGORA começa em (agora, agora + antecedência]:\n// envio_em = max(início − antecedência, piso) <= agora  ⇒  início <= agora + antecedência.\nvar ini = isoLocal(nowMs);\nvar fim = isoLocal(nowMs + antecedenciaMin * MIN_MS);\n\nvar cont = { candidatos: 0, enviados: 0, deduplicados: 0, agendados: 0,\n             aguardando: 0, pulado_em_cima: 0, pulado_atrasado: 0, falhas: 0 };\nvar falhas = [];\n\n// ---- 1) coleta paginada ----\nvar candidatos = [];\nvar pagina = 1;\nwhile (pagina <= MAX_PAGINAS) {\n  var raw = call('listar_janela', { data_inicio: ini, data_fim: fim, per_page: perPage, page: pagina });\n  if (raw && !raw.ok) {\n    log('lembrete_rapido: FALHA ao listar agendamentos (HTTP ' + (raw.status_code || '?') + ' ' + (raw.error || '') + ')', 'warning');\n    result({ acao_bloqueada: true, etapa: 'listar_janela', http: raw.status_code || null,\n             erro: raw.error || 'chamada não-ok', enviados: 0 });\n    return { ok: false, erro: 'listar_falhou', http: raw.status_code || null };\n  }\n  var lista = unwrap(raw);\n  if (!lista || !lista.length) break;\n  for (var i = 0; i < lista.length; i++) {\n    var ag = lista[i];\n    if (!ag || !ag.id || !ag.cliente_id) continue;\n    if (ag.visibilidade && String(ag.visibilidade) !== 'publica') continue;\n    if (ag.status && pular[String(ag.status).toLowerCase()]) continue;\n    var startMs = Date.parse(ag.data_inicio);\n    if (isNaN(startMs) || startMs <= nowMs) continue;\n    candidatos.push(ag);\n  }\n  if (lista.length < perPage) break;\n  pagina++;\n}\ncont.candidatos = candidatos.length;\n\n// ---- 2) decide e envia (1 intenção por agendamento) ----\nfor (var c = 0; c < candidatos.length; c++) {\n  var a = candidatos[c];\n  var startMs2 = Date.parse(a.data_inicio);\n  var loc = partesLocais(startMs2);\n  var pisoMs = Date.parse(loc.data + 'T' + pad(horaMinima) + ':00:00' + tzOffset);\n  var envioMs = Math.max(startMs2 - antecedenciaMin * MIN_MS, isNaN(pisoMs) ? 0 : pisoMs);\n\n  if (envioMs > nowMs) { cont.aguardando++; continue; }                       // ainda não é hora\n  if (nowMs - envioMs > atrasoMaxMin * MIN_MS) { cont.pulado_atrasado++; continue; }\n  var criadoMs = Date.parse(a.created_at || '');\n  if (!isNaN(criadoMs) && criadoMs > envioMs) { cont.pulado_em_cima++; continue; }\n\n  var r = call('enviar_intencao', {\n    destinatario_id: String(a.cliente_id),\n    modo_entrega: 'force_channel',\n    canal_solicitado: canal,\n    template_slug: template,\n    variaveis: {\n      cliente_nome: clienteNome(a.cliente_id) || 'paciente',\n      profissional_apelido: profApelido(a.profissional_id) || 'a clínica',\n      hora: loc.hh + ':' + loc.mm\n    },\n    origem_ms: 'agentes',\n    referencia_tipo: 'agendamento',\n    referencia_id: String(a.id),\n    idempotency_key: 'lembrete_rapido:' + a.id + ':' + a.data_inicio\n  });\n  var body = unwrap(r);\n  var st = body && body.status;\n  if (r && r.ok && st === 'aceito') cont.enviados++;\n  else if (r && r.ok && st === 'deduplicado') cont.deduplicados++;\n  else if (r && r.ok && st === 'agendado') cont.agendados++;\n  else {\n    cont.falhas++;\n    var f = { agendamento_id: String(a.id), http: (r && r.status_code) || null,\n              status: st || null, erro: (r && r.error) || null };\n    falhas.push(f);\n    log('lembrete_rapido: FALHA ao enviar (agendamento ' + f.agendamento_id + ', HTTP ' + (f.http || '?') +\n        ', status ' + (f.status || '-') + ')', 'warning');\n  }\n}\n\nlog('lembrete_rapido: ' + cont.candidatos + ' candidato(s) — ' + cont.enviados + ' enviado(s), ' +\n    cont.deduplicados + ' já enviado(s), ' + cont.agendados + ' agendado(s), ' + cont.falhas + ' falha(s)',\n    cont.falhas ? 'warning' : 'info');\nvar resumo = cont;\nresumo.janela = ini + '..' + fim;\nif (falhas.length) { resumo.acao_bloqueada = true; resumo.etapa = 'enviar_intencao'; resumo.falhas_detalhe = falhas.slice(0, 20); }\nresult(resumo);\nreturn { ok: falhas.length === 0, resumo: cont, janela: { de: ini, ate: fim } };\n"
+      }
+    }
+  ],
+  "knobs": []
+}

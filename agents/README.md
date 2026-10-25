@@ -58,6 +58,7 @@ E **NÃO contém** (por design):
 | [briefing](./times/briefing/) | Cartão de contexto do paciente antes do atendimento | 1 (IA) | médio |
 | [confirmacao-presenca](./times/confirmacao-presenca/) | Confirma presença por WhatsApp e triage a resposta | 3 (2 script + 1 IA) | médio |
 | [confirmacao-diaria](./times/confirmacao-diaria/) | Varre 1×/dia os agendamentos não confirmados (hoje+amanhã) e convida à confirmação por WhatsApp | 1 (script) | médio |
+| [lembrete-rapido](./times/lembrete-rapido/) | A cada 15 min, manda o lembrete por WhatsApp ~2h antes do agendamento (nunca antes das 8h), sem duplicar e com falha visível | 1 (script) | médio |
 | [jornada-cuidado](./times/jornada-cuidado/) | Vincula tarefas à jornada e avança/fecha fases | 2 (script) | médio |
 | [jornada-avisos](./times/jornada-avisos/) | Avisa a equipe sobre pendências de SLA da jornada | 1 (script) | médio |
 | [notas-fiscais](./times/notas-fiscais/) | Emite a NFS-e do serviço feito no nome de quem pagou (prevista → em formação → Revisar/governo) e envia por e-mail, por tabelas de regras da clínica | 4 (script) | alto |

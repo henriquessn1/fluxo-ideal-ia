@@ -58,6 +58,17 @@
       "manifesto": "agents/times/jornada-cuidado/manifest.json"
     },
     {
+      "chave": "lembrete-rapido",
+      "nome": "Lembrete rápido",
+      "descricao": "Manda pelo WhatsApp um lembrete cerca de 2h antes do agendamento (nunca antes das 8h).",
+      "versao": "1.0",
+      "agentes": 1,
+      "tipos": [
+        "script"
+      ],
+      "manifesto": "agents/times/lembrete-rapido/manifest.json"
+    },
+    {
       "chave": "notas-fiscais",
       "nome": "Notas fiscais",
       "descricao": "Emite a nota fiscal de serviço no nome de quem pagou, seguindo as regras da clínica, e envia por e-mail.",

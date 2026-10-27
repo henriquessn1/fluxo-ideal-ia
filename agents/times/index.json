@@ -2,6 +2,17 @@
   "schema_version": 1,
   "times": [
     {
+      "chave": "aprovacao-desconto-avisos",
+      "nome": "Aprovação de desconto",
+      "descricao": "Avisa quem aprova descontos, cuida da fila de aprovação e fecha o ciclo quando o desconto é decidido.",
+      "versao": "3.4",
+      "agentes": 5,
+      "tipos": [
+        "script"
+      ],
+      "manifesto": "agents/times/aprovacao-desconto-avisos/manifest.json"
+    },
+    {
       "chave": "briefing",
       "nome": "Briefing do atendimento",
       "descricao": "Monta o cartão de contexto do paciente para a equipe ler antes do atendimento.",

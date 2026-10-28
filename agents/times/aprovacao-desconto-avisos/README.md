@@ -15,11 +15,13 @@ equipe da decisão e fecha a tarefa.
 | `desconto_classificador` | idem | cria a **tarefa de aprovação** ligada à venda, com prioridade pela faixa do desconto (baixa / média a partir de `faixa_media_pct` / alta a partir de `faixa_alta_pct`) |
 | `desconto_executor` | alguém clica em Aprovar ou Rejeitar no aviso | aprova ou recusa o desconto **em nome da pessoa que clicou** — a decisão fica registrada no nome dela, e só vale se ela mesma puder aprovar desconto. Sem saber quem clicou, **não decide** |
 | `desconto_remediador` | o desconto é recusado | faz o que a clínica configurou em `acao_rejeicao`: `manter` (a venda segue, com o desconto de volta ao teto) ou `cancelar` a venda |
-| `desconto_fechador` | o desconto é decidido (aprovado ou recusado, pelo aviso **ou** pela tela de aprovações) | fecha o aviso **para toda a equipe** (só o daquela venda), avisa o mesmo papel **quem decidiu** ("Desconto de 25% da venda 1234 aprovado por Ana") e **conclui a tarefa** de aprovação daquela venda que o time abriu |
+| `desconto_fechador` | o desconto é decidido (aprovado ou recusado, pelo aviso **ou** pela tela de aprovações), ou a venda é cancelada | fecha o aviso **para toda a equipe** (só o daquela venda), avisa o mesmo papel **quem decidiu** ("Desconto de 25% da venda 1234 aprovado por Ana") e **conclui a tarefa** de aprovação daquela venda que o time abriu. Se a venda for **cancelada com o desconto ainda aguardando aprovação**, fecha o aviso e conclui a tarefa, sem aviso de decisão |
 
 - Cada passo do fechador degrada sozinho: se fechar o aviso falhar, ainda avisa e conclui a tarefa.
 - O fechador só conclui as tarefas **abertas que o próprio time criou** para a venda; outras tarefas da
   venda ficam como estão.
+- Na venda cancelada, o fechador confere na venda se o desconto ainda aguardava aprovação; se já tinha
+  sido decidido (ou se não der para conferir), não mexe em nada.
 - Sem permissão para ler o paciente ou o nome de quem pediu, o aviso sai sem esse dado (não falha).
 
 ## Config editável por clínica (knobs)
@@ -43,7 +45,7 @@ Um service-account (`botfn-desconto-aprovacao`) com:
 | `tarefas:listar` | achar a tarefa de aprovação da venda |
 | `tarefas:mover` | concluir a tarefa |
 | `desconto:aprovar` | aprovar ou recusar o desconto (em nome de quem clicou) |
-| `venda:read` | itens e valores da venda para o aviso |
+| `venda:read` | itens e valores da venda para o aviso; conferir o desconto quando a venda é cancelada |
 | `venda:cancel` | cancelar a venda, **só** com `acao_rejeicao=cancelar` |
 | `cliente:read:full` | nome do paciente no aviso |
 | `usuario:read_nome` | nome de quem pediu e de quem decidiu |
@@ -62,7 +64,8 @@ As ações citam as capabilities `notificacao.emitir_ui`, `notificacao.dismiss_d
 - 🛑 **Pode cancelar venda sozinho** quando `acao_rejeicao=cancelar`. No padrão (`manter`) não cancela.
 - 👁️ **Lê o nome do paciente** e os itens da venda para montar o aviso (fica só no aviso da equipe;
   o resumo da execução não leva dado pessoal).
-- ⚡ Age sozinho, nos eventos de desconto pedido, de clique no aviso e de desconto decidido.
+- ⚡ Age sozinho, nos eventos de desconto pedido, de clique no aviso, de desconto decidido e de venda
+  cancelada.
 
 ## Requisitos de versão
 
@@ -74,6 +77,13 @@ As ações citam as capabilities `notificacao.emitir_ui`, `notificacao.dismiss_d
 
 > ⚠️ Com o módulo de vendas mais antigo, o executor **aprova com a conta do agente**, e não em nome de
 > quem clicou. Confira as versões antes de ligar.
+
+## Versões
+
+| Versão | O que mudou |
+|---|---|
+| **3.5** | Venda cancelada com o desconto ainda aguardando aprovação: o aviso fecha e a tarefa de aprovação é concluída (antes ficava aberta). Textos do aviso e da tarefa com acento. Scripts mais enxutos |
+| 3.4 | Decide pelo aviso em nome de quem clicou, avisa a equipe de quem decidiu e conclui a tarefa |
 
 ## Instalação (Central → Configuração → Agentes → Importar)
 

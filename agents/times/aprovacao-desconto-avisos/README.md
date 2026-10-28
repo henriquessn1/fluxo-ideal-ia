@@ -71,7 +71,7 @@ As ações citam as capabilities `notificacao.emitir_ui`, `notificacao.dismiss_d
 
 | Módulo | Mínimo | Por quê |
 |---|---|---|
-| vendas | **0.1.93** | aceitar a decisão **em nome de quem clicou** só com o recibo do clique |
+| vendas | **0.1.95** | aceitar a decisão **em nome de quem clicou** só com o recibo do clique |
 | notification-center | **0.6.632** | informar quem clicou no aviso e gerar o recibo do clique |
 | agentes | **0.3.102** | repassar o recibo do clique |
 | estabelecimento | **0.8.794** | nome de quem pediu e de quem decidiu |

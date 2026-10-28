@@ -63,18 +63,20 @@ da carteirinha nem dado do paciente em log ou nota.
 - `fila_recepcao` (`recepcao`): fila para onde vai o que a IA não entendeu.
 - `ttl_seg` (`604800` = 7 dias): por quanto tempo acompanhar a conversa depois do pedido.
 - `coalesce_seg` (`20`): espera para juntar mensagens seguidas (frente e verso).
-- `espera_seg` (`12`): quanto esperar a leitura (o script desiste em 15 s).
+- `espera_seg` (`12`): quanto esperar a leitura em cada chamada (a chamada do script desiste em 15 s).
+- `tentativas_resultado` (`3`): quantas vezes buscar o resultado quando a IA demora (cada uma espera até `espera_seg`; ~48 s no total). Em homolog a leitura por texto levou ~18 s.
 - `llm_modelo` (`claude-haiku-4-5`): modelo da leitura por texto.
 
 ## Instalação (Central → Inteligência Artificial → Importar)
 
-Requer: interacoes ≥ 0.6.910, clientes ≥ 0.7.599, agentes ≥ 0.3.103 e o pedido de carteirinha (H4) configurado.
+Requer: interacoes ≥ 0.6.911, clientes ≥ 0.7.599, agentes ≥ 0.3.104 e o pedido de carteirinha (H4) configurado.
 
 1. Importe este `manifest.json` e conceda ao service-account os grants acima.
 2. Confira a chave da IA (cofre da Central) — sem ela a leitura falha e tudo vai para a recepção.
 3. Ligue os agentes.
 
 > **Atenção:**
+> - Enquanto espera a IA, o script ocupa um dos consumidores do agentes (até ~48 s). Com muitas respostas ao mesmo tempo, a leitura pode demorar mais e ir para a recepção — volume esperado é baixo (só respostas ao pedido de carteirinha).
 > - O agente de texto precisa se chamar `carteirinha-convenio-texto` (é por esse nome que a leitura o chama).
 >   Renomear na Central faz a leitura por texto falhar.
 > - Carteirinha **sem validade impressa** vai para a recepção (o cadastro exige a validade).

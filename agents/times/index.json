@@ -94,7 +94,7 @@
       "chave": "pedido-carteirinha",
       "nome": "Leitura da carteirinha pedida",
       "descricao": "Quando o paciente responde ao pedido de carteirinha pelo WhatsApp (foto, ou número e validade por escrito), a IA lê e cria uma solicitação de convênio para a recepção aprovar. Se não entender, passa a conversa para a recepção.",
-      "versao": "1.0",
+      "versao": "1.1",
       "agentes": 3,
       "tipos": [
         "llm",

@@ -5,7 +5,7 @@
       "chave": "aprovacao-desconto-avisos",
       "nome": "Aprovação de desconto",
       "descricao": "Avisa quem aprova descontos, cuida da fila de aprovação e fecha o ciclo quando o desconto é decidido.",
-      "versao": "3.5",
+      "versao": "3.6",
       "agentes": 5,
       "tipos": [
         "script"

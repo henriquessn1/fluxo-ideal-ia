@@ -63,6 +63,7 @@ E **NÃO contém** (por design):
 | [jornada-avisos](./times/jornada-avisos/) | Avisa a equipe sobre pendências de SLA da jornada | 1 (script) | médio |
 | [notas-fiscais](./times/notas-fiscais/) | Emite a NFS-e do serviço feito no nome de quem pagou (prevista → em formação → Revisar/governo) e envia por e-mail, por tabelas de regras da clínica | 4 (script) | alto |
 | [aprovacao-desconto-avisos](./times/aprovacao-desconto-avisos/) | Avisa quem aprova o desconto acima do teto, abre a tarefa, aprova/recusa pelo aviso em nome de quem clicou, avisa a equipe da decisão e fecha a tarefa (recusa: manter ou cancelar a venda) | 5 (script) | alto |
+| [pedido-carteirinha](./times/pedido-carteirinha/) | Lê a carteirinha (foto ou texto) que o paciente manda em resposta ao pedido pelo WhatsApp e cria a solicitação de convênio para a recepção aprovar; o que não entender vai para a recepção | 3 (2 script + 1 IA) | médio |
 
 Cada pasta tem o `manifest.json` (para importar) e um `README.md` (o que faz, o que pede, o risco).
 

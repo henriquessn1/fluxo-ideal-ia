@@ -59,8 +59,8 @@ As ações citam as capabilities `notificacao.emitir_ui`, `notificacao.dismiss_d
 ## Risco: **alto**
 
 - 💸 **Decide desconto em nome de uma pessoa**: o clique no aviso vira a aprovação (ou a recusa) daquela
-  pessoa. A trava é dupla: só quem pode aprovar desconto consegue decidir, e o time nunca decide sem
-  saber quem clicou.
+  pessoa. A trava é tripla: só quem pode aprovar desconto consegue decidir, o time nunca decide sem
+  saber quem clicou, e cada clique gera um recibo que vale uma vez só, para aquela venda e aquele %.
 - 🛑 **Pode cancelar venda sozinho** quando `acao_rejeicao=cancelar`. No padrão (`manter`) não cancela.
 - 👁️ **Lê o nome do paciente** e os itens da venda para montar o aviso (fica só no aviso da equipe;
   o resumo da execução não leva dado pessoal).
@@ -71,18 +71,20 @@ As ações citam as capabilities `notificacao.emitir_ui`, `notificacao.dismiss_d
 
 | Módulo | Mínimo | Por quê |
 |---|---|---|
-| vendas | **0.1.83** | aceitar a decisão **em nome de quem clicou** |
-| notification-center | **0.6.629** | informar quem clicou no aviso |
+| vendas | **0.1.93** | aceitar a decisão **em nome de quem clicou** só com o recibo do clique |
+| notification-center | **0.6.632** | informar quem clicou no aviso e gerar o recibo do clique |
+| agentes | **0.3.102** | repassar o recibo do clique |
 | estabelecimento | **0.8.794** | nome de quem pediu e de quem decidiu |
 
-> ⚠️ Com o módulo de vendas mais antigo, o executor **aprova com a conta do agente**, e não em nome de
-> quem clicou. Confira as versões antes de ligar.
+> ⚠️ Com versões mais antigas, a decisão pelo aviso é recusada (sem o recibo, o vendas não aceita a
+> decisão em nome de ninguém). A tela de aprovações continua funcionando. Confira as versões antes de ligar.
 
 ## Versões
 
 | Versão | O que mudou |
 |---|---|
-| **3.5** | Venda cancelada com o desconto ainda aguardando aprovação: o aviso fecha e a tarefa de aprovação é concluída (antes ficava aberta). Textos do aviso e da tarefa com acento. Scripts mais enxutos |
+| **3.6** | Cada clique no aviso gera um recibo de uso único, e a decisão só vale com ele: para aquela venda, aquele % e um aviso do próprio time. Os botões do aviso levam o % do desconto |
+| 3.5 | Venda cancelada com o desconto ainda aguardando aprovação: o aviso fecha e a tarefa de aprovação é concluída (antes ficava aberta). Textos do aviso e da tarefa com acento. Scripts mais enxutos |
 | 3.4 | Decide pelo aviso em nome de quem clicou, avisa a equipe de quem decidiu e conclui a tarefa |
 
 ## Instalação (Central → Configuração → Agentes → Importar)

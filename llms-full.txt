@@ -2103,7 +2103,7 @@ name: estoque
 description: O estoque rastreável da clínica no Fluxo Ideal — saldo por unidade e local, lote/validade e nº de série, FEFO, consumo de material no paciente e vínculo de implante (etiqueta da RDC 556/2021, UDI da classe IV), material consignado com prazo, reserva para procedimento agendado, alertas de validade/mínimo, o custo do material (custo na entrada, custo médio, extrato valorizado), o inventário (contagem cega, fechamento por diferença e o relatório de inventário de 31/12 ao custo para o contador) os kits de material por procedimento e por profissional (consumo sugerido, reservar o kit, custo do kit) e a entrada pela nota fiscal eletrônica do fornecedor (XML da NF-e subido na tela: classificação pelo CFOP, de-para do produto, conferência de lote/validade/série, conta a pagar por duplicata, nota do consignado e estorno), e o que o time de agentes do estoque faz sozinho (resumo de alertas, tarefa de reposição, relatório semanal ao fornecedor do consignado). Use para "quanto tem da lente X na unidade Y?", "o que vence este mês?", "lança o material da cirurgia", "reserva a prótese para amanhã", "quais implantes esse paciente recebeu?", "quanto vale o estoque?", "vamos fazer o inventário", "preciso do inventário de 31/12 para o contador", "monta o kit da cirurgia de catarata", "reserva o kit da cirurgia de amanhã", "quanto custa o material desse procedimento?", "subi a nota do fornecedor, confere comigo", "por que a nota ficou com a conta pendente?", "estorna essa nota", "quem abriu essa tarefa de repor?", "o fornecedor recebe o relatório do consignado?".
 audience: [ia, humano]
 depends_on: [estoque-rastreavel, consumo-material, implantes, consignado, reservas-material, alertas-estoque, custo-material, inventario-estoque, kits-material, nota-entrada]
-version: 0.6.0
+version: 0.6.1
 updated: 2026-10-30
 ---
 
@@ -2407,8 +2407,9 @@ Sete ideias sustentam tudo:
 - **Custo do kit**: a soma de quantidade × **custo médio** de cada item — exige o acesso de **ver custo**.
   Produto sem custo médio fica **fora da soma** (o custo fica **parcial**); nenhum item com médio = custo
   **desconhecido**, nunca zero.
-- **Margem prevista**: a simulação de margem do procedimento usa o **custo do kit padrão** como custo do
-  material quando o procedimento tem kit; sem kit, usa o custo estimado do cadastro do procedimento.
+- **Margem prevista**: a simulação de margem do procedimento usa o **custo do kit** como custo do material
+  quando o procedimento tem kit — se a simulação é para um **profissional com kit próprio** (ativo), o kit dele
+  **substitui o padrão**; senão, o **kit padrão**. Sem kit, usa o custo estimado do cadastro do procedimento.
 
 **Agenda e avisos**
 - **Reserva**: material separado para um **agendamento** — por quantidade (o lote é escolhido no consumo) ou
@@ -2587,8 +2588,9 @@ o que aconteceu e **onde** mexer:
 2. Consulte o kit que vale (do profissional, se a pergunta for sobre ele; senão o padrão) e responda o **custo
    do kit** = Σ quantidade × custo médio. Custo **parcial** ou **desconhecido**: diga quais itens estão sem
    custo médio — não complete com estimativa.
-3. A margem do procedimento usa esse custo (o do kit padrão) quando há kit → `precificador` para simular o
-   preço, `financeiro` para a margem realizada.
+3. A margem prevista usa esse custo quando há kit — o do kit do profissional, se a simulação é para um
+   profissional com kit próprio; senão, o do padrão → `precificador` para simular o preço, `financeiro` para a
+   margem realizada.
 
 ### "Chegou material consignado"
 1. Confira que o consignado está ligado e que existe um **local consignado** na unidade.

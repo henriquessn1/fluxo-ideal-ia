@@ -3,7 +3,7 @@ name: estoque
 description: O estoque rastreável da clínica no Fluxo Ideal — saldo por unidade e local, lote/validade e nº de série, FEFO, consumo de material no paciente e vínculo de implante (etiqueta da RDC 556/2021, UDI da classe IV), material consignado com prazo, reserva para procedimento agendado, alertas de validade/mínimo e o custo do material (custo na entrada, custo médio, extrato valorizado). Use para "quanto tem da lente X na unidade Y?", "o que vence este mês?", "lança o material da cirurgia", "reserva a prótese para amanhã", "quais implantes esse paciente recebeu?", "quanto vale o estoque?".
 audience: [ia, humano]
 depends_on: [estoque-rastreavel, consumo-material, implantes, consignado, reservas-material, alertas-estoque, custo-material]
-version: 0.2.0
+version: 0.2.1
 updated: 2026-10-30
 ---
 
@@ -129,7 +129,8 @@ Cinco ideias sustentam tudo:
   **saldo em valor** é do **produto** (todas as unidades); filtrando por local, é a quantidade do local × o
   médio.
 - **Pendência de custo**: material que entrou sem custo (estoque anterior ao custo, produto sem custo no
-  catálogo) ficou com custo 0 e aparece na lista de pendências da tela de estoque, para a gestão corrigir.
+  catálogo) ficou com custo 0 e aparece na lista de **pendências de custo** (na tela e pelo assistente), para a
+  gestão corrigir.
   Produto que nunca teve custo **não tem médio**: as saídas dele ficam sem custo (não se inventa).
 - **Ver custo é um acesso à parte** (gestão e financeiro). Sem ele, saldo, extrato e resumo saem **sem os
   valores**. Quem só movimenta **digita** o custo na entrada, mas não o vê nas listas. O custo do produto no
@@ -172,7 +173,14 @@ Para achar o local, use a ferramenta de configuração. Buscar pelo nome exige t
   devolução dele, **ajuste** (informe a quantidade **contada**; o sistema lança a diferença), **perda** (perda,
   vencimento ou avaria) e **estorno** de um movimento. Entrada, transferência, empréstimo e entregas pedem o
   acesso de **movimentar**; ajuste, perda e estorno pedem o de **ajustar** (mais restrito). A **entrada própria
-  exige o custo unitário** (pergunte se não veio); a remessa consignada não leva custo.
+  exige o custo unitário** — pergunte se não veio; **0 só** para doação ou bonificação. As ações que saem ao
+  custo médio (transferência, empréstimo, ajuste, perda, estorno) **não recebem custo**; a remessa consignada
+  também não.
+- **Pendências de custo** (entradas que ficaram com custo 0 por falta de custo) → ferramenta que **lista as
+  pendências de custo** (pede o acesso de ver custo). **Corrigir o custo** de uma entrada pendente →
+  ferramenta de **correção de custo**: pede o acesso de **ajustar** e o de **ver custo**, mostra a simulação
+  primeiro e só grava confirmado; o custo médio se refaz sozinho. Só vale para entrada **pendente** — custo
+  errado em outra entrada se corrige por estorno e entrada nova.
 - **Entregas pendentes** da venda → ferramenta de entregas pendentes (listar) e a movimentação (entregar com
   série/lote e UDI, ou cancelar).
 
@@ -195,7 +203,7 @@ Para achar o local, use a ferramenta de configuração. Buscar pelo nome exige t
   consignado**. Com o consignado desligado, a ferramenta avisa — ligar é da gestão.
 
 **Fora da IA:** marcar um alerta como "já avisado" é do time de avisos; anexar a **foto da etiqueta** do
-implante e corrigir as **pendências de custo** são pela tela.
+implante é pela tela.
 
 ## Fluxos comuns
 
@@ -243,7 +251,8 @@ implante e corrigir as **pendências de custo** são pela tela.
 1. Precisa do acesso de **ver custo**; sem ele, diga que os valores não estão disponíveis para quem pergunta.
 2. Valor do produto = saldo próprio × custo médio (todas as unidades). Por local = quantidade do local × médio.
 3. O **consignado não entra** no valor da clínica (é do fornecedor).
-4. Produto com pendência de custo está com custo 0 até a gestão corrigir — avise que o valor está incompleto.
+4. Produto com pendência de custo está com custo 0 até a gestão corrigir — avise que o valor está incompleto
+   e, se quem pergunta tem o acesso, ofereça corrigir (simulação, confirmação, gravação).
 
 ### "O que vence este mês?" / "O que está faltando?"
 1. Peça os alertas (ou o saldo com "vence até").

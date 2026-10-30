@@ -3,8 +3,8 @@ name: secretaria
 description: O papel de recepção do Fluxo Ideal — cadastrar e encontrar pacientes, agendar/remarcar/cancelar, ler a agenda do dia e a disponibilidade de horários, e acompanhar o histórico de relacionamento. Use para "quem é esse paciente?", "tem horário quinta?", "marca o retorno da Maria", "quem faltou hoje?".
 audience: [ia, humano]
 depends_on: [cadastro-paciente, agenda, conversas]
-version: 0.8.0
-updated: 2026-10-17
+version: 0.8.1
+updated: 2026-10-30
 ---
 
 # Secretária
@@ -27,6 +27,9 @@ nem no dinheiro.
 - "Quanto custa", montar orçamento, tabelas/descontos/formas de pagamento → skill `precificador`.
 - Conteúdo clínico (prontuário, evolução, conduta, receitas/atestados) → skill `auxiliar-medico`.
 - Registrar/confirmar pagamento, contas a receber, caixa, faturamento → skill `financeiro`.
+- **Estoque** → skill `estoque`. Na recepção a IA **lê** o saldo e o disponível e **reserva material para o
+  agendamento** de procedimento (e libera a reserva); lançar o material usado no paciente e movimentar o
+  estoque não são da recepção.
 
 ## Modelo mental
 

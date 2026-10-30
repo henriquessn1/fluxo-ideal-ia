@@ -3,8 +3,8 @@ name: medico
 description: O papel médico assistido por IA no Fluxo Ideal — conduzir e DOCUMENTAR o atendimento (adendo write-only) sem que a IA jamais leia o prontuário. Use para registrar evolução, mover o atendimento e ver a fila, com o clínico protegido.
 audience: [ia, humano]
 depends_on: [atendimento-clinico, evolucao-write-only]
-version: 0.5.0
-updated: 2026-10-17
+version: 0.5.1
+updated: 2026-10-30
 ---
 
 # Médico
@@ -26,6 +26,9 @@ paciente. A IA pode **anexar** documentação (write-only), mas nunca recebe de 
 - **Ler prontuário, evolução, diagnóstico, resultado de exame** → nunca pela IA (regra dura acima).
 - Recepção/agenda/cadastro → `secretaria`. Preço/orçamento → `precificador`.
 - Fluxo operacional puro (check-in, fila) sem documentar → `auxiliar-medico`.
+- **Material usado no paciente** (lançar o consumo do procedimento, sugestão FEFO, implantes e UDI) → skill
+  `estoque`. Neste papel a IA **lê** o estoque e **lança/estorna o consumo** do atendimento; movimentar,
+  reservar e operar o consignado não são do médico.
 
 ## Modelo mental
 O médico-IA trabalha em dois planos:

@@ -3,8 +3,8 @@ name: financeiro
 description: O ciclo do DINHEIRO depois da venda no Fluxo Ideal — receber (parcelas, contas a receber, aging/DSO/inadimplência), pagar (despesas, fornecedores, recorrências), o caixa (saldo, conferência, frente de caixa) e a saúde financeira (fluxo de caixa projetado, ponto de equilíbrio). Use para responder "quanto entrou / quanto a clínica deve / tem dinheiro em caixa / vai empatar?".
 audience: [ia, humano]
 depends_on: [pagamentos, contas-receber, contas-pagar, caixa, indicadores-financeiros]
-version: 0.7.0
-updated: 2026-10-22
+version: 0.7.1
+updated: 2026-10-30
 ---
 
 # Financeiro
@@ -29,6 +29,8 @@ cuida do *dinheiro efetivamente circulando*.
 - Faturamento de convênio / glosa / recurso (TISS) — existe no domínio, mas é um mundo
   próprio (lote, retorno da operadora, glosa, recurso). Trate **conceitualmente** aqui e
   deixe o detalhe para a skill `faturamento-convenio`.
+- **Estoque** (quanto tem, onde, o que vence, o extrato de um material) → skill `estoque`. Neste papel a IA
+  só **lê** o estoque; movimentar, ajustar, reservar e operar o consignado são da gestão do estoque.
 
 ## Modelo mental
 

@@ -2,8 +2,8 @@
 name: financeiro
 description: O ciclo do DINHEIRO depois da venda no Fluxo Ideal — receber (parcelas, contas a receber, aging/DSO/inadimplência), pagar (despesas, fornecedores, recorrências), o caixa (saldo, conferência, frente de caixa) e a saúde financeira (fluxo de caixa projetado, ponto de equilíbrio). Use para responder "quanto entrou / quanto a clínica deve / tem dinheiro em caixa / vai empatar?".
 audience: [ia, humano]
-depends_on: [pagamentos, contas-receber, contas-pagar, caixa, indicadores-financeiros]
-version: 0.7.1
+depends_on: [pagamentos, contas-receber, contas-pagar, caixa, indicadores-financeiros, custo-material]
+version: 0.8.0
 updated: 2026-10-30
 ---
 
@@ -30,7 +30,8 @@ cuida do *dinheiro efetivamente circulando*.
   próprio (lote, retorno da operadora, glosa, recurso). Trate **conceitualmente** aqui e
   deixe o detalhe para a skill `faturamento-convenio`.
 - **Estoque** (quanto tem, onde, o que vence, o extrato de um material) → skill `estoque`. Neste papel a IA
-  só **lê** o estoque; movimentar, ajustar, reservar e operar o consignado são da gestão do estoque.
+  só **lê** o estoque — com o acesso de **ver custo**, também o custo médio e o valor; movimentar, ajustar,
+  reservar e operar o consignado são da gestão do estoque.
 
 ## Modelo mental
 
@@ -120,6 +121,18 @@ Três ideias sustentam tudo:
   entradas e saídas previstas ao saldo atual.
 - **Ponto de equilíbrio (break-even)**: quanto a clínica precisa **faturar** para não ter
   prejuízo — custos fixos do período ÷ margem de contribuição (a margem vem do lado das vendas).
+- **Margem de contribuição com material**: o que sobra da venda depois dos custos **variáveis** —
+  comissão, custo de terceiros e o **material**: o custo do material usado nos atos e o custo do **produto
+  vendido**, os dois ao **custo médio** do estoque (ver skill `estoque`). Sai por procedimento, por
+  profissional e por convênio.
+- **"Material sem procedimento"**: material lançado no atendimento **sem ligar a um ato** (só à venda). Ele
+  **não é rateado**: entra no total da venda e do convênio e aparece como uma linha própria
+  ("material sem procedimento") nas visões por procedimento e por profissional.
+- **Consignado na margem**: o material do fornecedor só vira custo quando ele **fatura**. Faturado à
+  clínica → entra com o custo da nota; faturado à fonte pagadora → custo zero para a clínica; **ainda
+  aguardando faturamento** → aparece **à parte** (é custo que ainda vai chegar, não zero).
+- **Material indisponível**: quando o estoque não respondeu, a margem sai **sem o material** e com o
+  aviso de material indisponível — a margem está **maior do que a real** naquele momento.
 
 **Convênio (TISS) — só o conceito**
 - **Faturamento de convênio / glosa / recurso**: cobrar da operadora, tratar o que ela
@@ -185,7 +198,10 @@ Três ideias sustentam tudo:
   saídas** — não é caixa zerado de entradas.
 - "Quanto preciso faturar pra empatar?" → ferramenta de **ponto de equilíbrio**. Distinga:
   *margem indisponível* (fonte de vendas fora — não calcule, não invente) de *break-even
-  indefinido de verdade* (margem ≤ 0).
+  indefinido de verdade* (margem ≤ 0). A margem já desconta o **material**; se vier o aviso de
+  **material indisponível**, o ponto de equilíbrio está **subestimado** — diga isso junto do número.
+- **Margem por procedimento, profissional ou convênio** (com a coluna de material) → o painel de
+  **indicadores** (skill `indicadores`), no aprofundamento da margem de contribuição.
 
 **Contas a receber (dinheiro dos pacientes)**
 - A **carteira de recebíveis** — **aging** (por faixa), **DSO**, **inadimplência**, visão consolidada
@@ -287,6 +303,17 @@ faturando o suficiente?).
    por competência) ÷ margem de contribuição.
 2. Se a margem estiver indisponível (fonte de vendas fora), **não estime** — reporte a
    indisponibilidade. Margem ≤ 0 é break-even **indefinido** (diferente de indisponível).
+3. A margem já inclui o **material**. Com o aviso de **material indisponível**, o número saiu sem o
+   material: apresente-o como **provisório** (o real é maior) e não trate o material como zero.
+
+### "Qual a margem real deste procedimento?"
+1. Abra a margem de contribuição por procedimento (painel de indicadores): preço − comissão − terceiros −
+   **material** dos atos daquele procedimento.
+2. A linha **"material sem procedimento"** é material lançado só no atendimento — não pertence a nenhum
+   procedimento; não o distribua de cabeça entre eles.
+3. **Consignado aguardando faturamento** aparece à parte: diga que a margem ainda vai cair quando o
+   fornecedor faturar.
+4. Margem baixa por causa de material? O detalhe (custo médio, extrato valorizado) é da skill `estoque`.
 
 ### "O paciente (ou quem pagou) pediu a nota fiscal"
 1. Ache a nota na fila (filtre pelo paciente) e confira o estado: só **autorizada/cancelada** tem arquivos.
@@ -328,7 +355,8 @@ faturando o suficiente?).
 - **Competência ≠ liquidação.** O fato econômico (a venda/despesa) e a entrada/saída de
   dinheiro têm datas próprias; o custo fixo do break-even conta pela **competência**.
 - **Indicador degradado nunca é zero.** Quando a fonte de recebíveis/margem cai, os
-  indicadores avisam e mostram cenário conservador — **não se inventa número**.
+  indicadores avisam e mostram cenário conservador — **não se inventa número**. O mesmo vale para o
+  **material** na margem: indisponível não é custo zero.
 - **Contas a pagar são da CLÍNICA**, não do paciente (despesas gerais); contas a **receber**
   são dos pacientes (parcelas em aberto). Não confunda os dois lados.
 - **Ações que tocam o paciente são outward-facing** (enviar link de assinatura, e-mail) →
@@ -344,6 +372,8 @@ faturando o suficiente?).
 ## Limites / o que esta skill NÃO cobre
 - **Antes** do dinheiro circular (preço, tabela, condição/forma de pagamento, orçamento,
   fechar a venda) → skill `precificador`.
+- **Custo do material** (custo na entrada, custo médio, valor do estoque) → skill `estoque`. Rateio de
+  custo fixo por procedimento e a margem **prevista** (antes do atendimento) não estão aqui.
 - **Faturamento de convênio / glosa / recurso (TISS)** — citado só conceitualmente; tem skill
   própria: `faturamento-convenio` (lote, retorno da operadora, glosa, recurso, conciliação).
 - **Conciliação com adquirente/gateway de cartão** (bater o extrato do meio de pagamento

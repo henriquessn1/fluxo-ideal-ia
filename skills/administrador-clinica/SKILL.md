@@ -3,8 +3,8 @@ name: administrador-clinica
 description: A "planta baixa" da clínica no Fluxo Ideal — configurar a identidade do estabelecimento (dados, contato, endereço, branding/white-label), cadastrar e gerir os profissionais (especialidades, registros de conselho, grade de horários, vínculos, documentos), os convênios aceitos, o catálogo de especialidades e o site público. Use para "cadastra a Dra. X", "adiciona esse convênio", "quais médicos temos?", "veste a marca da clínica", "monta o estabelecimento novo". Criar login/acesso (IAM) fica FORA.
 audience: [ia, humano]
 depends_on: [identidade-clinica, profissionais, especialidades, convenios, salas-recursos]
-version: 0.3.0
-updated: 2026-10-17
+version: 0.3.1
+updated: 2026-10-30
 ---
 
 # Administrador da clínica
@@ -37,6 +37,10 @@ comportamento de agentes, e **não cria login/acesso** (isso é IAM, fica fora).
 - Conteúdo clínico (prontuário, receitas) → skill `auxiliar-medico`.
 - Configurar o **comportamento** de um agente/bot (prompts, gatilhos, o que ele faz) →
   skill `designer-agentes`.
+- **Estoque** (saldo, locais, mínimos, movimentos, reservas, consignado) → skill `estoque`. Neste papel a IA
+  costuma ter a **leitura** e a **gestão** do estoque (configuração, locais, mínimo por local, entrada,
+  transferência, ajuste, perda, estorno), as **reservas** e o **consignado**; lançar o material usado no
+  paciente é da equipe clínica.
 
 ## Modelo mental
 

@@ -20,7 +20,7 @@
 - [comunicacao-paciente](https://fluxoideal.com/skills/comunicacao-paciente/SKILL.md): o envio GOVERNADO ao paciente — usar um template pronto para enviar um e-mail agora ou programar uma mensagem automática (quiet-hours, teto, idempotência) e checar a entrega.
 - [financeiro](https://fluxoideal.com/skills/financeiro/SKILL.md): o dinheiro depois da venda — pagamentos, parcelas, contas a receber/pagar, caixa, fluxo de caixa, ponto de equilíbrio e margem com o material, e nota fiscal (NFS-e).
 - [faturamento-convenio](https://fluxoideal.com/skills/faturamento-convenio/SKILL.md): o financeiro de convênio (TISS) — faturar guias/lotes, o material usado no paciente cobrado sozinho no Anexo de Outras Despesas da guia SP/SADT (TUSS ou código da operadora, unidade, preço do convênio, OPME consignado faturado pelo fornecedor ou pela clínica, pendências do lote), importar o demonstrativo da operadora, tratar glosas e recorrer.
-- [estoque](https://fluxoideal.com/skills/estoque/SKILL.md): o estoque rastreável — saldo por unidade e local, lote/validade e nº de série (FEFO, lote vencido bloqueado), físico × reservado × disponível, consumo de material no paciente e vínculo de implante (etiqueta da RDC 556/2021, UDI da classe IV), consignado com prazo por remessa, reserva para o agendamento, alertas de validade/mínimo, tarefa de reposição e relatório semanal ao fornecedor do consignado (time estoque-avisos), o custo do material (custo na entrada, custo médio móvel, extrato valorizado) o inventário (contagem cega, fechamento por diferença e o relatório de inventário de 31/12 ao custo) e os kits de material por procedimento e por profissional (consumo sugerido, reservar o kit com as faltas, custo do kit).
+- [estoque](https://fluxoideal.com/skills/estoque/SKILL.md): o estoque rastreável — saldo por unidade e local, lote/validade e nº de série (FEFO, lote vencido bloqueado), físico × reservado × disponível, consumo de material no paciente e vínculo de implante (etiqueta da RDC 556/2021, UDI da classe IV), consignado com prazo por remessa, reserva para o agendamento, alertas de validade/mínimo, tarefa de reposição e relatório semanal ao fornecedor do consignado (time estoque-avisos), o custo do material (custo na entrada, custo médio móvel, extrato valorizado), o inventário (contagem cega, fechamento por diferença e o relatório de inventário de 31/12 ao custo), os kits de material por procedimento e por profissional (consumo sugerido, reservar o kit com as faltas, custo do kit) e a entrada pela NF-e do fornecedor (XML subido na tela, classificação pelo CFOP — compra, bonificação, remessa, faturamento e retorno do consignado —, de-para do produto com fator de conversão, conferência de lote/validade/série, conta a pagar por duplicata e estorno).
 - [designer-agentes](https://fluxoideal.com/skills/designer-agentes/SKILL.md): como se desenha o comportamento de um agente de IA — persona, capacidades, gatilhos e modo (LLM × script).
 - [conversas](https://fluxoideal.com/skills/conversas/SKILL.md): atender e triar o relacionamento via tickets/filas — atribuição, resolução (com CSAT), transferência, observadores, notas internas e detecção de frustração.
 - [pesquisas-satisfacao](https://fluxoideal.com/skills/pesquisas-satisfacao/SKILL.md): medir satisfação (CX/NPS) — a pesquisa e seus gatilhos, funil de convites, reenviar/antecipar e resultados agregados.
@@ -2100,10 +2100,10 @@ conteúdo por canal em **prévia** → conferir os `{{placeholders}}` e a polít
 
 ---
 name: estoque
-description: O estoque rastreável da clínica no Fluxo Ideal — saldo por unidade e local, lote/validade e nº de série, FEFO, consumo de material no paciente e vínculo de implante (etiqueta da RDC 556/2021, UDI da classe IV), material consignado com prazo, reserva para procedimento agendado, alertas de validade/mínimo, o custo do material (custo na entrada, custo médio, extrato valorizado), o inventário (contagem cega, fechamento por diferença e o relatório de inventário de 31/12 ao custo para o contador) e os kits de material por procedimento e por profissional (consumo sugerido, reservar o kit, custo do kit), e o que o time de agentes do estoque faz sozinho (resumo de alertas, tarefa de reposição, relatório semanal ao fornecedor do consignado). Use para "quanto tem da lente X na unidade Y?", "o que vence este mês?", "lança o material da cirurgia", "reserva a prótese para amanhã", "quais implantes esse paciente recebeu?", "quanto vale o estoque?", "vamos fazer o inventário", "preciso do inventário de 31/12 para o contador", "monta o kit da cirurgia de catarata", "reserva o kit da cirurgia de amanhã", "quanto custa o material desse procedimento?", "quem abriu essa tarefa de repor?", "o fornecedor recebe o relatório do consignado?".
+description: O estoque rastreável da clínica no Fluxo Ideal — saldo por unidade e local, lote/validade e nº de série, FEFO, consumo de material no paciente e vínculo de implante (etiqueta da RDC 556/2021, UDI da classe IV), material consignado com prazo, reserva para procedimento agendado, alertas de validade/mínimo, o custo do material (custo na entrada, custo médio, extrato valorizado), o inventário (contagem cega, fechamento por diferença e o relatório de inventário de 31/12 ao custo para o contador) os kits de material por procedimento e por profissional (consumo sugerido, reservar o kit, custo do kit) e a entrada pela nota fiscal eletrônica do fornecedor (XML da NF-e subido na tela: classificação pelo CFOP, de-para do produto, conferência de lote/validade/série, conta a pagar por duplicata, nota do consignado e estorno), e o que o time de agentes do estoque faz sozinho (resumo de alertas, tarefa de reposição, relatório semanal ao fornecedor do consignado). Use para "quanto tem da lente X na unidade Y?", "o que vence este mês?", "lança o material da cirurgia", "reserva a prótese para amanhã", "quais implantes esse paciente recebeu?", "quanto vale o estoque?", "vamos fazer o inventário", "preciso do inventário de 31/12 para o contador", "monta o kit da cirurgia de catarata", "reserva o kit da cirurgia de amanhã", "quanto custa o material desse procedimento?", "subi a nota do fornecedor, confere comigo", "por que a nota ficou com a conta pendente?", "estorna essa nota", "quem abriu essa tarefa de repor?", "o fornecedor recebe o relatório do consignado?".
 audience: [ia, humano]
-depends_on: [estoque-rastreavel, consumo-material, implantes, consignado, reservas-material, alertas-estoque, custo-material, inventario-estoque, kits-material]
-version: 0.5.0
+depends_on: [estoque-rastreavel, consumo-material, implantes, consignado, reservas-material, alertas-estoque, custo-material, inventario-estoque, kits-material, nota-entrada]
+version: 0.6.1
 updated: 2026-10-30
 ---
 
@@ -2127,13 +2127,17 @@ ou faltar**. O estoque é a fonte da verdade do saldo; o catálogo (preço, cada
   de inventário** numa data (o de 31/12 para o contador).
 - Montar e manter o **kit** de material de um procedimento (o padrão e o de cada profissional), usar o kit para
   **sugerir** o material do paciente, **reservar o kit** de um agendamento e saber o **custo do kit**.
+- Dar entrada pela **nota fiscal do fornecedor** (o XML da NF-e, subido na tela): conferir a nota, casar o produto,
+  confirmar (com a conta a pagar), a nota do **consignado** (remessa, faturamento, retorno) e o **estorno** da nota.
 
 ## Quando NÃO usar
 - Cadastrar o produto, mudar o preço, o modo de controle ou as marcações (implantável, consignável, classe de
   risco…) → skill `precificador` (é o **catálogo**). O estoque só **lê** o cadastro.
 - Ler prontuário, evolução ou conduta → nunca pela IA (ver `medico`). O vínculo de implante é rastreabilidade do
   material, não conteúdo clínico.
-- Pagar o fornecedor, conta a pagar → `financeiro`. Faturar material no convênio (TISS) → `faturamento-convenio`.
+- Pagar o fornecedor e cuidar da conta a pagar (inclusive a que a nota de entrada criou) → `financeiro`. O **CNPJ da
+  clínica** (configuração fiscal) e o **cadastro do fornecedor** (AFE, e-mail) → `financeiro`. Faturar material no
+  convênio (TISS) → `faturamento-convenio`.
 - A **margem** do procedimento com o material e o ponto de equilíbrio → `financeiro` (o estoque só dá o custo).
   A **simulação de margem** de um preço (que usa o custo do kit como custo previsto) → `precificador`.
 - Mudar o comportamento do time de agentes do estoque (horário, papéis, janela do relatório) → `designer-agentes`.
@@ -2145,6 +2149,9 @@ ou faltar**. O estoque é a fonte da verdade do saldo; o catálogo (preço, cada
 ```
  catálogo (produto: modo de controle · implantável · consignável · classe de risco · registro ANVISA)
         │  o estoque lê
+        ▼
+ NF-e do fornecedor (XML, pela tela) ─► conferência ─► entrada · remessa · reposição ─► conta a pagar (financeiro)
+        │
         ▼
  UNIDADE ── LOCAL (padrão da unidade · outros · consignado = exclusivo do fornecedor)
         │
@@ -2159,7 +2166,7 @@ ou faltar**. O estoque é a fonte da verdade do saldo; o catálogo (preço, cada
         └─► alertas: validade vencida/próxima · abaixo do mínimo · prazo do consignado
 ```
 
-Seis ideias sustentam tudo:
+Sete ideias sustentam tudo:
 - **O saldo é derivado dos movimentos.** Ninguém digita o saldo: ele resulta do **kardex** (o extrato de
   movimentos), e movimento **nunca se apaga** — corrige-se com **estorno** (o movimento inverso).
 - **O produto diz como ele é controlado.** Por **quantidade**, por **lote** (com validade) ou por **nº de
@@ -2174,6 +2181,9 @@ Seis ideias sustentam tudo:
 - **O kit é uma receita, não um movimento.** Ele diz **o que** um procedimento costuma usar (produto e
   quantidade); **qual lote ou série** sai só se decide no consumo ou na reserva. O kit **sugere** — quem baixa
   é sempre uma pessoa confirmando.
+- **A nota do fornecedor é a porta de entrada.** Subir o XML da NF-e monta a entrada (produto pelo de-para, lote,
+  validade, custo) e classifica cada item pelo CFOP; a pessoa **confere** e **confirma** — e a conta a pagar nasce
+  junto, uma por duplicata. Até a confirmação, nada entra no estoque.
 
 ## Glossário
 
@@ -2248,6 +2258,89 @@ Seis ideias sustentam tudo:
 - **Consumo ligado à venda**: o material do ato fica ligado ao **item** da venda e o dos "Materiais do
   atendimento" à **venda** — é assim que o custo chega à margem.
 
+**Nota fiscal de entrada (NF-e do fornecedor)**
+- **Nota de entrada**: a NF-e (modelo 55) que o fornecedor emitiu, trazida pelo **arquivo XML** — o emitente é
+  obrigado a enviá-lo ao destinatário (Ajuste SINIEF 07/05, cl. 7ª, §7º, I). Subir o XML cria a nota em
+  **rascunho**; nada entra no estoque até a **confirmação**. Depois: **confirmada** (ou **confirmada — conta
+  pendente**) e, se desfeita, **estornada**.
+- **Subir é pela tela**: o XML se arrasta na tela do estoque. O assistente **não sobe XML** nem lê o arquivo — ele
+  consulta a nota já subida e ajuda a conferir.
+- **Recusas no upload** (nada é gravado; a mensagem diz o motivo): XML ilegível ou que não é NF-e modelo 55; nota
+  **sem autorização** da SEFAZ (sem o protocolo); nota do **ambiente de testes** da SEFAZ; **nota repetida** (a
+  mesma chave já importada e não estornada); nota **complementar, de ajuste ou de devolução** (fora do escopo);
+  **destinatário que não é a clínica** (nenhum dos CNPJs da configuração fiscal) — salvo o faturamento e o retorno
+  do consignado (abaixo); e **clínica sem CNPJ** na configuração fiscal ("cadastre o CNPJ da clínica na
+  configuração fiscal" → `financeiro`).
+- **Classificação pelo CFOP do fornecedor**: o CFOP da nota é o **do emitente** — a compra chega com CFOP de
+  **saída** do fornecedor. Cada item vira (consignado: Ajuste SINIEF 2/2024, alterado pelo 29/2024):
+
+  | Nota do fornecedor (CFOP do item) | Vira | Custo e conta a pagar |
+  |---|---|---|
+  | Venda (5.1xx/6.1xx, 5.4xx/6.4xx) | **compra** — entrada própria | custo do item; gera conta |
+  | Bonificação (5.910/6.910) | entrada própria | **custo 0** (aviso: dilui o custo médio); sem conta |
+  | Remessa em consignação (5.917/6.917) | **remessa consignada** — uma por nota | sem custo e sem conta; exige o consignado ligado |
+  | Faturamento do consignado usado (5.113–5.115/6.113–6.115) | casa com o **consumo** e o marca **reposto** | custo direto no consumo; conta só se a clínica é a destinatária |
+  | Retorno simbólico (1.919/2.919 — nota de entrada emitida pelo fornecedor) | registro na remessa | sem movimento físico, sem custo, sem conta |
+  | Qualquer outro | **não entra no estoque** | a pessoa pode forçar como compra |
+
+- **Trocar a classificação**: só entre **compra** e **não entra** (ex.: forçar um item como compra). Remessa,
+  faturamento e retorno seguem o CFOP — não se trocam.
+- **Faturamento do consignado**: a nota com que o fornecedor fatura o que a clínica usou. Ela **cita a nota de
+  remessa**: o sistema acha a remessa e sugere os **consumos inteiros** dela (mesmo produto, ainda aguardando) cuja
+  soma bate com a quantidade do item, do mais antigo para o mais novo; sem citação, ou se a soma não fecha, a pessoa
+  escolhe a remessa e os consumos à mão. Na confirmação cada consumo vira **reposto** (com o nº da nota) e recebe o
+  custo: **faturado à clínica** (o custo do item; gera conta) quando a clínica é a destinatária, ou **faturado à
+  fonte pagadora** (custo 0 para a clínica; sem conta) quando o destinatário é outro — o convênio, ou o próprio
+  paciente no OPME (Ajuste SINIEF 2/2024, cl. 7ª, III). Por isso essa nota é aceita com outro destinatário, desde
+  que cite uma remessa já importada ou não cite nenhuma (casar à mão); citando uma remessa que não está no sistema:
+  "importe a NF de remessa antes".
+- **Retorno simbólico**: a nota de entrada do fornecedor que devolve simbolicamente o consignado (também cita a
+  remessa) — fica registrada na remessa, sem mexer no saldo.
+- **De-para fornecedor × item**: "este código do fornecedor é este produto meu". Pelo **CNPJ do fornecedor** e o
+  **código do produto na nota**, guarda o produto e o **fator de conversão** — quantas unidades de estoque vêm em
+  cada unidade da nota (caixa com 10 = fator 10). Na primeira vez o sistema **sugere** o produto pelo código de
+  barras (EAN) e depois pelo nome — **nunca escolhe sozinho** — e o fator pela unidade tributável da nota; na
+  confirmação ele **aprende**, e a próxima nota daquele fornecedor já vem casada. Item sem produto no catálogo:
+  cadastre no catálogo (`precificador`) e volte.
+- **Conferência**: por item, o **produto**, a **quantidade convertida** (quantidade da nota × fator), o **lote e a
+  validade**, as **séries**, o **local** e o **custo**.
+  - **Lote e validade**: do **grupo de rastreabilidade** do item, quando o fornecedor preencheu — obrigatório só
+    para **medicamento**; para dispositivo médico e OPME é **facultativo** (NT 2016.002); senão, uma **sugestão lida
+    do texto do item** (informações adicionais), a confirmar; senão, **digitados** da embalagem.
+  - **Série**: a NF-e **não tem campo de nº de série** — ela é sempre **lida no leitor ou digitada** (o texto do item
+    pode dar uma pista, que nunca vale sozinha). Obrigatória no modo série, uma por unidade; um item por série aceita
+    **no máximo um lote** (séries de lotes diferentes → itens separados ou entrada manual).
+  - **Local**: compra e bonificação vão para um local **próprio** (padrão: o local padrão da unidade principal); a
+    remessa, para um **local consignado**.
+- **Custo unitário da nota**: (valor do produto − desconto + frete + seguro + outras despesas + IPI + ICMS-ST +
+  FCP-ST **do item**) ÷ quantidade convertida — os tributos entram todos no custo (crédito de imposto não é tratado).
+  Se a soma dos itens não fecha com o total da nota, a diferença é **rateada** pelo valor dos itens. Ver o custo na
+  conferência faz parte do acesso de nota de entrada.
+- **Fornecedor da nota**: achado pelo **CNPJ do emitente** no cadastro de fornecedores (`financeiro`) — e **criado**
+  se não existir. Dois fornecedores ativos com o mesmo CNPJ → a conferência **escolhe** um. A entrada e a remessa
+  copiam a **AFE** (Autorização de Funcionamento da ANVISA) vigente do fornecedor — a guia do convênio pode pedi-la
+  no OPME (`faturamento-convenio`).
+- **Conta a pagar da nota**: **uma despesa por duplicata** (valor e vencimento de cada parcela), descrita como
+  "NF-e nº, fornecedor, parcela n/N", na competência do mês da emissão e no **plano de contas padrão** escolhido na
+  configuração do estoque. Sem duplicatas: uma despesa com vencimento na emissão, pelo valor do que gera pagamento;
+  nota marcada **sem pagamento**: nenhuma. Gera conta a nota com item de **compra** (inclusive forçado) ou de
+  **faturamento à clínica**. **Sem plano de contas padrão**, a confirmação de nota que gera conta é bloqueada (a
+  remessa passa).
+- **Conta pendente**: a confirmação grava o estoque primeiro (o material chegou) e depois pede as despesas ao
+  financeiro. Se ele falha ou recusa, a nota fica **confirmada — conta pendente**, com o motivo: o estoque **não se
+  desfaz**, o sistema **tenta de novo sozinho** (espaçando as tentativas) e a tela tem **"tentar de novo"**. Recusa
+  com motivo (plano de contas ou fornecedor inválido) → corrija na nota e tente de novo. Tentar de novo **nunca
+  duplica** a despesa.
+- **Estorno da nota**: desfaz o que ela fez, com motivo — as entradas (pela regra do estorno: recusado se o material
+  já saiu), a remessa (só se nada dela saiu e sem faturamento ou retorno ligado), o faturamento (os consumos voltam a
+  **aguardando**, sem custo) — e **cancela as despesas** dela. **Despesa já paga bloqueia o estorno**: estorne o
+  pagamento no financeiro antes. Movimento que veio de nota **só se estorna pela nota**. A NF-e estornada pode ser
+  **subida de novo** (vira outra nota).
+- **XML guardado**: o XML original fica com a nota pelo prazo da legislação tributária (Ajuste SINIEF 07/05, cl.
+  10ª, §2º — na prática, no mínimo 5 anos) e **nunca se apaga**, nem no estorno. Baixar o XML é pela tela, com o
+  acesso de nota de entrada. Quando o destinatário é **pessoa física** (o paciente, no faturamento de OPME), o
+  **CPF aparece mascarado** na tela e para o assistente; o arquivo fica íntegro (é registro fiscal).
+
 **Inventário**
 - **Inventário**: a contagem física de um ou mais **locais** (opcionalmente só alguns produtos), aberta pela
   gestão. Só pode haver **um inventário aberto por local**. Termina **fechado** (com os ajustes) ou **cancelado**
@@ -2314,8 +2407,9 @@ Seis ideias sustentam tudo:
 - **Custo do kit**: a soma de quantidade × **custo médio** de cada item — exige o acesso de **ver custo**.
   Produto sem custo médio fica **fora da soma** (o custo fica **parcial**); nenhum item com médio = custo
   **desconhecido**, nunca zero.
-- **Margem prevista**: a simulação de margem do procedimento usa o **custo do kit padrão** como custo do
-  material quando o procedimento tem kit; sem kit, usa o custo estimado do cadastro do procedimento.
+- **Margem prevista**: a simulação de margem do procedimento usa o **custo do kit** como custo do material
+  quando o procedimento tem kit — se a simulação é para um **profissional com kit próprio** (ativo), o kit dele
+  **substitui o padrão**; senão, o **kit padrão**. Sem kit, usa o custo estimado do cadastro do procedimento.
 
 **Agenda e avisos**
 - **Reserva**: material separado para um **agendamento** — por quantidade (o lote é escolhido no consumo) ou
@@ -2408,8 +2502,22 @@ do acesso de reserva)**
 - O custo do kit e de cada item só vêm com o acesso de **ver custo** — sem ele, diga que falta o acesso, não
   responda zero.
 
+**Nota de entrada (acesso de nota de entrada; nota com item do consignado pede também o acesso ao consignado)**
+- **Subir o XML** da NF-e é só pela **tela** do estoque — guie a pessoa até lá (`navegar-central`). O assistente
+  não recebe nem sobe o arquivo.
+- As notas (por estado, fornecedor, período — as **com conta pendente** à frente) e uma nota com os itens, a
+  classificação, as sugestões de produto e de lote, o custo calculado, as duplicatas e os **avisos** → ferramenta de
+  **consulta de notas de entrada**.
+- **Conferir** a nota em rascunho — por item: produto, fator, lotes, séries, local, a remessa e os consumos do
+  faturamento, forçar **compra** ou **não entra**; na nota: o fornecedor entre os candidatos, o plano de contas, a
+  observação → ferramenta de **conferência da nota**, com prévia e confirmação. Na nota com conta pendente, só o
+  fornecedor e o plano de contas se mexem.
+- **Confirmar**, **tentar de novo a conta** e **estornar** mexem no estoque e no financeiro: mostre o que vai
+  acontecer, confirme com a pessoa e só então faça; se a ferramenta não oferecer o ato, guie até a tela.
+- O **plano de contas padrão** da nota é da configuração do estoque (gestão — acesso de ajustar).
+
 **Fora da IA:** marcar um alerta como "já avisado" ou "com tarefa" é do time de agentes do estoque; anexar a
-**foto da etiqueta** do implante é pela tela.
+**foto da etiqueta** do implante e **subir ou baixar o XML** da nota de entrada é pela tela.
 
 **O time de agentes do estoque (`estoque-avisos`, se a clínica instalou) — por intenção**
 São rotinas automáticas, sem IA, cada uma ligada ou desligada pela clínica. A IA não as dispara; ela **explica**
@@ -2480,19 +2588,25 @@ o que aconteceu e **onde** mexer:
 2. Consulte o kit que vale (do profissional, se a pergunta for sobre ele; senão o padrão) e responda o **custo
    do kit** = Σ quantidade × custo médio. Custo **parcial** ou **desconhecido**: diga quais itens estão sem
    custo médio — não complete com estimativa.
-3. A margem do procedimento usa esse custo (o do kit padrão) quando há kit → `precificador` para simular o
-   preço, `financeiro` para a margem realizada.
+3. A margem prevista usa esse custo quando há kit — o do kit do profissional, se a simulação é para um
+   profissional com kit próprio; senão, o do padrão → `precificador` para simular o preço, `financeiro` para a
+   margem realizada.
 
 ### "Chegou material consignado"
 1. Confira que o consignado está ligado e que existe um **local consignado** na unidade.
-2. Registre a **remessa**: fornecedor, local consignado, NF de remessa e itens no modo de controle do produto.
-   O prazo de uso sai sozinho (data + prazo da clínica).
+2. Registre a **remessa**: de preferência subindo o **XML da NF-e de remessa** na tela (vira a remessa sozinha —
+   ver "Chegou a nota do fornecedor"); sem o XML, à mão: fornecedor, local consignado, NF de remessa e itens no
+   modo de controle do produto. O prazo de uso sai sozinho (data + prazo da clínica).
 3. No uso, o consumo é o normal, escolhendo o **local consignado**.
 4. Para o fornecedor faturar: o relatório de consumo (com o time de agentes do estoque, ele chega por e-mail ao
-   fornecedor toda semana); quando ele repõe, marque como **reposto** (com a NF).
+   fornecedor toda semana). Quando ele fatura, a **nota de faturamento** subida na tela marca os consumos como
+   **repostos** sozinha (ver "Chegou a nota de faturamento do consignado"); sem a nota, marque **reposto** à mão
+   (com a NF).
    O que não foi usado volta por **devolução ao fornecedor**, antes do prazo.
 
 ### "Chegou material" (entrada com custo)
+Veio com **NF-e**? Prefira subir o XML (ver "Chegou a nota do fornecedor") — o custo sai da nota. A entrada
+manual abaixo é para o que chegou sem nota eletrônica.
 1. Ache o produto e o local; confira o modo de controle (lote e validade? séries?).
 2. Pergunte o **custo unitário** de aquisição, se não veio: preço − descontos + frete/seguro + tributos que a
    clínica não recupera, dividido pela quantidade. Na dúvida sobre o que entra no custo, peça ao contador —
@@ -2500,6 +2614,48 @@ o que aconteceu e **onde** mexer:
 3. Mostre a prévia (quantidade, lote/séries, custo) e grave confirmado. O custo médio do produto se recalcula
    sozinho.
 4. Custo errado já gravado: estorne a entrada (se o material ainda não saiu) e lance de novo.
+
+### "Chegou a nota do fornecedor" (entrada pelo XML da NF-e)
+1. Peça para subir o **XML** na tela do estoque. Recusado? Leia o motivo e diga o que fazer: **sem autorização** →
+   peça ao fornecedor o XML autorizado; **repetida** → a nota já está no sistema (procure-a); **complementar,
+   ajuste ou devolução** → fora do escopo, lance à mão; **destinatário que não é a clínica** → confira o CNPJ da
+   nota com o fornecedor; **clínica sem CNPJ** → configuração fiscal (`financeiro`).
+2. Abra a nota em **rascunho**: o fornecedor (escolha, se vierem dois com o mesmo CNPJ), os itens, a
+   classificação de cada um e os avisos.
+3. Item a item: o **produto** (a sugestão por código de barras ou nome só vale se a pessoa confirmar; o de-para
+   já aprendido vem pronto), o **fator** (caixa × unidade), **lote e validade** (da nota, da sugestão do texto do
+   item ou da embalagem), as **séries** (leitor ou digitadas) e o **local**. **Nunca invente** lote, validade ou
+   série.
+4. Mostre o **custo unitário** calculado (vê-lo faz parte do acesso de nota de entrada) e os avisos (bonificação
+   dilui o médio, diferença rateada).
+5. Nota que gera conta precisa do **plano de contas padrão** na configuração do estoque. Mostre o resumo
+   (entradas, remessa, reposições, parcelas da conta), combine com a pessoa e só então confirme a nota.
+6. Leia o resultado: **confirmada**, ou **confirmada — conta pendente** (ver abaixo). Na próxima nota desse
+   fornecedor, os produtos já vêm casados.
+
+### "Chegou a nota de faturamento do consignado"
+1. A nota cita a **remessa** pela chave da NF de remessa — casa sozinha com a remessa que entrou pelo XML; a
+   remessa registrada à mão se escolhe na conferência. Recusou com "importe a NF de remessa antes"? Suba a de
+   remessa e depois esta.
+2. Confira os **consumos** casados a cada item (consumos inteiros, do mais antigo); se não vieram, escolha a
+   remessa e os consumos à mão — a soma tem de bater com a quantidade do item.
+3. Destinatário **é a clínica** → o custo vai para os consumos e nasce a conta a pagar. Destinatário **é outro**
+   (convênio, paciente) → faturado à fonte pagadora: custo 0 para a clínica, sem conta.
+4. Confirme: os consumos viram **repostos** com o nº da nota e saem do relatório semanal ao fornecedor.
+
+### "Por que a nota ficou com a conta pendente?"
+1. Consulte a nota e leia o **motivo**: financeiro **indisponível** → o sistema tenta de novo sozinho (ou "tentar
+   de novo" agora); **recusa** com motivo (plano de contas ou fornecedor) → corrija na nota e tente de novo.
+2. O material **já está no estoque** — não estorne a nota por causa da conta.
+3. Tentar de novo não duplica despesa; as parcelas que já entraram não se repetem.
+
+### "Estorna essa nota"
+1. Peça o **motivo**. Mostre o que será desfeito: entradas, remessa, reposições do faturamento e as despesas a
+   cancelar.
+2. Recusas: **despesa já paga** → estorne o pagamento no financeiro antes; **material já saiu** do estoque (ou algo
+   da remessa já foi usado, ou há faturamento/retorno ligado a ela) → não dá para estornar a nota inteira.
+3. Confirmado, a nota fica **estornada** (o XML continua guardado); se a nota estava certa e só a conferência
+   errou, suba o XML de novo e confira outra vez.
 
 ### "Quanto vale o estoque?" / "Quanto custa esse material?"
 1. Precisa do acesso de **ver custo**; sem ele, diga que os valores não estão disponíveis para quem pergunta.
@@ -2569,11 +2725,23 @@ o que aconteceu e **onde** mexer:
 - **A reserva do agendamento vale antes do kit** para o mesmo produto; os outros itens do kit continuam.
 - **Reservar o kit reserva o que der e diz o que faltou**; a reserva comum é tudo ou nada.
 - **Custo do kit sem custo médio é desconhecido, não zero.**
+- **A nota de entrada só entra no estoque confirmada** — subir o XML cria um rascunho; quem confirma é uma pessoa.
+- **O CFOP do fornecedor manda**: remessa, faturamento e retorno não se reclassificam; a pessoa só troca entre
+  compra e "não entra".
+- **Lote, validade e série vêm da nota, da embalagem ou do leitor** — a sugestão lida do texto do item é pista, a
+  confirmar; a série nunca vem da nota.
+- **Falha da conta não desfaz o material que chegou**: a nota fica com a conta pendente e tenta de novo.
+- **Despesa paga bloqueia o estorno da nota**; movimento que veio de nota só se estorna pela nota.
+- **O XML da nota nunca se apaga** e não passa pelo assistente; o CPF de destinatário pessoa física aparece sempre
+  mascarado.
 
 ## Limites / o que esta skill NÃO cobre
 - **Cadastro do produto** (preço, modo de controle, marcações, classe de risco) → `precificador`.
-- **Nota fiscal de entrada (NF-e) e faturamento de material no convênio** — chegam em ciclos próprios e serão
-  acrescentados aqui quando existirem.
+- **NF-e de entrada**: a nota entra **só pelo XML subido na tela** — a busca automática das notas na SEFAZ
+  (distribuição e manifestação do destinatário) não existe hoje. Nota **complementar, de ajuste ou de devolução**,
+  NF-e emitida pela clínica, NFS-e e CT-e não entram; a assinatura digital do XML não é validada (vale o protocolo
+  de autorização); crédito de ICMS/PIS/COFINS não é tratado (os tributos entram no custo).
+- **Faturamento de material no convênio** (TISS) → `faturamento-convenio`.
 - **Kits**: não há baixa automática do kit, kit para **item de pacote**, kit por convênio ou por lateralidade
   (olho), kit dentro de kit, nem bandeja de instrumental (CME).
 - **Escrituração do Livro Registro de Inventário** (termos, visto do fisco, escrituração fiscal digital) → contador.
@@ -4187,7 +4355,7 @@ name: precificador
 description: O sistema de precificação do Fluxo Ideal — como se configura preço (catálogo, tabelas, condições e formas de pagamento, favoritos) e como isso converge em orçamento e venda. Use para entender "quanto custa", como montar um orçamento e por que os valores são o que são.
 audience: [ia, humano]
 depends_on: [precos, catalogo, convenios, condicoes-pagamento, orcamentos, termos-orcamento, estoque-rastreavel, kits-material]
-version: 0.7.0
+version: 0.7.1
 updated: 2026-10-30
 ---
 
@@ -4243,6 +4411,7 @@ Três ideias que sustentam tudo:
 **Configuração**
 - **Catálogo**: o que existe — **procedimentos**, **produtos** (bens físicos, controlados no estoque), **pacotes** (combos, às vezes já com retornos).
 - **Produto × estoque**: o cadastro do produto diz **como o estoque o controla** — o **modo de controle** (quantidade, lote com validade ou nº de série; não muda com saldo no estoque), as marcações **implantável**, **consignável**, **sensível a temperatura** e **controlado**, a **classe de risco** e o **registro ANVISA** (copiados do registro, nunca inferidos), fabricante, referência e código TUSS. O produto **não grava saldo nem mínimo**: a **quantidade em estoque** e o **"estoque baixo"** que o catálogo mostra são **projeção** do estoque (somente leitura, com pequeno atraso) — "estoque baixo" = algum local do produto está no mínimo ou abaixo, e o mínimo é **por local**, definido no estoque.
+  - **Dados TISS do material** (para cobrar do convênio na guia — skill `faturamento-convenio`): o **cadastro do produto** leva o código TUSS, o **tipo de despesa TISS** (material, medicamento, OPME…) e a **unidade de medida TISS**; o **preço do produto na tabela do convênio** leva o valor e o **código da operadora** (usado quando o material não tem TUSS).
 - **Tabela de preço**: quanto vale, por contexto (particular / um convênio / promoção). O **mesmo item tem preços diferentes em tabelas diferentes**; cada preço pode ter valor fixo, desconto, cortesia e comissão próprios naquela tabela, e a tabela define o **limite de desconto** permitido.
 - **Condição de pagamento**: como se parcela (nº de parcelas, juros simples/composto ou descritivo). É **vinculada às tabelas** — uma tabela oferece um conjunto de condições.
 - **Forma de pagamento**: por onde se paga (pix, dinheiro, cartão, boleto, convênio), com sua regra de parcelamento.

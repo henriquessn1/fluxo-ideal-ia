@@ -1,8 +1,8 @@
 {
   "chave": "estoque-avisos",
-  "versao": "1.0",
+  "versao": "1.1",
   "nome": "Avisos do estoque",
-  "descricao": "Uma vez por dia útil, avisa a equipe sobre material vencido ou perto de vencer, saldo abaixo do mínimo e consignado perto do prazo.",
+  "descricao": "Avisa a equipe sobre validade, mínimo e prazo do consignado, abre a tarefa de reposição do que caiu abaixo do mínimo e manda ao fornecedor do consignado o relatório do que foi usado.",
   "escopo": "por-tenant",
   "roles": [
     {
@@ -11,6 +11,22 @@
         "estoque:ler",
         "notificacao:enviar",
         "notificacao:broadcast"
+      ]
+    },
+    {
+      "nome": "botfn-estoque-reposicao",
+      "grants": [
+        "estoque:ler",
+        "tarefas:criar"
+      ]
+    },
+    {
+      "nome": "botfn-estoque-relatorio",
+      "grants": [
+        "estoque:consignado",
+        "fornecedor:list",
+        "mensageria_mensagem:enviar_intencao",
+        "notificacao:enviar"
       ]
     }
   ],
@@ -66,6 +82,91 @@
           }
         ]
       }
+    },
+    {
+      "chave": "estoque_reposicao",
+      "descricao": "Abre uma tarefa de reposição por produto e local que caiu abaixo do mínimo e marca o alerta, sem abrir de novo enquanto o saldo não voltar.",
+      "tipo": "script",
+      "roles": [
+        "botfn-estoque-reposicao"
+      ],
+      "triggers": [
+        {
+          "cron": "{{knob.cron_reposicao}}",
+          "tz": "America/Sao_Paulo",
+          "enabled": true
+        }
+      ],
+      "config": {
+        "script": "// estoque_reposicao — agente `script`. Comportamento = ESTE arquivo (DADO), nunca código de serviço.\n//\n// Agendado (padrão: dia útil às 7h30, fuso da clínica — knob `cron_reposicao` ou \"Quando roda\"):\n//   1. lista os alertas \"abaixo do mínimo\" que ainda NÃO têm tarefa de reposição (listar_sem_tarefa);\n//   2. para cada produto × local abre UMA tarefa (criar_tarefa) para o papel de `config.papel_reposicao`\n//      (tarefa do grupo): \"Repor <produto> em <local>\", físico × mínimo e o link para o produto;\n//   3. logo depois que a tarefa nasce, marca o alerta no canal `tarefa` (marcar_com_tarefa). A marca cai\n//      sozinha quando a condição some (o saldo voltou acima do mínimo) — a próxima queda abre outra tarefa.\n//\n// Sem chave de idempotência na tarefa: se a tarefa nascer e a marca falhar, a próxima rodada pode abrir\n// outra (duplicata eventual ACEITA — decisão do dono). A falha da marca vai para o log e `acao_bloqueada`.\n// Falha ao listar (inclusive 409) ou ao criar: log WARNING + `acao_bloqueada`, sem marcar.\n// O resumo (result) só leva contagens e flags — sem nome de produto, sem dado pessoal.\n//\n// Injetados: event, config, context, call() -> {ok,status_code,body}, log(), result().\n\nvar cfg = config || {};\nvar LIMITE_TITULO = 200;\n\nfunction num(v, d) { return (v !== undefined && v !== null && v !== '' && !isNaN(Number(v))) ? Number(v) : d; }\nfunction unwrap(r) {\n  if (!r || !r.ok) return null;\n  var b = r.body;\n  return (b && b.data !== undefined) ? b.data : b;\n}\nfunction qtd(v) {\n  var n = Number(v);\n  if (v === null || v === undefined || v === '' || isNaN(n)) return '?';\n  return String(Math.round(n * 100) / 100).replace('.', ',');\n}\nfunction corta(s, n) { s = String(s || ''); return s.length > n ? s.substring(0, n - 1) + '…' : s; }\n\nvar papel = String(cfg.papel_reposicao || '').split(',')[0].trim();\nvar link = String(cfg.link || '/financeiro/estoque');\nvar maxPorRodada = Math.max(1, Math.min(num(cfg.max_por_rodada, 50), 200));\nvar resumo = { alertas: 0, tarefas: 0, marcados: 0, falhas_tarefa: 0, falhas_marca: 0 };\n\nif (!papel) {\n  log('estoque_reposicao: papel_reposicao vazio — nenhuma tarefa aberta', 'warning');\n  resumo.acao_bloqueada = true; resumo.etapa = 'papel_reposicao'; resumo.erro = 'sem_responsavel';\n  result(resumo);\n  return { ok: false, erro: 'sem_responsavel' };\n}\n\n// ---- 1) alertas abaixo do mínimo ainda sem tarefa ----\nvar r = call('listar_sem_tarefa', {});\nvar corpo = unwrap(r);\nif (!corpo || !Array.isArray(corpo.itens)) {\n  var http = (r && r.status_code) || null;\n  log('estoque_reposicao: FALHA ao listar os alertas sem tarefa (HTTP ' + (http || '?') + ')', 'warning');\n  resumo.acao_bloqueada = true; resumo.etapa = 'listar_sem_tarefa'; resumo.http = http;\n  if (r && r.ok) resumo.erro = 'formato_inesperado';\n  result(resumo);\n  return { ok: false, erro: 'listar_falhou', http: http };\n}\n\n// Uma tarefa por produto × local (a chave do alerta já é por produto × local; deduplica por garantia).\nvar itens = [];\nvar vistos = {};\nfor (var i = 0; i < corpo.itens.length; i++) {\n  var a = corpo.itens[i];\n  if (!a || a.tipo !== 'abaixo_minimo' || !a.chave) continue;\n  var k = String(a.produto_id || '') + '|' + String(a.local_id || '') + '|' + String(a.chave);\n  if (vistos[k]) continue;\n  vistos[k] = true;\n  itens.push(a);\n}\nresumo.alertas = itens.length;\nif (corpo.truncado) resumo.truncado = true;\nif (!itens.length) {\n  log('estoque_reposicao: nenhum item abaixo do mínimo sem tarefa');\n  result(resumo);\n  return { ok: true, tarefas: 0 };\n}\nif (itens.length > maxPorRodada) { resumo.adiados = itens.length - maxPorRodada; itens = itens.slice(0, maxPorRodada); }\n\n// ---- 2) e 3) uma tarefa por item, marcada logo em seguida ----\nvar falhas = [];\nfor (var j = 0; j < itens.length; j++) {\n  var it = itens[j];\n  var prod = it.produto_nome || 'produto sem nome';\n  var local = it.local_nome || 'local sem nome';\n  var titulo = corta('Repor ' + prod + ' em ' + local, LIMITE_TITULO);\n  var url = link + (it.produto_id ? ((link.indexOf('?') >= 0 ? '&' : '?') + 'item=' + encodeURIComponent(String(it.produto_id))) : '');\n  var descricao = (it.severidade === 'critico' ? 'Sem saldo neste local. ' : 'Abaixo do mínimo deste local. ') +\n    'Físico: ' + qtd(it.quantidade) + ' · mínimo: ' + qtd(it.minimo) +\n    (it.produto_codigo ? ' · código ' + it.produto_codigo : '') + '.\\n' +\n    'Abrir o produto no estoque: ' + url + '\\n' +\n    'Tarefa aberta pelo agente de reposição do estoque. Se o saldo voltar acima do mínimo, a próxima queda abre outra tarefa.';\n\n  var rt = call('criar_tarefa', {\n    titulo: titulo,\n    descricao: descricao,\n    prioridade: it.severidade === 'critico' ? 'alta' : 'media',\n    responsavel_tipo: 'role',\n    responsavel_id: papel\n  });\n  if (!rt || !rt.ok) {\n    resumo.falhas_tarefa++;\n    falhas.push({ etapa: 'criar_tarefa', http: (rt && rt.status_code) || null });\n    log('estoque_reposicao: FALHA ao abrir a tarefa (HTTP ' + ((rt && rt.status_code) || '?') + ') — o alerta volta na próxima rodada', 'warning');\n    continue;\n  }\n  resumo.tarefas++;\n\n  var rm = call('marcar_com_tarefa', { chaves: [String(it.chave)], canal: 'tarefa' });\n  var bm = unwrap(rm);\n  if (!rm || !rm.ok || !bm) {\n    resumo.falhas_marca++;\n    falhas.push({ etapa: 'marcar_com_tarefa', http: (rm && rm.status_code) || null });\n    log('estoque_reposicao: tarefa aberta mas a marca FALHOU (HTTP ' + ((rm && rm.status_code) || '?') +\n      ') — a próxima rodada pode abrir outra tarefa para o mesmo item', 'warning');\n    continue;\n  }\n  resumo.marcados += num(bm.marcados, 0);\n}\n\nif (falhas.length) {\n  resumo.acao_bloqueada = true;\n  resumo.etapa = resumo.falhas_marca ? 'marcar_com_tarefa' : 'criar_tarefa';\n  resumo.falhas_detalhe = falhas.slice(0, 10);\n}\nlog('estoque_reposicao: ' + resumo.tarefas + ' tarefa(s) aberta(s), ' + resumo.marcados + ' marcada(s) de ' + resumo.alertas + ' alerta(s)',\n  resumo.acao_bloqueada ? 'warning' : 'info');\nresult(resumo);\nreturn { ok: !resumo.acao_bloqueada, tarefas: resumo.tarefas, marcados: resumo.marcados };\n",
+        "papel_reposicao": "{{knob.papel_reposicao}}",
+        "max_por_rodada": 50,
+        "link": "/financeiro/estoque",
+        "acoes": [
+          {
+            "nome": "listar_sem_tarefa",
+            "capability": "estoque.listar_alertas_sem_tarefa",
+            "kind": "internal"
+          },
+          {
+            "nome": "criar_tarefa",
+            "capability": "tarefas.criar",
+            "kind": "internal"
+          },
+          {
+            "nome": "marcar_com_tarefa",
+            "capability": "estoque.marcar_alertas_avisados",
+            "kind": "internal"
+          }
+        ]
+      }
+    },
+    {
+      "chave": "estoque_relatorio_fornecedor",
+      "descricao": "Toda semana manda por e-mail a cada fornecedor do consignado o que foi usado e ainda aguarda reposição; sem e-mail no cadastro, avisa a gestão.",
+      "tipo": "script",
+      "roles": [
+        "botfn-estoque-relatorio"
+      ],
+      "triggers": [
+        {
+          "cron": "{{knob.cron_relatorio}}",
+          "tz": "America/Sao_Paulo",
+          "enabled": true
+        }
+      ],
+      "config": {
+        "script": "// estoque_relatorio_fornecedor — agente `script`. Comportamento = ESTE arquivo (DADO), nunca código de serviço.\n//\n// Agendado (padrão: segunda às 9h, fuso da clínica — knob `cron_relatorio` ou \"Quando roda\"):\n//   1. lista o consumo de material consignado que AINDA AGUARDA reposição nos últimos `dias_janela` dias\n//      (consumo_aguardando, sempre em JSON). Consignado desligado (409) = saída limpa;\n//   2. agrupa por fornecedor. Um lembrete que repete toda semana até alguém marcar \"reposto\";\n//   3. por fornecedor:\n//      - alguma linha com `paciente_incompleto` (o cadastro de pacientes estava fora do ar) → NÃO envia e\n//        avisa a gestão (vai na próxima rodada). Identificação vazia por outro motivo sai como \"—\" e envia;\n//      - busca o fornecedor (obter_fornecedor): sem e-mail ou não encontrado → NÃO envia e avisa a gestão;\n//      - envia o e-mail (enviar_intencao) com o template `config.template_slug`, as linhas nas variáveis do\n//        template e `idempotency_key` = estoque-relatorio:<fornecedor_id>:<semana ISO> (sem dado pessoal):\n//        rodar de novo na mesma semana não manda outro e-mail;\n//   4. um único aviso à gestão (`config.papel_gestao`) com os fornecedores que ficaram sem envio.\n// Não marca \"reposto\" (é da equipe, ou da nota de faturamento do fornecedor).\n//\n// Minimização (LGPD art. 6º, III): a linha leva só a identificação que a clínica escolheu no estoque\n// (padrão = nº do atendimento). Nada de diagnóstico, CID ou prontuário. O e-mail do fornecedor é usado\n// só como destinatário — nunca vai para o log nem para o resumo.\n// O resumo (result) só leva contagens e flags.\n//\n// Injetados: event, config, context, call() -> {ok,status_code,body}, log(), result().\n\nvar cfg = config || {};\nvar DIA_MS = 86400000;\n\nfunction num(v, d) { return (v !== undefined && v !== null && v !== '' && !isNaN(Number(v))) ? Number(v) : d; }\nfunction ligado(v) { return !(v === false || v === 'false' || v === 0 || v === '0'); }\nfunction unwrap(r) {\n  if (!r || !r.ok) return null;\n  var b = r.body;\n  return (b && b.data !== undefined) ? b.data : b;\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction isoData(ms) { var d = new Date(ms); return d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) + '-' + pad(d.getUTCDate()); }\nfunction dataBr(iso) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})/.exec(String(iso || ''));\n  return m ? (m[3] + '/' + m[2] + '/' + m[1]) : '';\n}\nfunction qtd(v) {\n  var n = Number(v);\n  if (v === null || v === undefined || v === '' || isNaN(n)) return '?';\n  return String(Math.round(n * 1000) / 1000).replace('.', ',');\n}\n// Semana ISO 8601 (segunda a domingo) da data local `ms` (já deslocada para o fuso da clínica).\nfunction semanaIso(ms) {\n  var d = new Date(ms);\n  var t = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());\n  var x = new Date(t);\n  var dow = x.getUTCDay() || 7;\n  x.setUTCDate(x.getUTCDate() + 4 - dow);\n  var ano = x.getUTCFullYear();\n  var sem = Math.ceil(((x.getTime() - Date.UTC(ano, 0, 1)) / DIA_MS + 1) / 7);\n  return ano + '-W' + pad(sem);\n}\n\nvar papelGestao = String(cfg.papel_gestao || '').split(',')[0].trim();\nvar dias = Math.max(1, Math.min(Math.floor(num(cfg.dias_janela, 90)), 366));\nvar template = String(cfg.template_slug || 'estoque_relatorio_fornecedor').trim();\nvar maxLinhas = Math.max(1, Math.min(num(cfg.max_linhas_email, 300), 1000));\nvar link = String(cfg.link || '/financeiro/estoque?aba=consignado');\n// Fuso da clínica para \"hoje\" e para a semana ISO (São Paulo = -3, sem horário de verão).\nvar agoraLocal = Date.now() + num(cfg.fuso_horas, -3) * 3600000;\nvar ate = isoData(agoraLocal);\nvar desde = isoData(agoraLocal - dias * DIA_MS);\nvar semana = semanaIso(agoraLocal);\nvar resumo = { linhas: 0, fornecedores: 0, enviados: 0, deduplicados: 0, agendados: 0, sem_email: 0,\n               nao_encontrado: 0, paciente_incompleto: 0, falhas_envio: 0, semana: semana, dias_janela: dias };\n\n// ---- 1) consumo aguardando reposição ----\nvar r = call('consumo_aguardando', { desde: desde, ate: ate });\nif (r && r.status_code === 409) {\n  log('estoque_relatorio_fornecedor: consignado desligado na clínica — nada a enviar');\n  resumo.consignado = 'desligado';\n  result(resumo);\n  return { ok: true, skip: 'consignado_desligado' };\n}\nvar lista = unwrap(r);\nif (!Array.isArray(lista)) {\n  var http = (r && r.status_code) || null;\n  log('estoque_relatorio_fornecedor: FALHA ao listar o consumo do consignado (HTTP ' + (http || '?') + ')', 'warning');\n  resumo.acao_bloqueada = true; resumo.etapa = 'consumo_aguardando'; resumo.http = http;\n  if (r && r.ok) resumo.erro = 'formato_inesperado';\n  result(resumo);\n  return { ok: false, erro: 'listar_falhou', http: http };\n}\n\n// ---- 2) agrupa por fornecedor ----\nvar grupos = {};\nvar ordem = [];\nfor (var i = 0; i < lista.length; i++) {\n  var l = lista[i];\n  if (!l || !l.fornecedor_id || (l.reposicao && l.reposicao !== 'aguardando')) continue;\n  var fid = String(l.fornecedor_id);\n  if (!grupos[fid]) { grupos[fid] = { id: fid, nome: l.fornecedor_nome || 'Fornecedor', linhas: [], incompleto: false }; ordem.push(fid); }\n  grupos[fid].linhas.push(l);\n  if (l.paciente_incompleto === true) grupos[fid].incompleto = true;\n  resumo.linhas++;\n}\nresumo.fornecedores = ordem.length;\nif (!ordem.length) {\n  log('estoque_relatorio_fornecedor: nada aguardando reposição na janela');\n  result(resumo);\n  return { ok: true, fornecedores: 0 };\n}\n\nfunction variaveisDe(g, nomeFornecedor) {\n  var linhas = [];\n  var total = 0;\n  for (var j = 0; j < g.linhas.length; j++) {\n    var x = g.linhas[j];\n    total += num(x.quantidade, 0);\n    if (linhas.length >= maxLinhas) continue;\n    linhas.push({\n      data: dataBr(x.data),\n      produto: x.produto_nome || 'Produto sem nome',\n      codigo: x.produto_codigo || '',\n      lote: x.lote_numero || '',\n      validade: dataBr(x.lote_validade),\n      serie: x.numero_serie || '',\n      quantidade: qtd(x.quantidade),\n      remessa_nf: x.remessa_nf || '',\n      paciente: (x.paciente === null || x.paciente === undefined || x.paciente === '') ? '—' : String(x.paciente)\n    });\n  }\n  return {\n    fornecedor_nome: nomeFornecedor,\n    periodo_desde: dataBr(desde),\n    periodo_ate: dataBr(ate),\n    semana: semana,\n    total_linhas: g.linhas.length,\n    total_quantidade: qtd(total),\n    linhas_omitidas: Math.max(0, g.linhas.length - linhas.length),\n    linhas: linhas\n  };\n}\n\n// ---- 3) por fornecedor ----\nvar pendencias = [];   // {fornecedor, motivo} para a gestão (nome do fornecedor: empresa, não paciente)\nvar falhas = [];\nfor (var f = 0; f < ordem.length; f++) {\n  var g = grupos[ordem[f]];\n  if (g.incompleto) {\n    resumo.paciente_incompleto++;\n    pendencias.push({ fornecedor: g.nome, motivo: 'a identificação do paciente não pôde ser lida (cadastro de pacientes fora do ar) — vai na próxima rodada' });\n    continue;\n  }\n  var rf = call('obter_fornecedor', { id: g.id });\n  if (rf && rf.status_code === 404) {\n    resumo.nao_encontrado++;\n    pendencias.push({ fornecedor: g.nome, motivo: 'fornecedor não encontrado no cadastro do financeiro' });\n    continue;\n  }\n  var forn = unwrap(rf);\n  if (!forn) {\n    resumo.falhas_envio++;\n    falhas.push({ etapa: 'obter_fornecedor', http: (rf && rf.status_code) || null });\n    log('estoque_relatorio_fornecedor: FALHA ao ler o fornecedor (HTTP ' + ((rf && rf.status_code) || '?') + ')', 'warning');\n    continue;\n  }\n  var email = String(forn.email || '').trim();\n  if (!email || email.indexOf('@') < 1) {\n    resumo.sem_email++;\n    pendencias.push({ fornecedor: forn.nome || g.nome, motivo: 'sem e-mail no cadastro do fornecedor' });\n    continue;\n  }\n  var re = call('enviar_intencao', {\n    destinatario_email: email,\n    modo_entrega: 'force_channel',\n    canal_solicitado: 'email',\n    template_slug: template,\n    variaveis: variaveisDe(g, forn.nome || g.nome),\n    origem_ms: 'agentes',\n    referencia_tipo: 'estoque_consignado_fornecedor',\n    idempotency_key: 'estoque-relatorio:' + g.id + ':' + semana\n  });\n  var be = unwrap(re);\n  var st = be && be.status;\n  if (re && re.ok && st === 'aceito') resumo.enviados++;\n  else if (re && re.ok && st === 'deduplicado') resumo.deduplicados++;\n  else if (re && re.ok && st === 'agendado') resumo.agendados++;\n  else {\n    resumo.falhas_envio++;\n    falhas.push({ etapa: 'enviar_intencao', http: (re && re.status_code) || null, status: st || null });\n    log('estoque_relatorio_fornecedor: FALHA ao enviar o relatório (HTTP ' + ((re && re.status_code) || '?') +\n      (st ? ', ' + st : '') + ')', 'warning');\n  }\n}\n\n// ---- 4) um aviso à gestão com o que ficou sem envio ----\nif (pendencias.length) {\n  if (!papelGestao) {\n    log('estoque_relatorio_fornecedor: ' + pendencias.length + ' fornecedor(es) sem envio e papel_gestao vazio — ninguém foi avisado', 'warning');\n    falhas.push({ etapa: 'papel_gestao', erro: 'sem_destino' });\n  } else {\n    var linhasAviso = [];\n    for (var p = 0; p < pendencias.length && p < 20; p++) linhasAviso.push('• ' + pendencias[p].fornecedor + ': ' + pendencias[p].motivo);\n    if (pendencias.length > 20) linhasAviso.push('… e mais ' + (pendencias.length - 20) + '.');\n    var titulo = 'Consignado: ' + (pendencias.length === 1 ? '1 relatório não enviado ao fornecedor' : pendencias.length + ' relatórios não enviados aos fornecedores');\n    var message = {\n      type: 'alert', title: titulo, icon: 'warning',\n      text: 'O relatório semanal do que foi usado e aguarda reposição não foi enviado:\\n' + linhasAviso.join('\\n') +\n        '\\nCorrija o cadastro do fornecedor (e-mail) no financeiro; o envio é tentado de novo na próxima rodada.',\n      links: [{ url: link, text: 'Abrir o consignado' }],\n      windowsalert: ligado(cfg.notificacao_do_sistema) ? { text: titulo, url: link } : null\n    };\n    var rn = call('notificar_grupo', { type: 'mensagem', group_id: papelGestao, message: message });\n    if (rn && rn.ok) resumo.gestao_avisada = true;\n    else {\n      falhas.push({ etapa: 'notificar_grupo', http: (rn && rn.status_code) || null });\n      log('estoque_relatorio_fornecedor: FALHA ao avisar a gestão (HTTP ' + ((rn && rn.status_code) || '?') + ')', 'warning');\n    }\n  }\n  resumo.sem_envio = pendencias.length;\n}\n\nif (falhas.length) {\n  resumo.acao_bloqueada = true;\n  resumo.etapa = falhas[0].etapa;\n  resumo.falhas_detalhe = falhas.slice(0, 10);\n}\nlog('estoque_relatorio_fornecedor: ' + resumo.fornecedores + ' fornecedor(es), ' + resumo.enviados + ' enviado(s), ' +\n  resumo.deduplicados + ' já enviado(s) na semana, ' + (resumo.sem_envio || 0) + ' sem envio',\n  resumo.acao_bloqueada ? 'warning' : 'info');\nresult(resumo);\nreturn { ok: !resumo.acao_bloqueada, enviados: resumo.enviados, sem_envio: resumo.sem_envio || 0 };\n",
+        "papel_gestao": "{{knob.papel_gestao}}",
+        "dias_janela": "{{knob.dias_janela}}",
+        "template_slug": "{{knob.template_slug}}",
+        "notificacao_do_sistema": "{{knob.notificacao_do_sistema}}",
+        "max_linhas_email": 300,
+        "fuso_horas": -3,
+        "link": "/financeiro/estoque?aba=consignado",
+        "acoes": [
+          {
+            "nome": "consumo_aguardando",
+            "capability": "estoque.consumo_consignado_aguardando",
+            "kind": "internal"
+          },
+          {
+            "nome": "obter_fornecedor",
+            "capability": "financeiro.obter_fornecedor",
+            "kind": "internal"
+          },
+          {
+            "nome": "enviar_intencao",
+            "capability": "mensageria.enviar_intencao",
+            "kind": "internal"
+          },
+          {
+            "nome": "notificar_grupo",
+            "capability": "notificacao.notificar_grupo",
+            "kind": "internal"
+          }
+        ]
+      }
     }
   ],
   "knobs": [
@@ -110,6 +211,50 @@
       "rotulo": "Também como notificação do Windows/navegador",
       "default": true,
       "descricao": "Além do cartão na Central, o aviso aparece como notificação do sistema para quem permitiu no navegador."
+    },
+    {
+      "chave": "papel_reposicao",
+      "tipo": "string",
+      "fonte": "papeis",
+      "rotulo": "Papel que recebe a tarefa de reposição",
+      "default": "administrador",
+      "descricao": "A tarefa nasce para este perfil da equipe (tarefa do grupo). Um papel só."
+    },
+    {
+      "chave": "cron_reposicao",
+      "tipo": "string",
+      "rotulo": "Quando abrir as tarefas de reposição",
+      "default": "30 7 * * 1-5",
+      "descricao": "Horário no formato cron, no fuso de São Paulo. Padrão: dia útil às 7h30."
+    },
+    {
+      "chave": "papel_gestao",
+      "tipo": "string",
+      "fonte": "papeis",
+      "rotulo": "Papel avisado quando o relatório não pode ir ao fornecedor",
+      "default": "administrador",
+      "descricao": "Recebe o aviso quando falta o e-mail do fornecedor ou a identificação do paciente não pôde ser lida. Um papel só."
+    },
+    {
+      "chave": "dias_janela",
+      "tipo": "int",
+      "rotulo": "Janela do relatório ao fornecedor (dias)",
+      "default": 90,
+      "descricao": "O relatório traz tudo o que foi usado nesses últimos dias e ainda aguarda reposição. Repete toda semana até marcarem \"reposto\"."
+    },
+    {
+      "chave": "template_slug",
+      "tipo": "string",
+      "rotulo": "Modelo de e-mail do relatório",
+      "default": "estoque_relatorio_fornecedor",
+      "descricao": "O modelo criado no designer de mensagens (passo da instalação)."
+    },
+    {
+      "chave": "cron_relatorio",
+      "tipo": "string",
+      "rotulo": "Quando mandar o relatório aos fornecedores",
+      "default": "0 9 * * 1",
+      "descricao": "Horário no formato cron, no fuso de São Paulo. Padrão: segunda às 9h."
     }
   ]
 }

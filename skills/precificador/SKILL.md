@@ -3,7 +3,7 @@ name: precificador
 description: O sistema de precificação do Fluxo Ideal — como se configura preço (catálogo, tabelas, condições e formas de pagamento, favoritos) e como isso converge em orçamento e venda. Use para entender "quanto custa", como montar um orçamento e por que os valores são o que são.
 audience: [ia, humano]
 depends_on: [precos, catalogo, convenios, condicoes-pagamento, orcamentos, termos-orcamento, estoque-rastreavel]
-version: 0.6.0
+version: 0.6.1
 updated: 2026-10-30
 ---
 
@@ -79,6 +79,10 @@ Três ideias que sustentam tudo:
   (papel + tabela) e depois a de maior prioridade. Sem política configurada = sem restrição.
 - **Margem**: o que sobra do preço depois do **custo** do procedimento, da **comissão** do profissional e do
   custo de terceiros. **Markup** é a mesma folga vista sobre o custo.
+- **Custo do produto**: é o **custo médio** do estoque, projetado no catálogo — **só leitura** (não se digita no
+  produto; o custo entra com o material, na entrada do estoque). Ver o custo e a margem do produto pede um
+  **acesso à parte**; sem ele, o produto aparece sem esses dois campos. A margem **realizada** com o material é
+  da skill `financeiro`.
 - **No-show**: falta pode gerar **multa configurável** (confirmável, perdoável ou ajustável por quem tem alçada).
 - **Retorno**: direito de retorno já incluído (ex.: num pacote) — **não se recobra**.
 

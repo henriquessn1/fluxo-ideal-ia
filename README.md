@@ -48,7 +48,7 @@ Cada skill serve aos dois públicos no mesmo arquivo — a diferença está na d
 | [designer-mensageria](skills/designer-mensageria/SKILL.md) | Autoria de mensageria | templates, canais (WhatsApp/HSM, e-mail), aprovação de HSM — **desenhar**, não enviar | ✅ |
 | [comunicacao-paciente](skills/comunicacao-paciente/SKILL.md) | Envio governado ao paciente | enviar e-mail por template, intenção governada (quiet-hours/teto/idempotência), checar entrega | ✅ |
 | [financeiro](skills/financeiro/SKILL.md) | O dinheiro depois | pagamentos, parcelas, contas a receber/pagar, caixa, fluxo de caixa, break-even, nota fiscal | ✅ |
-| [faturamento-convenio](skills/faturamento-convenio/SKILL.md) | Financeiro de convênio (TISS) | faturar guias/lotes, demonstrativo, glosa, recurso | ✅ |
+| [faturamento-convenio](skills/faturamento-convenio/SKILL.md) | Financeiro de convênio (TISS) | faturar guias/lotes, material no anexo de outras despesas da SP/SADT, demonstrativo, glosa, recurso | ✅ |
 | [estoque](skills/estoque/SKILL.md) | Estoque rastreável | saldo por unidade/local, lote/validade e série (FEFO), consumo no paciente e implantes (RDC 556, UDI classe IV), consignado com prazo, reservas, alertas, custo médio | ✅ |
 | [designer-agentes](skills/designer-agentes/SKILL.md) | Agentes de IA | reusar um time do registro (`agents/`) ou desenhar comportamento (persona, capabilities, gatilhos, LLM × script) | ✅ |
 | [conversas](skills/conversas/SKILL.md) | Atender/triar tickets | filas, atribuição, resolução (CSAT), transferência, observadores, detectar frustração | ✅ |

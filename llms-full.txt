@@ -4355,7 +4355,7 @@ name: precificador
 description: O sistema de precificação do Fluxo Ideal — como se configura preço (catálogo, tabelas, condições e formas de pagamento, favoritos) e como isso converge em orçamento e venda. Use para entender "quanto custa", como montar um orçamento e por que os valores são o que são.
 audience: [ia, humano]
 depends_on: [precos, catalogo, convenios, condicoes-pagamento, orcamentos, termos-orcamento, estoque-rastreavel, kits-material]
-version: 0.7.0
+version: 0.7.1
 updated: 2026-10-30
 ---
 
@@ -4411,6 +4411,7 @@ Três ideias que sustentam tudo:
 **Configuração**
 - **Catálogo**: o que existe — **procedimentos**, **produtos** (bens físicos, controlados no estoque), **pacotes** (combos, às vezes já com retornos).
 - **Produto × estoque**: o cadastro do produto diz **como o estoque o controla** — o **modo de controle** (quantidade, lote com validade ou nº de série; não muda com saldo no estoque), as marcações **implantável**, **consignável**, **sensível a temperatura** e **controlado**, a **classe de risco** e o **registro ANVISA** (copiados do registro, nunca inferidos), fabricante, referência e código TUSS. O produto **não grava saldo nem mínimo**: a **quantidade em estoque** e o **"estoque baixo"** que o catálogo mostra são **projeção** do estoque (somente leitura, com pequeno atraso) — "estoque baixo" = algum local do produto está no mínimo ou abaixo, e o mínimo é **por local**, definido no estoque.
+  - **Dados TISS do material** (para cobrar do convênio na guia — skill `faturamento-convenio`): o **cadastro do produto** leva o código TUSS, o **tipo de despesa TISS** (material, medicamento, OPME…) e a **unidade de medida TISS**; o **preço do produto na tabela do convênio** leva o valor e o **código da operadora** (usado quando o material não tem TUSS).
 - **Tabela de preço**: quanto vale, por contexto (particular / um convênio / promoção). O **mesmo item tem preços diferentes em tabelas diferentes**; cada preço pode ter valor fixo, desconto, cortesia e comissão próprios naquela tabela, e a tabela define o **limite de desconto** permitido.
 - **Condição de pagamento**: como se parcela (nº de parcelas, juros simples/composto ou descritivo). É **vinculada às tabelas** — uma tabela oferece um conjunto de condições.
 - **Forma de pagamento**: por onde se paga (pix, dinheiro, cartão, boleto, convênio), com sua regra de parcelamento.

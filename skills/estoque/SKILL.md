@@ -1,9 +1,9 @@
 ---
 name: estoque
-description: O estoque rastreável da clínica no Fluxo Ideal — saldo por unidade e local, lote/validade e nº de série, FEFO, consumo de material no paciente e vínculo de implante (etiqueta da RDC 556/2021, UDI da classe IV), material consignado com prazo, reserva para procedimento agendado, alertas de validade/mínimo e o custo do material (custo na entrada, custo médio, extrato valorizado). Use para "quanto tem da lente X na unidade Y?", "o que vence este mês?", "lança o material da cirurgia", "reserva a prótese para amanhã", "quais implantes esse paciente recebeu?", "quanto vale o estoque?".
+description: O estoque rastreável da clínica no Fluxo Ideal — saldo por unidade e local, lote/validade e nº de série, FEFO, consumo de material no paciente e vínculo de implante (etiqueta da RDC 556/2021, UDI da classe IV), material consignado com prazo, reserva para procedimento agendado, alertas de validade/mínimo, o custo do material (custo na entrada, custo médio, extrato valorizado) e o inventário (contagem cega, fechamento por diferença e o relatório de inventário de 31/12 ao custo para o contador). Use para "quanto tem da lente X na unidade Y?", "o que vence este mês?", "lança o material da cirurgia", "reserva a prótese para amanhã", "quais implantes esse paciente recebeu?", "quanto vale o estoque?", "vamos fazer o inventário", "preciso do inventário de 31/12 para o contador".
 audience: [ia, humano]
-depends_on: [estoque-rastreavel, consumo-material, implantes, consignado, reservas-material, alertas-estoque, custo-material]
-version: 0.2.1
+depends_on: [estoque-rastreavel, consumo-material, implantes, consignado, reservas-material, alertas-estoque, custo-material, inventario-estoque]
+version: 0.3.0
 updated: 2026-10-30
 ---
 
@@ -23,6 +23,8 @@ ou faltar**. O estoque é a fonte da verdade do saldo; o catálogo (preço, cada
 - Reservar material para um agendamento, ver e liberar reservas (inclusive as órfãs).
 - Operar o **consignado**: remessa, devolução ao fornecedor, consumo para o fornecedor faturar, listagem de OPME.
 - "Quanto custa esse material?", "quanto vale o estoque?", o extrato **valorizado** de um produto.
+- Fazer o **inventário** (contagem cega por local, recontagem, fechamento por diferença) e tirar o **relatório
+  de inventário** numa data (o de 31/12 para o contador).
 
 ## Quando NÃO usar
 - Cadastrar o produto, mudar o preço, o modo de controle ou as marcações (implantável, consignável, classe de
@@ -32,6 +34,8 @@ ou faltar**. O estoque é a fonte da verdade do saldo; o catálogo (preço, cada
 - Pagar o fornecedor, conta a pagar → `financeiro`. Faturar material no convênio (TISS) → `faturamento-convenio`.
 - A **margem** do procedimento com o material e o ponto de equilíbrio → `financeiro` (o estoque só dá o custo).
 - Mudar o comportamento do time de avisos do estoque → `designer-agentes`.
+- **Escriturar** o Livro Registro de Inventário (termos, visto, escrituração fiscal digital) → é do **contador**;
+  o sistema entrega o relatório.
 
 ## Modelo mental
 
@@ -138,6 +142,45 @@ Cinco ideias sustentam tudo:
 - **Consumo ligado à venda**: o material do ato fica ligado ao **item** da venda e o dos "Materiais do
   atendimento" à **venda** — é assim que o custo chega à margem.
 
+**Inventário**
+- **Inventário**: a contagem física de um ou mais **locais** (opcionalmente só alguns produtos), aberta pela
+  gestão. Só pode haver **um inventário aberto por local**. Termina **fechado** (com os ajustes) ou **cancelado**
+  (sem nenhum movimento). **Fechado não reabre** — uma nova contagem é um inventário novo.
+- **Contagem cega**: quem conta vê **o que contar** (produto, unidade, lotes esperados, a remessa no local
+  consignado) e o que já lançou — **nunca a quantidade do sistema**. É isso que dá valor à contagem.
+- **Folha de contagem**: a lista do que contar num inventário, com o que já foi contado.
+- **Lançamento de contagem**: por produto (e lote, no modo lote; e remessa, no local consignado) a **quantidade
+  contada** — zero vale — ou, no modo série, **as séries encontradas**. Cada lançamento guarda o momento e o
+  saldo do sistema **daquele instante**: a movimentação **não para** durante o inventário.
+- **Recontagem**: lançar de novo a mesma linha substitui a contagem anterior (e o momento dela).
+- **Foto das séries**: no primeiro lançamento de série de um produto num local, o sistema registra as séries
+  que deveriam estar ali **naquele instante**. As encontradas marcam a foto; lançar **nenhuma** encontrada
+  também vale (só grava a foto).
+- **Revisão**: para quem fecha — contado × esperado, a **diferença** de cada linha (sobra ou falta) e, com o
+  acesso de ver custo, o **valor** da diferença.
+- **Fechamento por diferença**: cada diferença vira um **ajuste** sobre o saldo **de agora** (não sobre o da
+  contagem), ao custo médio, com o inventário como motivo; no local consignado o ajuste é da remessa e **sem
+  custo**. Produto não contado não é ajustado.
+- **Linha a recontar**: se, desde a contagem, saiu material e o ajuste deixaria o saldo negativo, a linha volta
+  para **recontagem** e **nada** é ajustado até recontar.
+- **Série não encontrada**: série da foto que continua registrada no local vira **perda**. Se estiver
+  **reservada** para um agendamento, o fechamento é bloqueado até liberar a reserva. Série que chegou ou saiu
+  do local depois da contagem não é perda.
+- **Revisão manual**: série encontrada que **não estava na foto** (de outro local ou sem registro) não entra
+  sozinha — a gestão confere a origem.
+- **Relatório de inventário**: o estoque **numa data** (padrão: **31/12 do ano anterior**), reconstruído pelo
+  kardex, ao **custo médio daquela data**, por unidade ou consolidado, em **três grupos separados**: **próprio**
+  (nos locais), **próprio em poder de terceiros** (os empréstimos em aberto, a quem) e **de terceiros em poder
+  da clínica** (o consignado, por fornecedor e remessa, **sem valor**). Total por grupo e geral (o geral soma só
+  os dois grupos próprios); lote e validade nas observações. Não aceita data **antes do início do kardex** (a
+  migração do saldo) nem no futuro.
+- **Quem é obrigado ao Livro Registro de Inventário**: empresa no **lucro presumido** (Lei 8.981/1995, art. 45)
+  e no **lucro real** (RIR/2018, art. 276 — inclui os bens de almoxarifado); no **Simples Nacional**, só quem é
+  **contribuinte do ICMS** (Resolução CGSN 140/2018, art. 63). A avaliação é ao **custo de aquisição** (custo
+  médio), sem ajuste a valor de mercado. A escrituração deve ser feita em até **60 dias** do balanço (ou do
+  último dia do ano, para quem não tem escrita contábil) — Convênio SINIEF s/nº de 1970, art. 76, o Modelo 7. A
+  escrituração é do **contador**.
+
 **Agenda e avisos**
 - **Reserva**: material separado para um **agendamento** — por quantidade (o lote é escolhido no consumo) ou
   por série (aquela unidade). A data e a unidade vêm do agendamento.
@@ -202,6 +245,18 @@ Para achar o local, use a ferramenta de configuração. Buscar pelo nome exige t
 - Registrar a remessa, devolver ao fornecedor e marcar consumo como **reposto** → ferramenta de **operação do
   consignado**. Com o consignado desligado, a ferramenta avisa — ligar é da gestão.
 
+**Inventário (contar pede o acesso de movimentar; abrir, revisar, fechar e cancelar, o de ajustar)**
+- Os inventários (abertos, fechados, cancelados), a **folha de contagem**, a **revisão** e o **relatório de
+  inventário** numa data → ferramenta de **consulta do inventário**. A folha nunca traz o saldo do sistema; o
+  relatório vem **resumido** (por grupo, totais, por local e as primeiras linhas) — o arquivo completo (CSV) e
+  o PDF saem da tela de relatórios do estoque.
+- **Abrir** o inventário (locais e, se quiser, só alguns produtos), **lançar a contagem**, **fechar** e
+  **cancelar** → ferramenta de **operação do inventário**. A prévia do fechamento mostra a revisão resumida (o
+  que vai virar ajuste, perda ou revisão manual) — mostre, confirme e só então feche. A resposta de uma contagem
+  só diz **quantas linhas entraram**.
+- O **regime tributário** da clínica (para dizer se ela é obrigada ao livro) está na configuração fiscal → skill
+  `financeiro`, se quem pergunta tiver acesso; sem ele, dê a regra geral.
+
 **Fora da IA:** marcar um alerta como "já avisado" é do time de avisos; anexar a **foto da etiqueta** do
 implante é pela tela.
 
@@ -254,6 +309,35 @@ implante é pela tela.
 4. Produto com pendência de custo está com custo 0 até a gestão corrigir — avise que o valor está incompleto
    e, se quem pergunta tem o acesso, ofereça corrigir (simulação, confirmação, gravação).
 
+### "Vamos fazer o inventário" (contagem cega)
+1. Com o acesso de ajustar, **abra** o inventário nos locais escolhidos (e, se for parcial, os produtos). Já
+   havendo um aberto no local, feche ou cancele aquele antes.
+2. Para quem vai contar, mostre só a **folha de contagem**. **Não consulte nem mostre o saldo, o extrato ou a
+   revisão** a quem conta — isso desfaz a contagem cega.
+3. Lance o que está na prateleira, por local: a **quantidade** (zero, se não achou nada), o **lote** lido na
+   embalagem (modo lote), a **remessa** (local consignado) ou, no modo série, **as séries encontradas** — lido
+   no leitor ou digitado, **nunca inventado**. Não achou nenhuma série? Lance a lista **vazia**.
+4. Errou ou ficou em dúvida? **Reconte**: lançar de novo a mesma linha substitui a anterior.
+5. Quem fecha olha a **revisão**: sobras, faltas e, com o acesso de ver custo, o valor. Diferença grande? Peça
+   recontagem antes de fechar.
+6. **Feche** com prévia e confirmação. Se vier "reconte antes de fechar", alguém tirou material depois da
+   contagem: reconte as linhas indicadas. Série reservada não encontrada: libere a reserva do agendamento (ou
+   ache a série) antes. Séries em **revisão manual** não entram sozinhas — confira a origem.
+7. Fechado não reabre. Desistiu antes de fechar? **Cancele** (nada é movimentado).
+
+### "Preciso do inventário de 31/12 para o contador"
+1. Peça o **relatório de inventário** da data (sem data = 31/12 do ano anterior), por **unidade** ou consolidado
+   — empresa **sem escrita contábil** levanta o inventário **em cada estabelecimento** no último dia do ano; na
+   dúvida, pergunte ao contador.
+2. Os valores exigem o acesso de **ver custo**; sem ele, o relatório vem só com as quantidades — diga isso, não
+   responda zero.
+3. Leia os **avisos** antes de entregar: **pendência de custo** deixa o valor incompleto (corrija primeiro) e o
+   **consignado** sai sem valor (é bem do fornecedor).
+4. Explique os **três grupos** e que o total geral é só do que é **próprio**.
+5. Diga **quem é obrigado** (lucro presumido e real; Simples só se contribuinte do ICMS) e o prazo de **60 dias**
+   do balanço; se tiver acesso à configuração fiscal, confira o regime da clínica.
+6. O arquivo (CSV) e o PDF saem da tela de relatórios do estoque; **escriturar o livro é do contador**.
+
 ### "O que vence este mês?" / "O que está faltando?"
 1. Peça os alertas (ou o saldo com "vence até").
 2. Responda por severidade: vencido primeiro (sai por perda/vencimento), depois perto de vencer e abaixo do
@@ -274,11 +358,17 @@ implante é pela tela.
 - **Custo nunca se inventa nem se estima**: vem da nota ou de quem comprou. Sem o acesso de ver custo, os
   valores **faltam** — não são zero.
 - **Um só custo médio por produto na clínica**; a saída mantém o médio; o consignado fica fora dele.
+- **Contagem é cega**: a quem conta, só a folha — nunca o saldo nem a revisão.
+- **Inventário fecha por diferença sobre o saldo de agora**, tudo ou nada; **fechado não reabre**. Produto não
+  contado não é ajustado.
+- **Série que sumiu vira perda; série achada sem registro vai para revisão manual** — nunca entra sozinha.
 
 ## Limites / o que esta skill NÃO cobre
 - **Cadastro do produto** (preço, modo de controle, marcações, classe de risco) → `precificador`.
-- **Nota fiscal de entrada (NF-e), kits por procedimento (e a margem prevista), inventário e faturamento de
-  material no convênio** — chegam em ciclos próprios e serão acrescentados aqui quando existirem.
+- **Nota fiscal de entrada (NF-e), kits por procedimento (e a margem prevista) e faturamento de material no
+  convênio** — chegam em ciclos próprios e serão acrescentados aqui quando existirem.
+- **Escrituração do Livro Registro de Inventário** (termos, visto do fisco, escrituração fiscal digital) → contador.
+  Laudo de perda por vencimento e inventário rotativo automático (por curva ABC) não existem hoje.
 - **Margem e ponto de equilíbrio** com o material → `financeiro`. Rateio de custo fixo não é custo do material.
 - **Temperatura e medicamentos controlados**: o produto só **marca** isso hoje; não há registro nem livro.
 - **Pagar o fornecedor** → `financeiro`. **Comportamento do time de avisos** → `designer-agentes`.

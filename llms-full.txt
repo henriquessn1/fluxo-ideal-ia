@@ -18,9 +18,9 @@
 - [designer-documentos](https://fluxoideal.com/skills/designer-documentos/SKILL.md): desenhar e gerir documentos — templates (sistema × design), conteúdo/versão, simular, publicar e documentos gerados por paciente.
 - [designer-mensageria](https://fluxoideal.com/skills/designer-mensageria/SKILL.md): a AUTORIA da comunicação com o paciente — desenhar templates, gerir canais (WhatsApp/HSM, e-mail) e a aprovação de HSM. (Disparar é `comunicacao-paciente`.)
 - [comunicacao-paciente](https://fluxoideal.com/skills/comunicacao-paciente/SKILL.md): o envio GOVERNADO ao paciente — usar um template pronto para enviar um e-mail agora ou programar uma mensagem automática (quiet-hours, teto, idempotência) e checar a entrega.
-- [financeiro](https://fluxoideal.com/skills/financeiro/SKILL.md): o dinheiro depois da venda — pagamentos, parcelas, contas a receber/pagar, caixa, fluxo de caixa, ponto de equilíbrio e nota fiscal (NFS-e).
+- [financeiro](https://fluxoideal.com/skills/financeiro/SKILL.md): o dinheiro depois da venda — pagamentos, parcelas, contas a receber/pagar, caixa, fluxo de caixa, ponto de equilíbrio e margem com o material, e nota fiscal (NFS-e).
 - [faturamento-convenio](https://fluxoideal.com/skills/faturamento-convenio/SKILL.md): o financeiro de convênio (TISS) — faturar guias/lotes, importar o demonstrativo da operadora, tratar glosas e recorrer.
-- [estoque](https://fluxoideal.com/skills/estoque/SKILL.md): o estoque rastreável — saldo por unidade e local, lote/validade e nº de série (FEFO, lote vencido bloqueado), físico × reservado × disponível, consumo de material no paciente e vínculo de implante (etiqueta da RDC 556/2021, UDI da classe IV), consignado com prazo por remessa, reserva para o agendamento e alertas de validade/mínimo (time estoque-avisos).
+- [estoque](https://fluxoideal.com/skills/estoque/SKILL.md): o estoque rastreável — saldo por unidade e local, lote/validade e nº de série (FEFO, lote vencido bloqueado), físico × reservado × disponível, consumo de material no paciente e vínculo de implante (etiqueta da RDC 556/2021, UDI da classe IV), consignado com prazo por remessa, reserva para o agendamento, alertas de validade/mínimo (time estoque-avisos) e o custo do material (custo na entrada, custo médio móvel, extrato valorizado).
 - [designer-agentes](https://fluxoideal.com/skills/designer-agentes/SKILL.md): como se desenha o comportamento de um agente de IA — persona, capacidades, gatilhos e modo (LLM × script).
 - [conversas](https://fluxoideal.com/skills/conversas/SKILL.md): atender e triar o relacionamento via tickets/filas — atribuição, resolução (com CSAT), transferência, observadores, notas internas e detecção de frustração.
 - [pesquisas-satisfacao](https://fluxoideal.com/skills/pesquisas-satisfacao/SKILL.md): medir satisfação (CX/NPS) — a pesquisa e seus gatilhos, funil de convites, reenviar/antecipar e resultados agregados.
@@ -2100,10 +2100,10 @@ conteúdo por canal em **prévia** → conferir os `{{placeholders}}` e a polít
 
 ---
 name: estoque
-description: O estoque rastreável da clínica no Fluxo Ideal — saldo por unidade e local, lote/validade e nº de série, FEFO, consumo de material no paciente e vínculo de implante (etiqueta da RDC 556/2021, UDI da classe IV), material consignado com prazo, reserva para procedimento agendado e alertas de validade/mínimo. Use para "quanto tem da lente X na unidade Y?", "o que vence este mês?", "lança o material da cirurgia", "reserva a prótese para amanhã", "quais implantes esse paciente recebeu?".
+description: O estoque rastreável da clínica no Fluxo Ideal — saldo por unidade e local, lote/validade e nº de série, FEFO, consumo de material no paciente e vínculo de implante (etiqueta da RDC 556/2021, UDI da classe IV), material consignado com prazo, reserva para procedimento agendado, alertas de validade/mínimo e o custo do material (custo na entrada, custo médio, extrato valorizado). Use para "quanto tem da lente X na unidade Y?", "o que vence este mês?", "lança o material da cirurgia", "reserva a prótese para amanhã", "quais implantes esse paciente recebeu?", "quanto vale o estoque?".
 audience: [ia, humano]
-depends_on: [estoque-rastreavel, consumo-material, implantes, consignado, reservas-material, alertas-estoque]
-version: 0.1.0
+depends_on: [estoque-rastreavel, consumo-material, implantes, consignado, reservas-material, alertas-estoque, custo-material]
+version: 0.2.1
 updated: 2026-10-30
 ---
 
@@ -2122,6 +2122,7 @@ ou faltar**. O estoque é a fonte da verdade do saldo; o catálogo (preço, cada
 - Ver os **implantes** de um paciente (rastreabilidade), completar o **UDI** de um implante classe IV.
 - Reservar material para um agendamento, ver e liberar reservas (inclusive as órfãs).
 - Operar o **consignado**: remessa, devolução ao fornecedor, consumo para o fornecedor faturar, listagem de OPME.
+- "Quanto custa esse material?", "quanto vale o estoque?", o extrato **valorizado** de um produto.
 
 ## Quando NÃO usar
 - Cadastrar o produto, mudar o preço, o modo de controle ou as marcações (implantável, consignável, classe de
@@ -2129,6 +2130,7 @@ ou faltar**. O estoque é a fonte da verdade do saldo; o catálogo (preço, cada
 - Ler prontuário, evolução ou conduta → nunca pela IA (ver `medico`). O vínculo de implante é rastreabilidade do
   material, não conteúdo clínico.
 - Pagar o fornecedor, conta a pagar → `financeiro`. Faturar material no convênio (TISS) → `faturamento-convenio`.
+- A **margem** do procedimento com o material e o ponto de equilíbrio → `financeiro` (o estoque só dá o custo).
 - Mudar o comportamento do time de avisos do estoque → `designer-agentes`.
 
 ## Modelo mental
@@ -2150,7 +2152,7 @@ ou faltar**. O estoque é a fonte da verdade do saldo; o catálogo (preço, cada
         └─► alertas: validade vencida/próxima · abaixo do mínimo · prazo do consignado
 ```
 
-Quatro ideias sustentam tudo:
+Cinco ideias sustentam tudo:
 - **O saldo é derivado dos movimentos.** Ninguém digita o saldo: ele resulta do **kardex** (o extrato de
   movimentos), e movimento **nunca se apaga** — corrige-se com **estorno** (o movimento inverso).
 - **O produto diz como ele é controlado.** Por **quantidade**, por **lote** (com validade) ou por **nº de
@@ -2158,7 +2160,10 @@ Quatro ideias sustentam tudo:
 - **Disponível ≠ físico.** O físico é o que está no local; a **reserva** para um agendamento não é movimento,
   só separa: **disponível = físico − reservado**. O consumo e as outras reservas só usam o disponível.
 - **O total do produto que aparece no catálogo é projeção do estoque.** O "estoque" e o "estoque baixo" que o
-  catálogo mostra vêm daqui (com um pequeno atraso); o detalhe por local, lote e mínimo está aqui.
+  catálogo mostra vêm daqui (com um pequeno atraso); o detalhe por local, lote e mínimo está aqui. O **custo do
+  produto** no catálogo também vem daqui (é o custo médio, só leitura).
+- **O custo entra com o material e sai pela média.** Cada entrada própria traz o seu **custo unitário**; o
+  estoque mantém um **custo médio** por produto, e tudo o que sai (consumo, perda) sai por esse médio.
 
 ## Glossário
 
@@ -2205,6 +2210,34 @@ Quatro ideias sustentam tudo:
   fica *aguardando* ou *reposta*.
 - **Listagem de OPME**: o saldo consignado atual por fornecedor, que o Fisco pode pedir.
 
+**Custo do material**
+- **Custo unitário da entrada**: o custo de aquisição de cada unidade — preço de compra **menos** descontos,
+  **mais** frete e seguro até a clínica e os tributos da compra que a clínica **não recupera** (juros da compra
+  a prazo ficam fora). É **obrigatório** na entrada própria; pode ser 0. O valor vem da nota ou de quem
+  comprou — **nunca se estima**.
+- **Custo médio (média móvel)**: um só por **produto na clínica** (todas as unidades e locais, saldo próprio,
+  inclusive o emprestado). É **recalculado a cada entrada**, ponderado pelas quantidades; **saídas,
+  transferências, empréstimos e ajustes saem ao médio vigente e não o mudam**. A perda sai ao médio e é
+  despesa do período.
+- **Estorno e custo**: estornar uma **saída** devolve o custo que ela levou; estornar uma **entrada** tira o
+  custo dela do médio — e é **recusado** se aquele material já saiu (o saldo próprio ou o valor ficariam
+  negativos). Um custo digitado errado se corrige assim: estorno da entrada e entrada nova.
+- **Consignado não tem custo médio**: é bem do fornecedor. O **consumo de consignado** nasce **aguardando
+  faturamento** (sem custo); quando o fornecedor fatura, vira **faturado à clínica** (o custo da nota vai
+  direto naquele consumo, sem passar pela média) ou **faturado à fonte pagadora** (custo zero para a clínica).
+- **Extrato valorizado**: cada movimento mostra o custo unitário, o valor e o custo médio depois dele. O
+  **saldo em valor** é do **produto** (todas as unidades); filtrando por local, é a quantidade do local × o
+  médio.
+- **Pendência de custo**: material que entrou sem custo (estoque anterior ao custo, produto sem custo no
+  catálogo) ficou com custo 0 e aparece na lista de **pendências de custo** (na tela e pelo assistente), para a
+  gestão corrigir.
+  Produto que nunca teve custo **não tem médio**: as saídas dele ficam sem custo (não se inventa).
+- **Ver custo é um acesso à parte** (gestão e financeiro). Sem ele, saldo, extrato e resumo saem **sem os
+  valores**. Quem só movimenta **digita** o custo na entrada, mas não o vê nas listas. O custo do produto no
+  catálogo segue a mesma regra.
+- **Consumo ligado à venda**: o material do ato fica ligado ao **item** da venda e o dos "Materiais do
+  atendimento" à **venda** — é assim que o custo chega à margem.
+
 **Agenda e avisos**
 - **Reserva**: material separado para um **agendamento** — por quantidade (o lote é escolhido no consumo) ou
   por série (aquela unidade). A data e a unidade vêm do agendamento.
@@ -2229,6 +2262,9 @@ Para achar o local, use a ferramenta de configuração. Buscar pelo nome exige t
 - "O que está vencendo / faltando?" → ferramenta de **alertas** (por tipo, com severidade e dias restantes);
   na mesma ferramenta, a visão dos **mínimos** por local com o físico atual.
 - Configuração do estoque e os **locais** de cada unidade → ferramenta de **configuração**.
+- Com o acesso de **ver custo**, o saldo, o resumo e o extrato trazem o **custo médio**, o custo de cada
+  movimento e o **valor** — use-os para "quanto vale o estoque?" e "quanto custou esse material?". Sem ele os
+  valores não vêm: diga que falta o acesso, **não** responda zero.
 
 **Gerir (acesso de gestão do estoque)**
 - Configurar o estoque (unidade principal, consignado ligado/prazo, antecedência dos alertas), criar/editar
@@ -2236,7 +2272,15 @@ Para achar o local, use a ferramenta de configuração. Buscar pelo nome exige t
 - **Movimentar** → ferramenta de **movimentação**: entrada, transferência entre locais, empréstimo (a quem) e a
   devolução dele, **ajuste** (informe a quantidade **contada**; o sistema lança a diferença), **perda** (perda,
   vencimento ou avaria) e **estorno** de um movimento. Entrada, transferência, empréstimo e entregas pedem o
-  acesso de **movimentar**; ajuste, perda e estorno pedem o de **ajustar** (mais restrito).
+  acesso de **movimentar**; ajuste, perda e estorno pedem o de **ajustar** (mais restrito). A **entrada própria
+  exige o custo unitário** — pergunte se não veio; **0 só** para doação ou bonificação. As ações que saem ao
+  custo médio (transferência, empréstimo, ajuste, perda, estorno) **não recebem custo**; a remessa consignada
+  também não.
+- **Pendências de custo** (entradas que ficaram com custo 0 por falta de custo) → ferramenta que **lista as
+  pendências de custo** (pede o acesso de ver custo). **Corrigir o custo** de uma entrada pendente →
+  ferramenta de **correção de custo**: pede o acesso de **ajustar** e o de **ver custo**, mostra a simulação
+  primeiro e só grava confirmado; o custo médio se refaz sozinho. Só vale para entrada **pendente** — custo
+  errado em outra entrada se corrige por estorno e entrada nova.
 - **Entregas pendentes** da venda → ferramenta de entregas pendentes (listar) e a movimentação (entregar com
   série/lote e UDI, ou cancelar).
 
@@ -2294,6 +2338,22 @@ implante é pela tela.
 4. Para o fornecedor faturar: o relatório de consumo; quando ele repõe, marque como **reposto** (com a NF).
    O que não foi usado volta por **devolução ao fornecedor**, antes do prazo.
 
+### "Chegou material" (entrada com custo)
+1. Ache o produto e o local; confira o modo de controle (lote e validade? séries?).
+2. Pergunte o **custo unitário** de aquisição, se não veio: preço − descontos + frete/seguro + tributos que a
+   clínica não recupera, dividido pela quantidade. Na dúvida sobre o que entra no custo, peça ao contador —
+   não estime.
+3. Mostre a prévia (quantidade, lote/séries, custo) e grave confirmado. O custo médio do produto se recalcula
+   sozinho.
+4. Custo errado já gravado: estorne a entrada (se o material ainda não saiu) e lance de novo.
+
+### "Quanto vale o estoque?" / "Quanto custa esse material?"
+1. Precisa do acesso de **ver custo**; sem ele, diga que os valores não estão disponíveis para quem pergunta.
+2. Valor do produto = saldo próprio × custo médio (todas as unidades). Por local = quantidade do local × médio.
+3. O **consignado não entra** no valor da clínica (é do fornecedor).
+4. Produto com pendência de custo está com custo 0 até a gestão corrigir — avise que o valor está incompleto
+   e, se quem pergunta tem o acesso, ofereça corrigir (simulação, confirmação, gravação).
+
 ### "O que vence este mês?" / "O que está faltando?"
 1. Peça os alertas (ou o saldo com "vence até").
 2. Responda por severidade: vencido primeiro (sai por perda/vencimento), depois perto de vencer e abaixo do
@@ -2311,11 +2371,15 @@ implante é pela tela.
   consignados. O prazo de uso é por remessa.
 - **Reserva não é movimento** — não aparece no kardex; o estorno de um consumo não reabre a reserva.
 - **Toda escrita com prévia e confirmação** — movimento de estoque é registro de rastreabilidade.
+- **Custo nunca se inventa nem se estima**: vem da nota ou de quem comprou. Sem o acesso de ver custo, os
+  valores **faltam** — não são zero.
+- **Um só custo médio por produto na clínica**; a saída mantém o médio; o consignado fica fora dele.
 
 ## Limites / o que esta skill NÃO cobre
 - **Cadastro do produto** (preço, modo de controle, marcações, classe de risco) → `precificador`.
-- **Nota fiscal de entrada (NF-e), custo do material, kits por procedimento, inventário e faturamento de
+- **Nota fiscal de entrada (NF-e), kits por procedimento (e a margem prevista), inventário e faturamento de
   material no convênio** — chegam em ciclos próprios e serão acrescentados aqui quando existirem.
+- **Margem e ponto de equilíbrio** com o material → `financeiro`. Rateio de custo fixo não é custo do material.
 - **Temperatura e medicamentos controlados**: o produto só **marca** isso hoje; não há registro nem livro.
 - **Pagar o fornecedor** → `financeiro`. **Comportamento do time de avisos** → `designer-agentes`.
 - Não expõe como o estoque é calculado ou guardado por dentro — só como **consultá-lo, operá-lo e pensá-lo**.
@@ -2428,8 +2492,8 @@ Há **duas naturezas de escrita**, e a fronteira entre elas é a lente-mestra:
 name: financeiro
 description: O ciclo do DINHEIRO depois da venda no Fluxo Ideal — receber (parcelas, contas a receber, aging/DSO/inadimplência), pagar (despesas, fornecedores, recorrências), o caixa (saldo, conferência, frente de caixa) e a saúde financeira (fluxo de caixa projetado, ponto de equilíbrio). Use para responder "quanto entrou / quanto a clínica deve / tem dinheiro em caixa / vai empatar?".
 audience: [ia, humano]
-depends_on: [pagamentos, contas-receber, contas-pagar, caixa, indicadores-financeiros]
-version: 0.7.1
+depends_on: [pagamentos, contas-receber, contas-pagar, caixa, indicadores-financeiros, custo-material]
+version: 0.8.0
 updated: 2026-10-30
 ---
 
@@ -2456,7 +2520,8 @@ cuida do *dinheiro efetivamente circulando*.
   próprio (lote, retorno da operadora, glosa, recurso). Trate **conceitualmente** aqui e
   deixe o detalhe para a skill `faturamento-convenio`.
 - **Estoque** (quanto tem, onde, o que vence, o extrato de um material) → skill `estoque`. Neste papel a IA
-  só **lê** o estoque; movimentar, ajustar, reservar e operar o consignado são da gestão do estoque.
+  só **lê** o estoque — com o acesso de **ver custo**, também o custo médio e o valor; movimentar, ajustar,
+  reservar e operar o consignado são da gestão do estoque.
 
 ## Modelo mental
 
@@ -2546,6 +2611,18 @@ Três ideias sustentam tudo:
   entradas e saídas previstas ao saldo atual.
 - **Ponto de equilíbrio (break-even)**: quanto a clínica precisa **faturar** para não ter
   prejuízo — custos fixos do período ÷ margem de contribuição (a margem vem do lado das vendas).
+- **Margem de contribuição com material**: o que sobra da venda depois dos custos **variáveis** —
+  comissão, custo de terceiros e o **material**: o custo do material usado nos atos e o custo do **produto
+  vendido**, os dois ao **custo médio** do estoque (ver skill `estoque`). Sai por procedimento, por
+  profissional e por convênio.
+- **"Material sem procedimento"**: material lançado no atendimento **sem ligar a um ato** (só à venda). Ele
+  **não é rateado**: entra no total da venda e do convênio e aparece como uma linha própria
+  ("material sem procedimento") nas visões por procedimento e por profissional.
+- **Consignado na margem**: o material do fornecedor só vira custo quando ele **fatura**. Faturado à
+  clínica → entra com o custo da nota; faturado à fonte pagadora → custo zero para a clínica; **ainda
+  aguardando faturamento** → aparece **à parte** (é custo que ainda vai chegar, não zero).
+- **Material indisponível**: quando o estoque não respondeu, a margem sai **sem o material** e com o
+  aviso de material indisponível — a margem está **maior do que a real** naquele momento.
 
 **Convênio (TISS) — só o conceito**
 - **Faturamento de convênio / glosa / recurso**: cobrar da operadora, tratar o que ela
@@ -2611,7 +2688,10 @@ Três ideias sustentam tudo:
   saídas** — não é caixa zerado de entradas.
 - "Quanto preciso faturar pra empatar?" → ferramenta de **ponto de equilíbrio**. Distinga:
   *margem indisponível* (fonte de vendas fora — não calcule, não invente) de *break-even
-  indefinido de verdade* (margem ≤ 0).
+  indefinido de verdade* (margem ≤ 0). A margem já desconta o **material**; se vier o aviso de
+  **material indisponível**, o ponto de equilíbrio está **subestimado** — diga isso junto do número.
+- **Margem por procedimento, profissional ou convênio** (com a coluna de material) → o painel de
+  **indicadores** (skill `indicadores`), no aprofundamento da margem de contribuição.
 
 **Contas a receber (dinheiro dos pacientes)**
 - A **carteira de recebíveis** — **aging** (por faixa), **DSO**, **inadimplência**, visão consolidada
@@ -2713,6 +2793,17 @@ faturando o suficiente?).
    por competência) ÷ margem de contribuição.
 2. Se a margem estiver indisponível (fonte de vendas fora), **não estime** — reporte a
    indisponibilidade. Margem ≤ 0 é break-even **indefinido** (diferente de indisponível).
+3. A margem já inclui o **material**. Com o aviso de **material indisponível**, o número saiu sem o
+   material: apresente-o como **provisório** (o real é maior) e não trate o material como zero.
+
+### "Qual a margem real deste procedimento?"
+1. Abra a margem de contribuição por procedimento (painel de indicadores): preço − comissão − terceiros −
+   **material** dos atos daquele procedimento.
+2. A linha **"material sem procedimento"** é material lançado só no atendimento — não pertence a nenhum
+   procedimento; não o distribua de cabeça entre eles.
+3. **Consignado aguardando faturamento** aparece à parte: diga que a margem ainda vai cair quando o
+   fornecedor faturar.
+4. Margem baixa por causa de material? O detalhe (custo médio, extrato valorizado) é da skill `estoque`.
 
 ### "O paciente (ou quem pagou) pediu a nota fiscal"
 1. Ache a nota na fila (filtre pelo paciente) e confira o estado: só **autorizada/cancelada** tem arquivos.
@@ -2754,7 +2845,8 @@ faturando o suficiente?).
 - **Competência ≠ liquidação.** O fato econômico (a venda/despesa) e a entrada/saída de
   dinheiro têm datas próprias; o custo fixo do break-even conta pela **competência**.
 - **Indicador degradado nunca é zero.** Quando a fonte de recebíveis/margem cai, os
-  indicadores avisam e mostram cenário conservador — **não se inventa número**.
+  indicadores avisam e mostram cenário conservador — **não se inventa número**. O mesmo vale para o
+  **material** na margem: indisponível não é custo zero.
 - **Contas a pagar são da CLÍNICA**, não do paciente (despesas gerais); contas a **receber**
   são dos pacientes (parcelas em aberto). Não confunda os dois lados.
 - **Ações que tocam o paciente são outward-facing** (enviar link de assinatura, e-mail) →
@@ -2770,6 +2862,8 @@ faturando o suficiente?).
 ## Limites / o que esta skill NÃO cobre
 - **Antes** do dinheiro circular (preço, tabela, condição/forma de pagamento, orçamento,
   fechar a venda) → skill `precificador`.
+- **Custo do material** (custo na entrada, custo médio, valor do estoque) → skill `estoque`. Rateio de
+  custo fixo por procedimento e a margem **prevista** (antes do atendimento) não estão aqui.
 - **Faturamento de convênio / glosa / recurso (TISS)** — citado só conceitualmente; tem skill
   própria: `faturamento-convenio` (lote, retorno da operadora, glosa, recurso, conciliação).
 - **Conciliação com adquirente/gateway de cartão** (bater o extrato do meio de pagamento
@@ -3774,7 +3868,7 @@ name: precificador
 description: O sistema de precificação do Fluxo Ideal — como se configura preço (catálogo, tabelas, condições e formas de pagamento, favoritos) e como isso converge em orçamento e venda. Use para entender "quanto custa", como montar um orçamento e por que os valores são o que são.
 audience: [ia, humano]
 depends_on: [precos, catalogo, convenios, condicoes-pagamento, orcamentos, termos-orcamento, estoque-rastreavel]
-version: 0.6.0
+version: 0.6.1
 updated: 2026-10-30
 ---
 
@@ -3850,6 +3944,10 @@ Três ideias que sustentam tudo:
   (papel + tabela) e depois a de maior prioridade. Sem política configurada = sem restrição.
 - **Margem**: o que sobra do preço depois do **custo** do procedimento, da **comissão** do profissional e do
   custo de terceiros. **Markup** é a mesma folga vista sobre o custo.
+- **Custo do produto**: é o **custo médio** do estoque, projetado no catálogo — **só leitura** (não se digita no
+  produto; o custo entra com o material, na entrada do estoque). Ver o custo e a margem do produto pede um
+  **acesso à parte**; sem ele, o produto aparece sem esses dois campos. A margem **realizada** com o material é
+  da skill `financeiro`.
 - **No-show**: falta pode gerar **multa configurável** (confirmável, perdoável ou ajustável por quem tem alçada).
 - **Retorno**: direito de retorno já incluído (ex.: num pacote) — **não se recobra**.
 

@@ -17,9 +17,9 @@ código.
 | Agente | Quando acorda | O que faz |
 |---|---|---|
 | **Registrador de notas** | a cada pagamento recebido, parcela paga, estorno ou troca de quem pagou | decide pela tabela se nasce a **nota prevista** (o saldo de quem pagou) e mantém esse saldo em dia |
-| **Confirmador de notas** | quando um serviço é feito ou cancelado, e todo dia às **00:10** | o serviço feito vira **nota em formação** (por venda + quem pagou + dia ou mês); no fechamento, a tabela decide entre **Revisar** e **transmitir ao governo** |
+| **Confirmador de notas** | quando um serviço é feito ou cancelado, todo dia às **00:10** e à noite (18:00–23:30, de 30 em 30 min) | o serviço feito vira **nota em formação** (por venda + quem pagou + dia ou mês); no fechamento, a tabela decide entre **Revisar** e **transmitir ao governo**. Se a clínica escolheu "fechar no mesmo dia" (Configuração fiscal → Quando a nota nasce), a nota do dia fecha a partir do horário escolhido, e não só às 00:10 do dia seguinte |
 | **Enviador de notas** | quando a nota é autorizada, com repescagem a cada 15 min | decide pela tabela se **envia a nota por e-mail** a quem pagou (o mesmo envio do botão da tela) |
-| **Vigia de notas previstas** | **na hora** em que o governo recusa uma nota ou a transmissão para, e dias úteis às 8h | avisa a equipe: um cartão na Central (com o link da nota) e a notificação do Windows/navegador para quem permitiu, no minuto da recusa ou falha; e um resumo diário das recusadas, com falha, paradas em Revisar e previstas paradas. A nota também fica em **Minhas pendências** (o sininho) até alguém resolver |
+| **Vigia de notas previstas** | **na hora** em que o governo recusa uma nota ou a transmissão para, e todo dia às 8h (resumo só nos dias úteis) | avisa a equipe: um cartão na Central (com o link da nota) e a notificação do Windows/navegador para quem permitiu, no minuto da recusa ou falha; e um resumo diário das recusadas, com falha, paradas em Revisar e previstas paradas. A nota também fica em **Minhas pendências** (o sininho) até alguém resolver. Nos últimos dias do mês (inclusive fim de semana), avisa as notas que ainda não foram para o governo, com link para a Mesa; em dezembro, lembra que dinheiro recebido no ano precisa de nota no mesmo ano (malha fina do paciente) |
 
 Regras que o sistema garante, independentemente das tabelas:
 - Nota com **pendência** sempre vai para Revisar. São pendências: valor a revisar, saldo
@@ -41,7 +41,7 @@ Cada tabela é lida de cima para baixo: a primeira linha que bate decide. A últ
 
 Outros ajustes:
 - `agrupar_por`: `dia` (padrão) ou `mes`, a nota por dia de atendimento ou por mês.
-- Vigia: `avisar_na_hora` (`true`), `notificacao_do_sistema` (`true`), `alvo_papel` (`administrador`), `dias_revisao_parada` (`2`) e `dias_parada` (`15`).
+- Vigia: `avisar_na_hora` (`true`), `notificacao_do_sistema` (`true`), `alvo_papel` (`administrador`), `dias_revisao_parada` (`2`), `dias_parada` (`15`) e `dias_aviso_virada` (`3`; `0` desliga o aviso de virada do mês).
   `alvo_papel` aceita um ou mais papéis da equipe separados por vírgula (ex.: `administrador,financeiro`); cada papel
   recebe o mesmo aviso no sino da Central. Na Central, a variável abre um seletor de papéis.
 - `esperar_antes` (`false`) e `esperar_minutos` (`30`) do Enviador, para dar tempo de revisar antes do e-mail.

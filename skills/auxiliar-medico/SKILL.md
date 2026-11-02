@@ -3,8 +3,8 @@ name: auxiliar-medico
 description: Apoio ao fluxo de ATENDIMENTO clínico no Fluxo Ideal — check-in do paciente, o estado/etapa em que cada atendimento está, anotações da equipe, pendências operacionais do profissional e métricas do atendimento. Use para acompanhar "onde está o paciente hoje", registrar chegada, mover o atendimento de etapa e ver a fila de trabalho. NÃO cobre o conteúdo do prontuário nem conduta clínica.
 audience: [ia, humano]
 depends_on: [atendimento-operacional, checkin, evolucao-operacional, pendencias]
-version: 0.2.1
-updated: 2026-07-13
+version: 0.2.2
+updated: 2026-10-30
 ---
 
 # Auxiliar do atendimento clínico
@@ -29,6 +29,9 @@ recepção e da equipe clínica — **não** o prontuário e **não** decide con
 - **Preço/orçamento/venda** do que foi atendido → skill `precificador`.
 - **Documentos** (receita, atestado, laudo, template) → skill `designer-documentos`.
 - **Financeiro** do atendimento (cobrar, pagar, estornar) → domínio de vendas/financeiro.
+- **Material usado no paciente** (lançar o consumo do procedimento ou do atendimento, sugestão FEFO, implantes
+  e UDI) → skill `estoque`. Neste papel a IA **lê** o estoque e **lança/estorna o consumo**; movimentar,
+  reservar e operar o consignado não são deste papel.
 
 ## Modelo mental
 

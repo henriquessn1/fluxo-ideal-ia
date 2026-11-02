@@ -2,9 +2,9 @@
 name: precificador
 description: O sistema de precificação do Fluxo Ideal — como se configura preço (catálogo, tabelas, condições e formas de pagamento, favoritos) e como isso converge em orçamento e venda. Use para entender "quanto custa", como montar um orçamento e por que os valores são o que são.
 audience: [ia, humano]
-depends_on: [precos, catalogo, convenios, condicoes-pagamento, orcamentos, termos-orcamento]
-version: 0.5.0
-updated: 2026-10-16
+depends_on: [precos, catalogo, convenios, condicoes-pagamento, orcamentos, termos-orcamento, estoque-rastreavel]
+version: 0.6.0
+updated: 2026-10-30
 ---
 
 # Precificador
@@ -22,6 +22,8 @@ ser pago) até ele virar **orçamento** e **venda**. Precificar aqui **não é**
 - O que acontece com o dinheiro **depois** — registrar/confirmar pagamento, parcelas em aberto,
   contas a receber, caixa → skill `financeiro`; faturamento/glosa (TISS) → skill `faturamento-convenio`.
 - Agenda ou dados do paciente → skill `secretaria`.
+- **Saldo, entrada, ajuste, mínimo, lote/validade, consumo no paciente** → skill `estoque`. O catálogo só
+  **cadastra** o produto e **mostra** o saldo que vem de lá.
 
 ## Modelo mental
 
@@ -55,7 +57,8 @@ Três ideias que sustentam tudo:
 
 ## Glossário
 **Configuração**
-- **Catálogo**: o que existe — **procedimentos**, **produtos** (com estoque), **pacotes** (combos, às vezes já com retornos).
+- **Catálogo**: o que existe — **procedimentos**, **produtos** (bens físicos, controlados no estoque), **pacotes** (combos, às vezes já com retornos).
+- **Produto × estoque**: o cadastro do produto diz **como o estoque o controla** — o **modo de controle** (quantidade, lote com validade ou nº de série; não muda com saldo no estoque), as marcações **implantável**, **consignável**, **sensível a temperatura** e **controlado**, a **classe de risco** e o **registro ANVISA** (copiados do registro, nunca inferidos), fabricante, referência e código TUSS. O produto **não grava saldo nem mínimo**: a **quantidade em estoque** e o **"estoque baixo"** que o catálogo mostra são **projeção** do estoque (somente leitura, com pequeno atraso) — "estoque baixo" = algum local do produto está no mínimo ou abaixo, e o mínimo é **por local**, definido no estoque.
 - **Tabela de preço**: quanto vale, por contexto (particular / um convênio / promoção). O **mesmo item tem preços diferentes em tabelas diferentes**; cada preço pode ter valor fixo, desconto, cortesia e comissão próprios naquela tabela, e a tabela define o **limite de desconto** permitido.
 - **Condição de pagamento**: como se parcela (nº de parcelas, juros simples/composto ou descritivo). É **vinculada às tabelas** — uma tabela oferece um conjunto de condições.
 - **Forma de pagamento**: por onde se paga (pix, dinheiro, cartão, boleto, convênio), com sua regra de parcelamento.
@@ -92,7 +95,8 @@ Três ideias que sustentam tudo:
 > A execução depende de **autorização** — o MCP aplica permissão; a skill ensina a intenção e o _quando_.
 
 **Hoje, por ferramenta:**
-- Ver/gerir procedimentos, produtos e pacotes → ferramentas de catálogo.
+- Ver/gerir procedimentos, produtos e pacotes → ferramentas de catálogo. A gestão do produto **não** mexe no
+  saldo nem no mínimo: dar entrada, contar, ver por local/lote e definir o mínimo → skill `estoque`.
 - Ver e gerir as tabelas de preço → ferramentas de tabelas de preço.
 - Ver/definir o preço de um item numa tabela → ferramenta de preço de item. Além do valor/desconto,
   ela configura a **cobertura de convênio** do item: *coberto totalmente* (paciente paga R$ 0) ou
@@ -133,6 +137,7 @@ Três ideias que sustentam tudo:
 - **Não existe preço único** — resolva sempre pela **tabela** aplicável primeiro.
 - **A venda não exige orçamento** — pode ser criada direto; o orçamento é uma etapa opcional que, quando existe e é aprovada, converte em venda.
 - **Orçamento/venda são snapshot** — catálogo alterado depois não muda documento já emitido.
+- **Saldo do produto não se edita no catálogo** — é projeção do estoque; corrigir saldo é movimento no estoque.
 - **Condição de pagamento pertence à tabela** — as opções de parcelamento saem da tabela aplicada, não são livres.
 - **Coparticipação preserva o valor cheio** — muda o rateio, não o preço do item.
 - **Cobertura ≠ desconto** — R$ 0 ao paciente ainda gera receita (do convênio).
@@ -143,4 +148,5 @@ Três ideias que sustentam tudo:
 ## Limites
 - Não cobre o **ciclo do dinheiro** (registrar/confirmar pagamento, parcelas, contas a receber, caixa) → `financeiro`; **faturamento/glosa TISS** → `faturamento-convenio`.
 - Não cobre agenda/paciente → `secretaria`.
+- Não cobre o **estoque** (saldo, movimentos, mínimo por local, lote/série, consumo, consignado) → `estoque`.
 - Não expõe como preços são calculados/armazenados por dentro — só como **configurá-los, usá-los e pensá-los**.

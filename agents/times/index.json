@@ -47,6 +47,17 @@
       "manifesto": "agents/times/confirmacao-presenca/manifest.json"
     },
     {
+      "chave": "estoque-avisos",
+      "nome": "Avisos do estoque",
+      "descricao": "Uma vez por dia útil, avisa a equipe sobre material vencido ou perto de vencer, saldo abaixo do mínimo e consignado perto do prazo.",
+      "versao": "1.0",
+      "agentes": 1,
+      "tipos": [
+        "script"
+      ],
+      "manifesto": "agents/times/estoque-avisos/manifest.json"
+    },
+    {
       "chave": "jornada-avisos",
       "nome": "Avisos da jornada",
       "descricao": "Avisa a equipe quando uma etapa da jornada do paciente passa do prazo.",

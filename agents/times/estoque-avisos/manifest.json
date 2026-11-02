@@ -1,0 +1,115 @@
+{
+  "chave": "estoque-avisos",
+  "versao": "1.0",
+  "nome": "Avisos do estoque",
+  "descricao": "Uma vez por dia útil, avisa a equipe sobre material vencido ou perto de vencer, saldo abaixo do mínimo e consignado perto do prazo.",
+  "escopo": "por-tenant",
+  "roles": [
+    {
+      "nome": "botfn-estoque-avisos",
+      "grants": [
+        "estoque:ler",
+        "notificacao:enviar",
+        "notificacao:broadcast"
+      ]
+    }
+  ],
+  "agentes": [
+    {
+      "chave": "estoque_avisos",
+      "descricao": "Junta os alertas novos do estoque num resumo, avisa os papéis escolhidos e marca o que já foi avisado.",
+      "tipo": "script",
+      "roles": [
+        "botfn-estoque-avisos"
+      ],
+      "triggers": [
+        {
+          "cron": "0 8 * * 1-5",
+          "tz": "America/Sao_Paulo",
+          "enabled": true
+        }
+      ],
+      "config": {
+        "script": "// estoque_avisos — agente `script`. Comportamento = ESTE arquivo (DADO), nunca código de serviço.\n//\n// Agendado (padrão: dia útil às 8h, fuso da clínica — a clínica muda em \"Quando roda\"):\n//   1. lista os alertas do estoque que a equipe ainda NÃO recebeu (listar_alertas);\n//   2. guarda só os tipos ligados em `config.tipos`; sem nada, sai limpo;\n//   3. manda UM resumo por papel de `config.papeis_destino` (ou para todos os conectados, com\n//      `config.avisar_todos`): contagem por severidade/tipo + as primeiras linhas (produto, local,\n//      lote/validade ou remessa/prazo, quantidade/mínimo). Os alertas não trazem dado de paciente;\n//   4. SÓ se o aviso chegou a todos os destinos, marca as chaves como avisadas (marcar_avisados, até\n//      500 por chamada). Aviso que falha NÃO marca: na próxima rodada o alerta volta.\n//\n// Falha visível: listar ou avisar que falha sai com log WARNING e `acao_bloqueada` no resumo.\n// O resumo (result) só leva contagens e flags.\n//\n// Injetados: event, config, context, call() -> {ok,status_code,body}, log(), result().\n\nvar cfg = config || {};\nvar TIPOS = ['validade_vencida', 'validade_proxima', 'abaixo_minimo', 'consignado_prazo_vencido', 'consignado_prazo_proximo'];\nvar ROTULO = {\n  validade_vencida: ['lote vencido', 'lotes vencidos'],\n  validade_proxima: ['lote perto de vencer', 'lotes perto de vencer'],\n  abaixo_minimo: ['item abaixo do mínimo', 'itens abaixo do mínimo'],\n  consignado_prazo_vencido: ['remessa consignada com prazo vencido', 'remessas consignadas com prazo vencido'],\n  consignado_prazo_proximo: ['remessa consignada perto do prazo', 'remessas consignadas perto do prazo']\n};\nvar LOTE_MARCAR = 500;\n\nfunction num(v, d) { return (v !== undefined && v !== null && v !== '' && !isNaN(Number(v))) ? Number(v) : d; }\nfunction ligado(v) { return !(v === false || v === 'false' || v === 0 || v === '0'); }\nfunction unwrap(r) {\n  if (!r || !r.ok) return null;\n  var b = r.body;\n  return (b && b.data !== undefined) ? b.data : b;\n}\n\n// config.tipos: objeto {tipo: bool} (padrão do manifesto), lista de tipos ou texto \"a,b\". Ausente = todos.\nfunction tiposLigados(t) {\n  var on = {};\n  var i;\n  if (t === undefined || t === null || t === '') { for (i = 0; i < TIPOS.length; i++) on[TIPOS[i]] = true; return on; }\n  if (typeof t === 'string') t = t.split(',');\n  if (Array.isArray(t)) {\n    for (i = 0; i < t.length; i++) { var k = String(t[i]).trim(); if (k) on[k] = true; }\n    return on;\n  }\n  for (i = 0; i < TIPOS.length; i++) on[TIPOS[i]] = (t[TIPOS[i]] === undefined) ? true : ligado(t[TIPOS[i]]);\n  return on;\n}\n// config.papeis_destino: \"administrador,estoque\" (o campo de papéis da Central) ou lista.\nfunction papeisDe(v) {\n  var lista = Array.isArray(v) ? v : String(v || '').split(',');\n  var out = [];\n  for (var i = 0; i < lista.length; i++) {\n    var p = String(lista[i]).trim();\n    if (p && out.indexOf(p) < 0) out.push(p);\n  }\n  return out;\n}\n\nfunction qtd(v) {\n  var n = Number(v);\n  if (v === null || v === undefined || isNaN(n)) return '?';\n  return String(Math.round(n * 100) / 100).replace('.', ',');\n}\nfunction dataBr(iso) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})/.exec(String(iso || ''));\n  return m ? (m[3] + '/' + m[2] + '/' + m[1]) : '';\n}\nfunction quando(dias, verboFuturo, verboPassado) {\n  if (dias === null || dias === undefined || isNaN(Number(dias))) return '';\n  var d = Number(dias);\n  if (d < 0) return verboPassado + ' há ' + (-d) + (d === -1 ? ' dia' : ' dias');\n  if (d === 0) return verboFuturo + ' hoje';\n  return verboFuturo + ' em ' + d + (d === 1 ? ' dia' : ' dias');\n}\nfunction corta(s, n) { s = String(s || ''); return s.length > n ? s.substring(0, n - 1) + '…' : s; }\n\nfunction linha(a) {\n  var t = a.tipo;\n  var prod = a.produto_nome || 'Produto sem nome';\n  var local = a.local_nome ? (' · ' + a.local_nome) : '';\n  if (t === 'validade_vencida' || t === 'validade_proxima') {\n    var lote = a.lote_numero ? (' · lote ' + a.lote_numero) : '';\n    var val = dataBr(a.lote_validade);\n    var q = quando(a.dias_restantes, 'vence', 'venceu');\n    return (t === 'validade_vencida' ? 'Vencido: ' : 'Vence logo: ') + prod + local + lote +\n      (val ? ' · validade ' + val : '') + (q ? ' (' + q + ')' : '') + ' · ' + qtd(a.quantidade) + ' no local';\n  }\n  if (t === 'abaixo_minimo') {\n    return (a.severidade === 'critico' ? 'Sem saldo: ' : 'Abaixo do mínimo: ') + prod + local +\n      ' · ' + qtd(a.quantidade) + ' de mínimo ' + qtd(a.minimo);\n  }\n  // consignado: a remessa tem vários itens, então não há produto\n  var rem = 'Remessa' + (a.nf_numero ? ' NF ' + a.nf_numero : '') + (a.fornecedor_nome ? ' (' + a.fornecedor_nome + ')' : '');\n  var prazo = dataBr(a.prazo_ate);\n  var q2 = quando(a.dias_restantes, 'vence', 'venceu');\n  return (t === 'consignado_prazo_vencido' ? 'Consignado vencido: ' : 'Consignado perto do prazo: ') + rem +\n    (prazo ? ' · prazo ' + prazo : '') + (q2 ? ' (' + q2 + ')' : '') + ' · ' + qtd(a.quantidade) + ' em saldo';\n}\nfunction plural(n, par) { return n + ' ' + (n === 1 ? par[0] : par[1]); }\n\nvar on = tiposLigados(cfg.tipos);\nvar papeis = papeisDe(cfg.papeis_destino);\nvar avisarTodos = cfg.avisar_todos === true || cfg.avisar_todos === 'true';\nvar maxLinhas = Math.max(0, Math.min(num(cfg.max_linhas, 10), 30));\nvar link = cfg.link || '/financeiro/estoque';\nvar resumo = { alertas: 0, avisados: 0, marcados: 0, ignorados: 0, destinos: 0, falhas_aviso: 0 };\n\n// ---- 1) alertas ainda não avisados ----\nvar r = call('listar_alertas', {});\nvar corpo = unwrap(r);\nif (!corpo || !Array.isArray(corpo.itens)) {\n  var http = (r && r.status_code) || null;\n  log('estoque_avisos: FALHA ao listar os alertas (HTTP ' + (http || '?') + ')', 'warning');\n  resumo.acao_bloqueada = true; resumo.etapa = 'listar_alertas'; resumo.http = http;\n  if (r && r.ok) resumo.erro = 'formato_inesperado';\n  result(resumo);\n  return { ok: false, erro: 'listar_falhou', http: http };\n}\n\n// ---- 2) só os tipos ligados ----\nvar itens = [];\nfor (var i = 0; i < corpo.itens.length; i++) {\n  var a = corpo.itens[i];\n  if (a && a.chave && on[a.tipo]) itens.push(a);\n}\n// Contagem: `por_tipo` conta tudo, mesmo com a lista truncada (teto de 1000).\nvar conta = {};\nvar total = 0;\nfor (var t = 0; t < TIPOS.length; t++) {\n  var tp = TIPOS[t];\n  if (!on[tp]) continue;\n  var n = (corpo.por_tipo && corpo.por_tipo[tp] !== undefined) ? num(corpo.por_tipo[tp], 0) : 0;\n  if (!corpo.por_tipo) { n = 0; for (var j = 0; j < itens.length; j++) if (itens[j].tipo === tp) n++; }\n  if (n) { conta[tp] = n; total += n; }\n}\nresumo.alertas = total;\nresumo.na_lista = itens.length;\nresumo.por_tipo = conta;\nif (corpo.truncado) resumo.truncado = true;\nif (!itens.length) {\n  log('estoque_avisos: nenhum alerta novo');\n  result(resumo);\n  return { ok: true, alertas: 0 };\n}\n\nif (!avisarTodos && !papeis.length) {\n  log('estoque_avisos: nenhum papel em papeis_destino — ninguém foi avisado', 'warning');\n  resumo.acao_bloqueada = true; resumo.etapa = 'papeis_destino'; resumo.erro = 'sem_destino';\n  result(resumo);\n  return { ok: false, erro: 'sem_destino' };\n}\n\n// ---- 3) um resumo: críticos primeiro (a lista já vem na ordem: crítico, dias, produto) ----\nvar criticos = [], avisos = [];\nvar CRIT = { validade_vencida: 1, consignado_prazo_vencido: 1 };\nfor (var c = 0; c < TIPOS.length; c++) {\n  var tc = TIPOS[c];\n  if (!conta[tc]) continue;\n  if (tc === 'abaixo_minimo') {\n    var zerados = 0;\n    for (var z = 0; z < itens.length; z++) if (itens[z].tipo === 'abaixo_minimo' && itens[z].severidade === 'critico') zerados++;\n    if (zerados) criticos.push(plural(zerados, ['item sem saldo (com mínimo)', 'itens sem saldo (com mínimo)']));\n    var resto = conta[tc] - zerados;\n    if (resto > 0) avisos.push(plural(resto, ROTULO[tc]));\n  } else if (CRIT[tc]) criticos.push(plural(conta[tc], ROTULO[tc]));\n  else avisos.push(plural(conta[tc], ROTULO[tc]));\n}\nvar partes = [];\nif (criticos.length) partes.push('Urgente: ' + criticos.join(', ') + '.');\nif (avisos.length) partes.push('Atenção: ' + avisos.join(', ') + '.');\nvar detalhe = [];\nfor (var d = 0; d < itens.length && d < maxLinhas; d++) detalhe.push('• ' + corta(linha(itens[d]), 160));\nvar faltam = total - detalhe.length;\nif (detalhe.length && faltam > 0) detalhe.push('… e mais ' + faltam + ' no painel de alertas do estoque.');\nvar texto = partes.join('\\n') + (detalhe.length ? '\\n' + detalhe.join('\\n') : '');\nvar titulo = 'Estoque: ' + (total === 1 ? '1 alerta novo' : total + ' alertas novos');\nvar message = {\n  type: criticos.length ? 'urgent' : 'alert', title: titulo, text: texto, icon: 'warning',\n  links: [{ url: link, text: 'Abrir o estoque' }],\n  windowsalert: cfg.notificacao_do_sistema === false || cfg.notificacao_do_sistema === 'false'\n    ? null : { text: titulo + ': ' + partes.join(' '), url: link }\n};\n\nvar destinos = [];\nif (avisarTodos) destinos.push({ acao: 'notificar', corpo: { type: 'mensagem', message: message } });\nelse for (var p = 0; p < papeis.length; p++) destinos.push({ acao: 'notificar_grupo', papel: papeis[p], corpo: { type: 'mensagem', group_id: papeis[p], message: message } });\nresumo.destinos = destinos.length;\nvar falhou = [];\nfor (var k = 0; k < destinos.length; k++) {\n  var rn = call(destinos[k].acao, destinos[k].corpo);\n  if (rn && rn.ok) resumo.avisados++;\n  else {\n    falhou.push({ destino: destinos[k].papel || 'todos', http: (rn && rn.status_code) || null });\n    log('estoque_avisos: FALHA ao avisar ' + (destinos[k].papel || 'todos') + ' (HTTP ' + ((rn && rn.status_code) || '?') + ')', 'warning');\n  }\n}\nif (falhou.length) {\n  // Não marca: na próxima rodada os alertas voltam e o aviso é tentado de novo.\n  resumo.falhas_aviso = falhou.length;\n  resumo.acao_bloqueada = true; resumo.etapa = 'notificar'; resumo.falhas_detalhe = falhou.slice(0, 10);\n  result(resumo);\n  return { ok: false, erro: 'aviso_falhou', alertas: total };\n}\n\n// ---- 4) marca o que foi avisado (só o que estava na lista; o resto volta na próxima rodada) ----\nvar chaves = [];\nfor (var q = 0; q < itens.length; q++) chaves.push(String(itens[q].chave));\nfor (var o = 0; o < chaves.length; o += LOTE_MARCAR) {\n  var rm = call('marcar_avisados', { chaves: chaves.slice(o, o + LOTE_MARCAR) });\n  var bm = unwrap(rm);\n  if (!rm || !rm.ok || !bm) {\n    log('estoque_avisos: FALHA ao marcar avisados (HTTP ' + ((rm && rm.status_code) || '?') + ') — pode repetir o aviso', 'warning');\n    resumo.acao_bloqueada = true; resumo.etapa = 'marcar_avisados'; resumo.http = (rm && rm.status_code) || null;\n    break;\n  }\n  resumo.marcados += num(bm.marcados, 0);\n  resumo.ignorados += (bm.ignorados && bm.ignorados.length) || 0;\n}\nlog('estoque_avisos: ' + total + ' alerta(s) avisado(s) a ' + destinos.length + ' destino(s), ' + resumo.marcados + ' marcado(s)',\n  resumo.acao_bloqueada ? 'warning' : 'info');\nresult(resumo);\nreturn { ok: !resumo.acao_bloqueada, alertas: total, marcados: resumo.marcados };\n",
+        "papeis_destino": "{{knob.papeis_destino}}",
+        "avisar_todos": "{{knob.avisar_todos}}",
+        "tipos": {
+          "validade_vencida": "{{knob.avisar_validade}}",
+          "validade_proxima": "{{knob.avisar_validade}}",
+          "abaixo_minimo": "{{knob.avisar_minimo}}",
+          "consignado_prazo_vencido": "{{knob.avisar_consignado}}",
+          "consignado_prazo_proximo": "{{knob.avisar_consignado}}"
+        },
+        "notificacao_do_sistema": "{{knob.notificacao_do_sistema}}",
+        "max_linhas": 10,
+        "link": "/financeiro/estoque",
+        "acoes": [
+          {
+            "nome": "listar_alertas",
+            "capability": "estoque.listar_alertas",
+            "kind": "internal"
+          },
+          {
+            "nome": "marcar_avisados",
+            "capability": "estoque.marcar_alertas_avisados",
+            "kind": "internal"
+          },
+          {
+            "nome": "notificar_grupo",
+            "capability": "notificacao.notificar_grupo",
+            "kind": "internal"
+          },
+          {
+            "nome": "notificar",
+            "capability": "notificacao.notificar",
+            "kind": "internal"
+          }
+        ]
+      }
+    }
+  ],
+  "knobs": [
+    {
+      "chave": "papeis_destino",
+      "tipo": "string",
+      "fonte": "papeis",
+      "rotulo": "Papéis que recebem o aviso",
+      "default": "administrador",
+      "descricao": "Um ou mais perfis da equipe (no sino da Central). Vários: separe por vírgula."
+    },
+    {
+      "chave": "avisar_todos",
+      "tipo": "bool",
+      "rotulo": "Avisar toda a equipe conectada",
+      "default": false,
+      "descricao": "Ligado: o aviso vai para todos que estão na Central, no lugar dos papéis acima."
+    },
+    {
+      "chave": "avisar_validade",
+      "tipo": "bool",
+      "rotulo": "Avisar lote vencido ou perto de vencer",
+      "default": true,
+      "descricao": "A antecedência (em dias) é a da configuração do estoque."
+    },
+    {
+      "chave": "avisar_minimo",
+      "tipo": "bool",
+      "rotulo": "Avisar saldo abaixo do mínimo do local",
+      "default": true
+    },
+    {
+      "chave": "avisar_consignado",
+      "tipo": "bool",
+      "rotulo": "Avisar consignado vencido ou perto do prazo",
+      "default": true,
+      "descricao": "Só vale com o consignado ligado no estoque."
+    },
+    {
+      "chave": "notificacao_do_sistema",
+      "tipo": "bool",
+      "rotulo": "Também como notificação do Windows/navegador",
+      "default": true,
+      "descricao": "Além do cartão na Central, o aviso aparece como notificação do sistema para quem permitiu no navegador."
+    }
+  ]
+}

@@ -38,7 +38,7 @@
       "chave": "confirmacao-presenca",
       "nome": "Confirmação de presença",
       "descricao": "Confirma a presença pelo WhatsApp e encaminha à recepção as respostas que precisam de uma pessoa.",
-      "versao": "1.3",
+      "versao": "1.5",
       "agentes": 3,
       "tipos": [
         "llm",

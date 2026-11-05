@@ -23,7 +23,9 @@ o mínimo para provar o caminho **evento → agente → aviso na tela**.
   - `titulo` + `corpo` (o corpo aceita **markdown**);
   - `botoes`: cada um com `label`, `estilo` e uma `acao`:
     - `{ tipo: 'link', href }` → **navega** para a entidade;
-    - `{ tipo: 'evento', event_type, payload }` → **chama o agente de volta** (round-trip);
+    - `{ tipo: 'evento', event_type, payload, destino }` → **chama o agente de volta** (round-trip). O botão
+      de evento **precisa** de `required_permission: 'recurso:acao'` — a permissão que quem clica tem de ter;
+      sem ela o notification-center recusa a diretiva. `destino` é o serviço que usa o recibo do clique;
   - `alvo`: `{ role }` e/ou `{ user_id }` — quem vê;
   - `persistencia`: `persistente` (sobrevive a recarregar até dispensar) ou `efemero`.
 - **Knob `alvo_role`:** o papel que recebe o aviso é **escolhido na instalação** (`{{knob.alvo_role}}`),
@@ -36,7 +38,7 @@ o mínimo para provar o caminho **evento → agente → aviso na tela**.
 - **Toast vs modal:** avisos triviais podem ser `toast` efêmero; decisões importantes, `modal`
   persistente.
 - **Botão de link → botão de evento (round-trip):** troque `{tipo:'link'}` por
-  `{tipo:'evento', event_type:'...'}` e crie um **segundo agente** que reage a esse clique — o clique
+  `{tipo:'evento', event_type:'...'}` (com `required_permission` no botão) e crie um **segundo agente** que reage a esse clique — o clique
   vira um gatilho (`notificacao.diretiva_respondida`). Ex.: *"Orçamento aprovado → [Enviar link ao
   cliente]"*, onde o clique aciona o agente que manda o link. Isso é um **time** (um avisa, outro age
   no clique, a pessoa no meio é o consentimento).

@@ -108,7 +108,7 @@ e-mail do fornecedor nem a identificação do paciente.
 | `semana` | a semana ISO do envio (ex.: `2026-W44`) |
 | `total_linhas`, `total_quantidade` | quantas linhas e a soma das quantidades |
 | `linhas_omitidas` | linhas que não couberam (`max_linhas_email`, padrão 300) — o resto está no relatório do estoque |
-| `linhas` | lista; cada uma com `data`, `produto`, `codigo`, `lote`, `validade`, `serie`, `quantidade`, `remessa_nf` e `paciente` (a identificação escolhida no estoque, ou "—") |
+| `linhas` | lista; cada uma com `data`, `produto`, `codigo_produto`, `lote`, `validade`, `serie`, `quantidade`, `remessa_nf` e `paciente` (a identificação escolhida no estoque, ou "—") |
 
 ## Capabilities que pede (superfície de consentimento)
 
@@ -198,12 +198,15 @@ A **antecedência** dos avisos de validade e de consignado é da configuração 
    Olá, {{ fornecedor_nome }}.
    Segue o material consignado usado na clínica que ainda aguarda reposição ({{ total_linhas }} itens):
 
-   {% for l in linhas %}- {{ l.data }} · {{ l.produto }}{% if l.codigo %} ({{ l.codigo }}){% endif %}{% if l.lote %} · lote {{ l.lote }}{% endif %}{% if l.serie %} · série {{ l.serie }}{% endif %} · qtd {{ l.quantidade }} · NF remessa {{ l.remessa_nf }} · atendimento {{ l.paciente }}
+   {% for l in linhas %}- {{ l.data }} · {{ l.produto }}{% if l.codigo_produto %} ({{ l.codigo_produto }}){% endif %}{% if l.lote %} · lote {{ l.lote }}{% endif %}{% if l.serie %} · série {{ l.serie }}{% endif %} · qtd {{ l.quantidade }} · NF remessa {{ l.remessa_nf }} · atendimento {{ l.paciente }}
    {% endfor %}{% if linhas_omitidas %}… e mais {{ linhas_omitidas }} linhas (peça o relatório completo).{% endif %}
 
    Por favor, emita o faturamento e a reposição. Este e-mail se repete toda semana até a reposição ser registrada.
    ```
    Não coloque no modelo nada além do que as variáveis trazem (nada de diagnóstico ou procedimento).
+   Use os nomes de variável como estão. A mensageria trata alguns nomes como segredo (`codigo`, `link`, `token`…):
+   o modelo que usa um deles passa pela regra de modelo seguro e é recusado se tiver link. Por isso o código do
+   produto é `codigo_produto`.
 4. Ligue os agentes que a clínica quer. Confira a primeira execução de cada um em "execuções":
    - `estoque_avisos`: `alertas` e `marcados` devem bater;
    - `estoque_reposicao`: `tarefas` e `marcados` devem bater, e as tarefas aparecem no quadro do papel;

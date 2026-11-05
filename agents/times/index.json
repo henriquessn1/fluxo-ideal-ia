@@ -49,9 +49,9 @@
     {
       "chave": "estoque-avisos",
       "nome": "Avisos do estoque",
-      "descricao": "Uma vez por dia útil, avisa a equipe sobre material vencido ou perto de vencer, saldo abaixo do mínimo e consignado perto do prazo.",
-      "versao": "1.0",
-      "agentes": 1,
+      "descricao": "Avisa a equipe sobre validade, mínimo e prazo do consignado, abre a tarefa de reposição do que caiu abaixo do mínimo e manda ao fornecedor do consignado o relatório do que foi usado.",
+      "versao": "1.1",
+      "agentes": 3,
       "tipos": [
         "script"
       ],

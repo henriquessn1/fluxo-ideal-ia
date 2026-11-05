@@ -1,9 +1,9 @@
 ---
 name: estoque
-description: O estoque rastreável da clínica no Fluxo Ideal — saldo por unidade e local, lote/validade e nº de série, FEFO, consumo de material no paciente e vínculo de implante (etiqueta da RDC 556/2021, UDI da classe IV), material consignado com prazo, reserva para procedimento agendado, alertas de validade/mínimo, o custo do material (custo na entrada, custo médio, extrato valorizado), o inventário (contagem cega, fechamento por diferença e o relatório de inventário de 31/12 ao custo para o contador) e os kits de material por procedimento e por profissional (consumo sugerido, reservar o kit, custo do kit). Use para "quanto tem da lente X na unidade Y?", "o que vence este mês?", "lança o material da cirurgia", "reserva a prótese para amanhã", "quais implantes esse paciente recebeu?", "quanto vale o estoque?", "vamos fazer o inventário", "preciso do inventário de 31/12 para o contador", "monta o kit da cirurgia de catarata", "reserva o kit da cirurgia de amanhã", "quanto custa o material desse procedimento?".
+description: O estoque rastreável da clínica no Fluxo Ideal — saldo por unidade e local, lote/validade e nº de série, FEFO, consumo de material no paciente e vínculo de implante (etiqueta da RDC 556/2021, UDI da classe IV), material consignado com prazo, reserva para procedimento agendado, alertas de validade/mínimo, o custo do material (custo na entrada, custo médio, extrato valorizado), o inventário (contagem cega, fechamento por diferença e o relatório de inventário de 31/12 ao custo para o contador) e os kits de material por procedimento e por profissional (consumo sugerido, reservar o kit, custo do kit), e o que o time de agentes do estoque faz sozinho (resumo de alertas, tarefa de reposição, relatório semanal ao fornecedor do consignado). Use para "quanto tem da lente X na unidade Y?", "o que vence este mês?", "lança o material da cirurgia", "reserva a prótese para amanhã", "quais implantes esse paciente recebeu?", "quanto vale o estoque?", "vamos fazer o inventário", "preciso do inventário de 31/12 para o contador", "monta o kit da cirurgia de catarata", "reserva o kit da cirurgia de amanhã", "quanto custa o material desse procedimento?", "quem abriu essa tarefa de repor?", "o fornecedor recebe o relatório do consignado?".
 audience: [ia, humano]
 depends_on: [estoque-rastreavel, consumo-material, implantes, consignado, reservas-material, alertas-estoque, custo-material, inventario-estoque, kits-material]
-version: 0.4.0
+version: 0.5.0
 updated: 2026-10-30
 ---
 
@@ -36,7 +36,7 @@ ou faltar**. O estoque é a fonte da verdade do saldo; o catálogo (preço, cada
 - Pagar o fornecedor, conta a pagar → `financeiro`. Faturar material no convênio (TISS) → `faturamento-convenio`.
 - A **margem** do procedimento com o material e o ponto de equilíbrio → `financeiro` (o estoque só dá o custo).
   A **simulação de margem** de um preço (que usa o custo do kit como custo previsto) → `precificador`.
-- Mudar o comportamento do time de avisos do estoque → `designer-agentes`.
+- Mudar o comportamento do time de agentes do estoque (horário, papéis, janela do relatório) → `designer-agentes`.
 - **Escriturar** o Livro Registro de Inventário (termos, visto, escrituração fiscal digital) → é do **contador**;
   o sistema entrega o relatório.
 
@@ -308,8 +308,26 @@ do acesso de reserva)**
 - O custo do kit e de cada item só vêm com o acesso de **ver custo** — sem ele, diga que falta o acesso, não
   responda zero.
 
-**Fora da IA:** marcar um alerta como "já avisado" é do time de avisos; anexar a **foto da etiqueta** do
-implante é pela tela.
+**Fora da IA:** marcar um alerta como "já avisado" ou "com tarefa" é do time de agentes do estoque; anexar a
+**foto da etiqueta** do implante é pela tela.
+
+**O time de agentes do estoque (`estoque-avisos`, se a clínica instalou) — por intenção**
+São rotinas automáticas, sem IA, cada uma ligada ou desligada pela clínica. A IA não as dispara; ela **explica**
+o que aconteceu e **onde** mexer:
+- **Avisar a equipe** do que vence, falta ou está perto do prazo do consignado → o **resumo diário** no sino
+  (sem repetir o mesmo alerta).
+- **Não esquecer de repor** → a **tarefa de reposição**: uma por produto × local abaixo do mínimo, para o papel
+  que a clínica escolheu, com físico × mínimo e o link do produto. Não se repete enquanto o saldo não voltar
+  acima do mínimo; se cair de novo, nasce outra. Raramente pode nascer uma tarefa a mais para o mesmo item
+  (quando a marca falha) — é só fechar a repetida.
+- **O fornecedor do consignado faturar e repor** → o **relatório semanal por e-mail** a cada fornecedor com o que
+  foi usado e **ainda aguarda reposição** (lembrete que repete até alguém marcar **reposto**; nunca marca
+  sozinho). Vai com a **identificação mínima** do paciente que a clínica escolheu (padrão: nº do atendimento) —
+  nunca diagnóstico. Fornecedor **sem e-mail** no cadastro, ou dado do paciente indisponível na hora, **não
+  recebe** e a gestão é avisada. Uma vez por semana por fornecedor, sem duplicar.
+- "Por que o fornecedor não recebeu?" → falta o **e-mail** no cadastro do fornecedor (→ `financeiro`), o
+  consignado está desligado, ou o agente do relatório não está ligado. "Já repôs?" → marque **reposto** (com a
+  NF) e ele sai do próximo relatório.
 
 ## Fluxos comuns
 
@@ -370,7 +388,8 @@ implante é pela tela.
 2. Registre a **remessa**: fornecedor, local consignado, NF de remessa e itens no modo de controle do produto.
    O prazo de uso sai sozinho (data + prazo da clínica).
 3. No uso, o consumo é o normal, escolhendo o **local consignado**.
-4. Para o fornecedor faturar: o relatório de consumo; quando ele repõe, marque como **reposto** (com a NF).
+4. Para o fornecedor faturar: o relatório de consumo (com o time de agentes do estoque, ele chega por e-mail ao
+   fornecedor toda semana); quando ele repõe, marque como **reposto** (com a NF).
    O que não foi usado volta por **devolução ao fornecedor**, antes do prazo.
 
 ### "Chegou material" (entrada com custo)
@@ -422,7 +441,8 @@ implante é pela tela.
 1. Peça os alertas (ou o saldo com "vence até").
 2. Responda por severidade: vencido primeiro (sai por perda/vencimento), depois perto de vencer e abaixo do
    mínimo. Sugira **transferir** de outro local antes de dizer que falta.
-3. O time **estoque-avisos** (se instalado) já avisa a equipe 1×/dia útil, sem repetir o mesmo alerta.
+3. O time **estoque-avisos** (se instalado) já avisa a equipe 1×/dia útil, sem repetir o mesmo alerta, e abre
+   a **tarefa de reposição** do que está abaixo do mínimo — antes de abrir outra, veja se ela já existe.
 
 ## Regras e invariantes
 - **Movimento nunca se apaga nem se edita.** Corrige-se com estorno, que é outro movimento; o kardex é a prova.

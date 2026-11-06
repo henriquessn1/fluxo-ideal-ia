@@ -76,6 +76,9 @@ As ações citam as capabilities `notificacao.emitir_ui`, `notificacao.dismiss_d
 | agentes | **0.3.102** | repassar o recibo do clique |
 | estabelecimento | **0.8.794** | nome de quem pediu e de quem decidiu |
 
+> ⚠️ **Atualize para a 3.7 antes de subir o notification-center da release 2026.11.2:** ele passa a recusar
+> botão de decisão sem a permissão de quem clica, e o aviso de desconto da 3.6 deixa de aparecer.
+>
 > ⚠️ Com versões mais antigas, a decisão pelo aviso é recusada (sem o recibo, o vendas não aceita a
 > decisão em nome de ninguém). A tela de aprovações continua funcionando. Confira as versões antes de ligar.
 
@@ -83,7 +86,8 @@ As ações citam as capabilities `notificacao.emitir_ui`, `notificacao.dismiss_d
 
 | Versão | O que mudou |
 |---|---|
-| **3.6** | Cada clique no aviso gera um recibo de uso único, e a decisão só vale com ele: para aquela venda, aquele % e um aviso do próprio time. Os botões do aviso levam o % do desconto |
+| **3.7** | Os botões **Aprovar** e **Rejeitar** do aviso declaram a permissão de quem clica (`desconto:aprovar`, a mesma que o vendas exige) e que só o vendas usa o recibo do clique. Quem não pode aprovar desconto não decide pelo aviso. **Obrigatória** a partir do notification-center da limpeza (release 2026.11.2): sem ela o aviso é recusado |
+| 3.6 | Cada clique no aviso gera um recibo de uso único, e a decisão só vale com ele: para aquela venda, aquele % e um aviso do próprio time. Os botões do aviso levam o % do desconto |
 | 3.5 | Venda cancelada com o desconto ainda aguardando aprovação: o aviso fecha e a tarefa de aprovação é concluída (antes ficava aberta). Textos do aviso e da tarefa com acento. Scripts mais enxutos |
 | 3.4 | Decide pelo aviso em nome de quem clicou, avisa a equipe de quem decidiu e conclui a tarefa |
 

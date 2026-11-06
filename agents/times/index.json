@@ -5,7 +5,7 @@
       "chave": "aprovacao-desconto-avisos",
       "nome": "Aprovação de desconto",
       "descricao": "Avisa quem aprova descontos, cuida da fila de aprovação e fecha o ciclo quando o desconto é decidido.",
-      "versao": "3.6",
+      "versao": "3.7",
       "agentes": 5,
       "tipos": [
         "script"
@@ -38,7 +38,7 @@
       "chave": "confirmacao-presenca",
       "nome": "Confirmação de presença",
       "descricao": "Confirma a presença pelo WhatsApp e encaminha à recepção as respostas que precisam de uma pessoa.",
-      "versao": "1.3",
+      "versao": "1.4",
       "agentes": 3,
       "tipos": [
         "llm",

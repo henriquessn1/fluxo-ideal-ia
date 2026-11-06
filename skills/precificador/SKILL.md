@@ -2,8 +2,8 @@
 name: precificador
 description: O sistema de precificação do Fluxo Ideal — como se configura preço (catálogo, tabelas, condições e formas de pagamento, favoritos) e como isso converge em orçamento e venda. Use para entender "quanto custa", como montar um orçamento e por que os valores são o que são.
 audience: [ia, humano]
-depends_on: [precos, catalogo, convenios, condicoes-pagamento, orcamentos, termos-orcamento, estoque-rastreavel]
-version: 0.6.1
+depends_on: [precos, catalogo, convenios, condicoes-pagamento, orcamentos, termos-orcamento, estoque-rastreavel, kits-material]
+version: 0.7.0
 updated: 2026-10-30
 ---
 
@@ -79,6 +79,12 @@ Três ideias que sustentam tudo:
   (papel + tabela) e depois a de maior prioridade. Sem política configurada = sem restrição.
 - **Margem**: o que sobra do preço depois do **custo** do procedimento, da **comissão** do profissional e do
   custo de terceiros. **Markup** é a mesma folga vista sobre o custo.
+- **Custo de material na margem prevista**: quando o procedimento tem **kit** de material com custo (skill
+  `estoque`), a simulação usa o **custo do kit** — o do **profissional**, quando a simulação é para ele e ele
+  tem kit próprio (substitui o padrão inteiro), senão o **kit padrão**. Sem kit, ou com kit cujos itens ainda
+  não têm custo, ou com o estoque indisponível, ela usa o **custo estimado** do cadastro do procedimento. A
+  resposta diz **de onde** veio o custo e avisa quando ele é **parcial** (itens do kit sem custo) ou quando o
+  **estoque não respondeu**.
 - **Custo do produto**: é o **custo médio** do estoque, projetado no catálogo — **só leitura** (não se digita no
   produto; o custo entra com o material, na entrada do estoque). Ver o custo e a margem do produto pede um
   **acesso à parte**; sem ele, o produto aparece sem esses dois campos. A margem **realizada** com o material é
@@ -122,7 +128,11 @@ Três ideias que sustentam tudo:
 - **Comparar tabelas** (particular × convênios × promoção) para um conjunto de procedimentos ou uma categoria,
   com a diferença em R$ e em % contra uma tabela de referência → ferramenta de comparação de tabelas.
 - **Simular a margem** de um preço antes de defini-lo (custo + comissão → margem e markup; avisa margem
-  negativa) → simulador de margem. Não grava.
+  negativa) → simulador de margem. Não grava. O custo de material sai do **kit** do procedimento quando há
+  kit com custo (o do profissional substitui o padrão), senão do custo estimado do cadastro. Sempre diga ao
+  usuário **qual custo foi usado** e repasse os avisos: custo **parcial** = a margem real é **menor** que a
+  simulada (faltou custo de algum item); **estoque indisponível** = a conta saiu com o custo estimado, não
+  com o kit. Kit vazio de custo ou desatualizado se corrige no `estoque`, não aqui.
 - **Histórico do preço** de um procedimento, ou "quanto cobrávamos na data X" numa tabela → ferramenta de
   histórico de preço.
 - **Reajuste em massa** por regra (percentual, somar um valor, ou valor novo único; arredondamento; filtro por

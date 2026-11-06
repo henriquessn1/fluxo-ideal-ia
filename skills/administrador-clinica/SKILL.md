@@ -3,8 +3,8 @@ name: administrador-clinica
 description: A "planta baixa" da clínica no Fluxo Ideal — configurar a identidade do estabelecimento (dados, contato, endereço, branding/white-label), cadastrar e gerir os profissionais (especialidades, registros de conselho, grade de horários, vínculos, documentos), os convênios aceitos, o catálogo de especialidades e o site público. Use para "cadastra a Dra. X", "adiciona esse convênio", "quais médicos temos?", "veste a marca da clínica", "monta o estabelecimento novo". Criar login/acesso (IAM) fica FORA.
 audience: [ia, humano]
 depends_on: [identidade-clinica, profissionais, especialidades, convenios, salas-recursos]
-version: 0.3.1
-updated: 2026-10-30
+version: 0.3.2
+updated: 2026-11-06
 ---
 
 # Administrador da clínica
@@ -75,6 +75,11 @@ Ideias que orientam quase tudo:
 - **Cadastrar o profissional ≠ dar-lhe acesso.** Este papel cria/edita o **registro** do profissional;
   **criar login, senha ou papel de acesso (IAM)** é ato privilegiado à parte e **fica fora** (nunca a
   gestão de acessos). Montar a pessoa é aqui; deixá-la **entrar no sistema** é outro papel.
+- **Inativar o profissional desliga o login dele.** Se ele tem acesso ao sistema, inativar também o
+  impede de entrar; reativar religa. Avise o usuário e confirme antes. A leitura do profissional diz se
+  ele **tem acesso**. A plataforma recusa, explicando o motivo, inativar a si mesmo, inativar um
+  administrador sem ser administrador e inativar o último administrador. Se o serviço de login estiver
+  fora, **nada muda** (nem o cadastro) e dá para tentar de novo.
 - **CPF é write-only.** Ao cadastrar/editar um profissional você **pode informar** o CPF, mas as
   leituras **nunca o devolvem** — some da projeção. Você configura sem PII sensível vazar de volta.
 - **Configurar identidade é ato deliberado.** Criar ou revestir um estabelecimento muda a cara do
@@ -122,7 +127,8 @@ Ideias que orientam quase tudo:
   **estabelecimentos** onde atua e **registros de conselho** (CRM/CRO — números públicos).
 - **Cadastrar/editar (como dado):** criar ou atualizar o profissional, sua **grade de horários** e seus
   **documentos** → ferramentas de gestão de profissional. CPF é **write-only** (pode informar; nunca
-  volta na leitura). **Não** cria login/acesso — isso é IAM, fora.
+  volta na leitura). **Não** cria login/acesso — isso é IAM, fora. **Inativar/reativar** desliga e
+  religa o login que já existe (ver a regra acima): confirme antes.
 
 **Convênios**
 - **Ler:** quais a clínica aceita (e ativos) → listagem de convênios.

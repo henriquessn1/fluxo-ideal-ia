@@ -3,8 +3,8 @@ name: designer-mensageria
 description: A AUTORIA da comunicação da clínica com o paciente no Fluxo Ideal — desenhar os templates de mensagem (assunto + corpo com variáveis), gerir os canais (e-mail, WhatsApp) e a aprovação de HSM no provedor. Use para escrever/ajustar os textos que vão ao paciente, criar/ativar um template, gerir canais e submeter/acompanhar o HSM. Disparar de fato (enviar/programar/checar entrega) é do operador → skill `comunicacao-paciente`.
 audience: [ia, humano]
 depends_on: [mensagens, templates, canais, entrega]
-version: 0.5.0
-updated: 2026-08-13
+version: 0.5.1
+updated: 2026-11-06
 ---
 
 # Designer de Mensageria
@@ -162,7 +162,19 @@ conteúdo por canal em **prévia** → conferir os `{{placeholders}}` e a polít
    informativo; **erro de sintaxe** impede gravar.
 4. Só então **grave**. Lembre: passa a valer para os **próximos** envios; os já enfileirados não mudam.
 5. Se for um template **crítico/transacional** (verificação, código de acesso, link de assinatura,
-   convite de pesquisa), redobre o cuidado — editar errado quebra automações; confirme explicitamente.
+   convite de pesquisa, moldura do e-mail), redobre o cuidado — editar errado quebra automações; confirme
+   explicitamente.
+
+### Ajustar a moldura do e-mail (cabeçalho e rodapé de todo e-mail)
+1. A **moldura** é um modelo do sistema, um por clínica: ela embrulha **todo** e-mail, inclusive o de
+   código de acesso e o de link mágico. Cada linha do rodapé só aparece se o dado existir no cadastro.
+2. O corpo tem de mostrar o **lugar do conteúdo** (`{{ conteudo }}`) **uma vez**, em texto visível, fora
+   de link, botão ou título, sem esconder o texto. Fora disso, a plataforma recusa e diz o código da
+   regra; a prévia já mostra a recusa.
+3. Editar a moldura exige uma **permissão própria**, diferente da que edita os modelos de código de
+   acesso e de link mágico. Sem ela, a plataforma recusa e nada é gravado: oriente a pedir a quem
+   administra os acessos.
+4. É template crítico: prévia, confirmação explícita e só então gravar.
 
 > **Enviar agora, programar mensagem automática e investigar "não chegou"** são fluxos do operador de
 > envio → skill `comunicacao-paciente`.
@@ -179,8 +191,8 @@ conteúdo por canal em **prévia** → conferir os `{{placeholders}}` e a polít
   humana**; deletar na Meta é a caminho.)
 - **Regra de ouro do remetente** — quando escolhível, o remetente é o **e-mail do próprio usuário
   logado**; alguns templates exigem isso por política.
-- **Templates críticos/transacionais** (verificação, código, link mágico, convite de pesquisa) exigem
-  confirmação reforçada antes de editar — quebrá-los derruba automações.
+- **Templates críticos/transacionais** (verificação, código, link mágico, convite de pesquisa, moldura do
+  e-mail) exigem confirmação reforçada antes de editar — quebrá-los derruba automações.
 - **Toda ação que fala com o paciente é confirmada com o usuário** antes de disparar.
 
 ## Limites / o que esta skill NÃO cobre

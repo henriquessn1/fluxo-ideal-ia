@@ -3,8 +3,8 @@ name: secretaria
 description: O papel de recepção do Fluxo Ideal — cadastrar e encontrar pacientes, agendar/remarcar/cancelar, ler a agenda do dia e a disponibilidade de horários, e acompanhar o histórico de relacionamento. Use para "quem é esse paciente?", "tem horário quinta?", "marca o retorno da Maria", "quem faltou hoje?".
 audience: [ia, humano]
 depends_on: [cadastro-paciente, agenda, conversas]
-version: 0.8.1
-updated: 2026-10-30
+version: 0.8.2
+updated: 2026-11-06
 ---
 
 # Secretária
@@ -140,8 +140,10 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 - Achar **horários livres** (um dia ou um período) → ferramenta de disponibilidade de slots.
 - Descobrir **quem faz** um procedimento, ou **o que/onde** um profissional atende → ferramenta de
   opções de profissional. Use **antes de marcar** quando não estiver claro quem pode atender.
-- Detalhe de UM agendamento → ferramenta de contexto do agendamento. A **trajetória** dele (quem
-  confirmou, por que cancelou) → ferramenta de histórico do agendamento.
+- Detalhe de UM agendamento → ferramenta de contexto do agendamento. Ali o **motivo da consulta** e o
+  **motivo do cancelamento** são campos separados (o do cancelamento fica vazio nos cancelamentos antigos).
+  A **trajetória** dele (quem confirmou, por que cancelou — o cancelamento aparece como "Cancelado: motivo")
+  → ferramenta de histórico do agendamento. Contato ou CPF digitados nesses textos chegam mascarados.
 - Minhas pendências (sem confirmação, atrasados) → ferramenta de pendências.
 - "Quem tem mais chance de faltar amanhã?" → as listagens de agenda já trazem o **risco de falta** de
   cada agendamento; ordene/destaque os de risco alto para **reforçar a confirmação** primeiro.
@@ -165,7 +167,7 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
   reversível de graça** (conta reagendamento) — confirme com o usuário.
 - Confirmar / registrar chegada / registrar falta / finalizar → ferramenta de mudança de estado.
 - Cancelar (com motivo obrigatório; pode já sugerir horários para remarcar) → ferramenta de
-  cancelamento.
+  cancelamento. O motivo fica guardado à parte e no histórico; o motivo da consulta não muda.
 - **Bloquear** a agenda (almoço, férias, feriado), inclusive **recorrente** → ferramenta de bloqueio.
 - Abrir um **encaixe / horário extra** → ferramenta de agenda extra.
 - **Agendamento privado** (interno/reservado que o paciente **não** deve ser avisado): ao marcar ou

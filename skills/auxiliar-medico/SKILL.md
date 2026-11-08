@@ -3,8 +3,8 @@ name: auxiliar-medico
 description: Apoio ao fluxo de ATENDIMENTO clínico no Fluxo Ideal — check-in do paciente, o estado/etapa em que cada atendimento está, anotações da equipe, pendências operacionais do profissional e métricas do atendimento. Use para acompanhar "onde está o paciente hoje", registrar chegada, mover o atendimento de etapa e ver a fila de trabalho. NÃO cobre o conteúdo do prontuário nem conduta clínica.
 audience: [ia, humano]
 depends_on: [atendimento-operacional, checkin, evolucao-operacional, pendencias]
-version: 0.2.2
-updated: 2026-10-30
+version: 0.2.3
+updated: 2026-11-06
 ---
 
 # Auxiliar do atendimento clínico
@@ -97,7 +97,10 @@ Ideias que sustentam o domínio:
 > skill nunca promete acesso. Ações que mudam estado devem ser **confirmadas com o usuário** antes.
 
 - **Registrar a chegada do paciente** (criar/abrir o atendimento) → ferramenta de **check-in**. Para
-  walk-in/encaixe, lembre de informar o **serviço** ou a venda existente.
+  walk-in/encaixe, lembre de informar o **serviço** ou a venda existente. Com horário marcado, o
+  **convênio** e a **venda** vêm do agendamento: não informe nenhum dos dois se não houver motivo.
+  Particular num agendamento de convênio só se for pedido explicitamente; convênio diferente do agendamento
+  fica gravado sem aviso na resposta (só na auditoria), então confirme com o usuário.
 - **Ver a situação dos atendimentos** (do dia, de um período, de um paciente, ou só os **ativos agora**)
   → ferramenta de **busca** de atendimentos. Traz uma visão enxuta (estado, quem, quando) — sem detalhe
   clínico.
@@ -105,7 +108,10 @@ Ideias que sustentam o domínio:
   comentários, checklist, acompanhantes) → ferramenta de **contexto** do atendimento. Se uma seção não
   for permitida, ela vem marcada como sem acesso, sem derrubar o resto.
 - **Mudar a etapa** (chamar para atendimento, avançar de estado; ou **finalizar**; ou **cancelar** com
-  motivo/tipo) → ferramenta de **mudança de estado**. Confirme com o usuário antes.
+  motivo/tipo) → ferramenta de **mudança de estado**. Confirme com o usuário antes. **Iniciar** o
+  atendimento confere o termo de consentimento da venda e, quando a clínica liga essas travas, a venda
+  (ou a cortesia) e a autorização do convênio. Se travar, diga o que falta; liberar sem a autorização,
+  com justificativa, é na tela.
 - **Deixar uma anotação da equipe** num atendimento → ferramenta de **comentário**. Só recado
   operacional — nada de conteúdo clínico sensível.
 - **Concluir ou reabrir um item do checklist** de preparo do atendimento → ferramenta de **checklist**.
@@ -124,9 +130,11 @@ comentário se precisar.
 
 ### Paciente chegou (com horário marcado)
 1. Localize o atendimento/agendamento do paciente (busca do dia).
-2. Registre o **check-in** — o atendimento é aberto e entra na fila (`Em espera`).
+2. Registre o **check-in** — o atendimento é aberto e entra na fila (`Em espera`). Convênio e venda
+   vêm do agendamento; não crie outra venda com serviços.
 3. Se o check-in do mesmo agendamento já tinha sido feito, você recebe o atendimento existente (não
-   duplica) — apenas siga com ele.
+   duplica) — apenas siga com ele. Repetir o check-in **não troca o convênio**: se ele estiver errado,
+   a correção é na tela.
 
 ### Paciente sem horário (walk-in / encaixe)
 1. Faça o **check-in** informando o **serviço** que será atendido (ou uma venda existente) — sem isso a

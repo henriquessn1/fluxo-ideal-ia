@@ -55,8 +55,8 @@ name: administrador-clinica
 description: A "planta baixa" da clínica no Fluxo Ideal — configurar a identidade do estabelecimento (dados, contato, endereço, branding/white-label), cadastrar e gerir os profissionais (especialidades, registros de conselho, grade de horários, vínculos, documentos), os convênios aceitos, o catálogo de especialidades e o site público. Use para "cadastra a Dra. X", "adiciona esse convênio", "quais médicos temos?", "veste a marca da clínica", "monta o estabelecimento novo". Criar login/acesso (IAM) fica FORA.
 audience: [ia, humano]
 depends_on: [identidade-clinica, profissionais, especialidades, convenios, salas-recursos]
-version: 0.3.1
-updated: 2026-10-30
+version: 0.3.2
+updated: 2026-11-06
 ---
 
 # Administrador da clínica
@@ -127,6 +127,11 @@ Ideias que orientam quase tudo:
 - **Cadastrar o profissional ≠ dar-lhe acesso.** Este papel cria/edita o **registro** do profissional;
   **criar login, senha ou papel de acesso (IAM)** é ato privilegiado à parte e **fica fora** (nunca a
   gestão de acessos). Montar a pessoa é aqui; deixá-la **entrar no sistema** é outro papel.
+- **Inativar o profissional desliga o login dele.** Se ele tem acesso ao sistema, inativar também o
+  impede de entrar; reativar religa. Avise o usuário e confirme antes. A leitura do profissional diz se
+  ele **tem acesso**. A plataforma recusa, explicando o motivo, inativar a si mesmo, inativar um
+  administrador sem ser administrador e inativar o último administrador. Se o serviço de login estiver
+  fora, **nada muda** (nem o cadastro) e dá para tentar de novo.
 - **CPF é write-only.** Ao cadastrar/editar um profissional você **pode informar** o CPF, mas as
   leituras **nunca o devolvem** — some da projeção. Você configura sem PII sensível vazar de volta.
 - **Configurar identidade é ato deliberado.** Criar ou revestir um estabelecimento muda a cara do
@@ -174,7 +179,8 @@ Ideias que orientam quase tudo:
   **estabelecimentos** onde atua e **registros de conselho** (CRM/CRO — números públicos).
 - **Cadastrar/editar (como dado):** criar ou atualizar o profissional, sua **grade de horários** e seus
   **documentos** → ferramentas de gestão de profissional. CPF é **write-only** (pode informar; nunca
-  volta na leitura). **Não** cria login/acesso — isso é IAM, fora.
+  volta na leitura). **Não** cria login/acesso — isso é IAM, fora. **Inativar/reativar** desliga e
+  religa o login que já existe (ver a regra acima): confirme antes.
 
 **Convênios**
 - **Ler:** quais a clínica aceita (e ativos) → listagem de convênios.
@@ -465,8 +471,8 @@ name: auxiliar-medico
 description: Apoio ao fluxo de ATENDIMENTO clínico no Fluxo Ideal — check-in do paciente, o estado/etapa em que cada atendimento está, anotações da equipe, pendências operacionais do profissional e métricas do atendimento. Use para acompanhar "onde está o paciente hoje", registrar chegada, mover o atendimento de etapa e ver a fila de trabalho. NÃO cobre o conteúdo do prontuário nem conduta clínica.
 audience: [ia, humano]
 depends_on: [atendimento-operacional, checkin, evolucao-operacional, pendencias]
-version: 0.2.2
-updated: 2026-10-30
+version: 0.2.3
+updated: 2026-11-06
 ---
 
 # Auxiliar do atendimento clínico
@@ -559,7 +565,10 @@ Ideias que sustentam o domínio:
 > skill nunca promete acesso. Ações que mudam estado devem ser **confirmadas com o usuário** antes.
 
 - **Registrar a chegada do paciente** (criar/abrir o atendimento) → ferramenta de **check-in**. Para
-  walk-in/encaixe, lembre de informar o **serviço** ou a venda existente.
+  walk-in/encaixe, lembre de informar o **serviço** ou a venda existente. Com horário marcado, o
+  **convênio** e a **venda** vêm do agendamento: não informe nenhum dos dois se não houver motivo.
+  Particular num agendamento de convênio só se for pedido explicitamente; convênio diferente do agendamento
+  fica gravado sem aviso na resposta (só na auditoria), então confirme com o usuário.
 - **Ver a situação dos atendimentos** (do dia, de um período, de um paciente, ou só os **ativos agora**)
   → ferramenta de **busca** de atendimentos. Traz uma visão enxuta (estado, quem, quando) — sem detalhe
   clínico.
@@ -567,7 +576,10 @@ Ideias que sustentam o domínio:
   comentários, checklist, acompanhantes) → ferramenta de **contexto** do atendimento. Se uma seção não
   for permitida, ela vem marcada como sem acesso, sem derrubar o resto.
 - **Mudar a etapa** (chamar para atendimento, avançar de estado; ou **finalizar**; ou **cancelar** com
-  motivo/tipo) → ferramenta de **mudança de estado**. Confirme com o usuário antes.
+  motivo/tipo) → ferramenta de **mudança de estado**. Confirme com o usuário antes. **Iniciar** o
+  atendimento confere o termo de consentimento da venda e, quando a clínica liga essas travas, a venda
+  (ou a cortesia) e a autorização do convênio. Se travar, diga o que falta; liberar sem a autorização,
+  com justificativa, é na tela.
 - **Deixar uma anotação da equipe** num atendimento → ferramenta de **comentário**. Só recado
   operacional — nada de conteúdo clínico sensível.
 - **Concluir ou reabrir um item do checklist** de preparo do atendimento → ferramenta de **checklist**.
@@ -586,9 +598,11 @@ comentário se precisar.
 
 ### Paciente chegou (com horário marcado)
 1. Localize o atendimento/agendamento do paciente (busca do dia).
-2. Registre o **check-in** — o atendimento é aberto e entra na fila (`Em espera`).
+2. Registre o **check-in** — o atendimento é aberto e entra na fila (`Em espera`). Convênio e venda
+   vêm do agendamento; não crie outra venda com serviços.
 3. Se o check-in do mesmo agendamento já tinha sido feito, você recebe o atendimento existente (não
-   duplica) — apenas siga com ele.
+   duplica) — apenas siga com ele. Repetir o check-in **não troca o convênio**: se ele estiver errado,
+   a correção é na tela.
 
 ### Paciente sem horário (walk-in / encaixe)
 1. Faça o **check-in** informando o **serviço** que será atendido (ou uma venda existente) — sem isso a
@@ -1899,8 +1913,8 @@ name: designer-mensageria
 description: A AUTORIA da comunicação da clínica com o paciente no Fluxo Ideal — desenhar os templates de mensagem (assunto + corpo com variáveis), gerir os canais (e-mail, WhatsApp) e a aprovação de HSM no provedor. Use para escrever/ajustar os textos que vão ao paciente, criar/ativar um template, gerir canais e submeter/acompanhar o HSM. Disparar de fato (enviar/programar/checar entrega) é do operador → skill `comunicacao-paciente`.
 audience: [ia, humano]
 depends_on: [mensagens, templates, canais, entrega]
-version: 0.5.0
-updated: 2026-08-13
+version: 0.5.1
+updated: 2026-11-06
 ---
 
 # Designer de Mensageria
@@ -2058,7 +2072,19 @@ conteúdo por canal em **prévia** → conferir os `{{placeholders}}` e a polít
    informativo; **erro de sintaxe** impede gravar.
 4. Só então **grave**. Lembre: passa a valer para os **próximos** envios; os já enfileirados não mudam.
 5. Se for um template **crítico/transacional** (verificação, código de acesso, link de assinatura,
-   convite de pesquisa), redobre o cuidado — editar errado quebra automações; confirme explicitamente.
+   convite de pesquisa, moldura do e-mail), redobre o cuidado — editar errado quebra automações; confirme
+   explicitamente.
+
+### Ajustar a moldura do e-mail (cabeçalho e rodapé de todo e-mail)
+1. A **moldura** é um modelo do sistema, um por clínica: ela embrulha **todo** e-mail, inclusive o de
+   código de acesso e o de link mágico. Cada linha do rodapé só aparece se o dado existir no cadastro.
+2. O corpo tem de mostrar o **lugar do conteúdo** (`{{ conteudo }}`) **uma vez**, em texto visível, fora
+   de link, botão ou título, sem esconder o texto. Fora disso, a plataforma recusa e diz o código da
+   regra; a prévia já mostra a recusa.
+3. Editar a moldura exige uma **permissão própria**, diferente da que edita os modelos de código de
+   acesso e de link mágico. Sem ela, a plataforma recusa e nada é gravado: oriente a pedir a quem
+   administra os acessos.
+4. É template crítico: prévia, confirmação explícita e só então gravar.
 
 > **Enviar agora, programar mensagem automática e investigar "não chegou"** são fluxos do operador de
 > envio → skill `comunicacao-paciente`.
@@ -2075,8 +2101,8 @@ conteúdo por canal em **prévia** → conferir os `{{placeholders}}` e a polít
   humana**; deletar na Meta é a caminho.)
 - **Regra de ouro do remetente** — quando escolhível, o remetente é o **e-mail do próprio usuário
   logado**; alguns templates exigem isso por política.
-- **Templates críticos/transacionais** (verificação, código, link mágico, convite de pesquisa) exigem
-  confirmação reforçada antes de editar — quebrá-los derruba automações.
+- **Templates críticos/transacionais** (verificação, código, link mágico, convite de pesquisa, moldura do
+  e-mail) exigem confirmação reforçada antes de editar — quebrá-los derruba automações.
 - **Toda ação que fala com o paciente é confirmada com o usuário** antes de disparar.
 
 ## Limites / o que esta skill NÃO cobre
@@ -4095,8 +4121,8 @@ name: secretaria
 description: O papel de recepção do Fluxo Ideal — cadastrar e encontrar pacientes, agendar/remarcar/cancelar, ler a agenda do dia e a disponibilidade de horários, e acompanhar o histórico de relacionamento. Use para "quem é esse paciente?", "tem horário quinta?", "marca o retorno da Maria", "quem faltou hoje?".
 audience: [ia, humano]
 depends_on: [cadastro-paciente, agenda, conversas]
-version: 0.8.1
-updated: 2026-10-30
+version: 0.8.2
+updated: 2026-11-06
 ---
 
 # Secretária
@@ -4232,8 +4258,11 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 - Achar **horários livres** (um dia ou um período) → ferramenta de disponibilidade de slots.
 - Descobrir **quem faz** um procedimento, ou **o que/onde** um profissional atende → ferramenta de
   opções de profissional. Use **antes de marcar** quando não estiver claro quem pode atender.
-- Detalhe de UM agendamento → ferramenta de contexto do agendamento. A **trajetória** dele (quem
-  confirmou, por que cancelou) → ferramenta de histórico do agendamento.
+- Detalhe de UM agendamento → ferramenta de contexto do agendamento. Ali o **motivo da consulta** e o
+  **motivo do cancelamento** são campos separados (o do cancelamento fica vazio nos cancelamentos antigos).
+  A **trajetória** dele (quem confirmou, por que cancelou — o cancelamento aparece como "Cancelado: motivo")
+  → ferramenta de histórico do agendamento. Contato ou CPF digitados nesses textos chegam mascarados;
+  como podem citar a saúde do paciente, use-os só para responder o que foi perguntado.
 - Minhas pendências (sem confirmação, atrasados) → ferramenta de pendências.
 - "Quem tem mais chance de faltar amanhã?" → as listagens de agenda já trazem o **risco de falta** de
   cada agendamento; ordene/destaque os de risco alto para **reforçar a confirmação** primeiro.
@@ -4257,7 +4286,7 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
   reversível de graça** (conta reagendamento) — confirme com o usuário.
 - Confirmar / registrar chegada / registrar falta / finalizar → ferramenta de mudança de estado.
 - Cancelar (com motivo obrigatório; pode já sugerir horários para remarcar) → ferramenta de
-  cancelamento.
+  cancelamento. O motivo fica guardado à parte e no histórico; o motivo da consulta não muda.
 - **Bloquear** a agenda (almoço, férias, feriado), inclusive **recorrente** → ferramenta de bloqueio.
 - Abrir um **encaixe / horário extra** → ferramenta de agenda extra.
 - **Agendamento privado** (interno/reservado que o paciente **não** deve ser avisado): ao marcar ou

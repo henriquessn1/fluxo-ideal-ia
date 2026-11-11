@@ -55,8 +55,8 @@ name: administrador-clinica
 description: A "planta baixa" da clínica no Fluxo Ideal — configurar a identidade do estabelecimento (dados, contato, endereço, branding/white-label), cadastrar e gerir os profissionais (especialidades, registros de conselho, grade de horários, vínculos, documentos), os convênios aceitos, o catálogo de especialidades e o site público. Use para "cadastra a Dra. X", "adiciona esse convênio", "quais médicos temos?", "veste a marca da clínica", "monta o estabelecimento novo". Criar login/acesso (IAM) fica FORA.
 audience: [ia, humano]
 depends_on: [identidade-clinica, profissionais, especialidades, convenios, salas-recursos]
-version: 0.3.2
-updated: 2026-11-06
+version: 0.4.0
+updated: 2026-11-11
 ---
 
 # Administrador da clínica
@@ -71,7 +71,7 @@ comportamento de agentes, e **não cria login/acesso** (isso é IAM, fica fora).
 ## Quando usar
 - "Quais profissionais a clínica tem?", "me fala sobre a Dra. X", "quem faz odontologia?",
   "o CRM dela está vigente?", "em quais unidades o Dr. Y atende?".
-- **Cadastrar / editar um profissional** como **dado** — especialidades, registros de conselho,
+- **Completar / editar um profissional** como **dado** (ele nasce na tela de usuários) — especialidades, registros de conselho,
   grade-modelo de horários, vínculo com unidade(s), documentos. (Criar o **login/acesso** dele é IAM,
   fora daqui.)
 - "Quais convênios a clínica aceita?" e **cadastrar / ativar / desativar** um convênio institucional.
@@ -124,7 +124,8 @@ Ideias que orientam quase tudo:
   especialidades (uma **principal**), registros de conselho (CRM/CRO — números **públicos**), os
   **estabelecimentos** onde atua, uma **grade-modelo** de horários (template de disponibilidade,
   **não** a agenda real — de `secretaria`) e **documentos**.
-- **Cadastrar o profissional ≠ dar-lhe acesso.** Este papel cria/edita o **registro** do profissional;
+- **Cadastrar o profissional ≠ dar-lhe acesso.** Este papel edita o **registro** do profissional (que nasce
+  com o login, na tela de usuários da Central — o assistente não cria);
   **criar login, senha ou papel de acesso (IAM)** é ato privilegiado à parte e **fica fora** (nunca a
   gestão de acessos). Montar a pessoa é aqui; deixá-la **entrar no sistema** é outro papel.
 - **Inativar o profissional desliga o login dele.** Se ele tem acesso ao sistema, inativar também o
@@ -177,7 +178,7 @@ Ideias que orientam quase tudo:
   (**enxuta**, **sem CPF**); ver **um** em detalhe → detalhe do profissional, expandindo sob demanda
   **especialidades** (com a principal), **grade-modelo de horários** (template, não a agenda real),
   **estabelecimentos** onde atua e **registros de conselho** (CRM/CRO — números públicos).
-- **Cadastrar/editar (como dado):** criar ou atualizar o profissional, sua **grade de horários** e seus
+- **Editar (como dado):** atualizar o profissional que já existe, sua **grade de horários** e seus
   **documentos** → ferramentas de gestão de profissional. CPF é **write-only** (pode informar; nunca
   volta na leitura). **Não** cria login/acesso — isso é IAM, fora. **Inativar/reativar** desliga e
   religa o login que já existe (ver a regra acima): confirme antes.
@@ -257,11 +258,15 @@ Ideias que orientam quase tudo:
 3. "Quanto o convênio paga / preço por convênio" é `precificador`; "carteirinha do paciente" é
    `secretaria`; "faturar TISS" é `faturamento-convenio`. Aqui é a **entidade** convênio.
 
-### Cadastrar um profissional novo (como dado)
-1. Crie o **registro** do profissional (nome/atributos) — pré-visualize, confirme, aplique.
-2. Complete: **especialidades** (marque a principal), **registros de conselho** (CRM/CRO com UF/validade),
-   **vínculo** com a(s) unidade(s), a **grade-modelo de horários** e **documentos**. CPF é write-only.
-3. Dar-lhe **login/acesso** ao sistema é **IAM** — outro papel, fora daqui.
+### Profissional novo: nasce na tela de usuários
+1. **O assistente não cria profissional.** Quem cria é um administrador, na Central, em
+   **Configuração › Usuários › Novo Usuário › Criar médico** — ali nascem juntos o login e o registro do
+   profissional. Leve a pessoa até lá e diga o que vai precisar (nome, e-mail, conselho).
+2. Depois de criado, complete **por aqui**: **especialidades** (marque a principal), **registros de conselho**
+   (CRM/CRO com UF/validade), **vínculo** com a(s) unidade(s), a **grade-modelo de horários** e **documentos**.
+   CPF é write-only.
+3. **Remover** um profissional desliga o login dele e apaga o vínculo com a conta — avise antes de confirmar e
+   prefira **desativar** quando a pessoa só saiu de férias ou deixou de atender por um tempo.
 
 ### Vestir a marca da clínica (white-label)
 1. Reúna o kit: nome, cores (primária/secundária/fundo/texto), tema (claro/escuro), fonte, logos,
@@ -282,8 +287,11 @@ Ideias que orientam quase tudo:
   atende — só se define quem a clínica é.
 - **CPF é write-only.** Pode ser informado ao cadastrar/editar um profissional, mas a **leitura nunca
   o devolve** — as consultas são de propósito institucional e a PII sensível não volta na projeção.
-- **Cadastrar ≠ dar acesso.** Criar/editar o profissional é cadastro de **dado**; criar login/senha/
-  papel de acesso é **IAM** e fica **fora** (nunca a gestão de acessos).
+- **Cadastrar ≠ dar acesso.** Editar o profissional é cadastro de **dado**; criar login/senha/
+  papel de acesso é **IAM** e fica **fora** (nunca a gestão de acessos). O profissional **nasce** na tela de
+  usuários da Central (login e registro juntos); o assistente não cria, só completa e edita.
+- **Remover desliga o login.** Excluir um profissional corta o acesso dele e apaga o vínculo com a conta —
+  confirme com a pessoa e prefira desativar.
 - **Registro de conselho é público.** CRM/CRO/etc podem ser mostrados (com UF/validade); servem
   para conferir vigência.
 - **Grade-modelo ≠ agenda.** O horário do profissional aqui é um **template** de disponibilidade,

@@ -3,7 +3,7 @@ name: secretaria
 description: O papel de recepção do Fluxo Ideal — cadastrar e encontrar pacientes, agendar/remarcar/cancelar, ler a agenda do dia e a disponibilidade de horários, e acompanhar o histórico de relacionamento. Use para "quem é esse paciente?", "tem horário quinta?", "marca o retorno da Maria", "quem faltou hoje?".
 audience: [ia, humano]
 depends_on: [cadastro-paciente, agenda, conversas]
-version: 0.9.0
+version: 0.10.0
 updated: 2026-11-21
 ---
 
@@ -128,6 +128,14 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
   → ferramentas de convênio do cliente.
 - **Tags**, **relacionamentos** (responsável/dependente) e marcar o cadastro como **revisado**
   → ferramentas de gestão do cadastro.
+- **Consentimento de divulgação** ("ela pediu para não receber promoção", "pode mandar campanha para
+  ele?") → a ficha do paciente traz, **quando você pede**, o consentimento por canal (WhatsApp, e-mail,
+  SMS): se a divulgação está permitida ou bloqueada, de onde veio o bloqueio (o próprio paciente pelo
+  WhatsApp ou pelo portal, ou a recepção) e quando mudou. O padrão é permitido. Ler isso pede uma
+  autorização própria. Se o consentimento vier **desconhecido** (serviço fora), trate como desconhecido:
+  **não divulgue**. Para **registrar** o pedido do paciente → a ferramenta de consentimento (ver o fluxo
+  abaixo). Vale só para **divulgação** (marketing); avisos da consulta, código de acesso e documentos não
+  passam por aqui.
 - Suspeita de cadastro duplicado → ferramenta de **análise de duplicados** (só analisa/recomenda) e,
   quando estiver confiante, a ferramenta de **mesclar** — **com guarda**: ensaio (dry-run) +
   confirmação explícita, e só acima de **alta similaridade**. Mesclar é **irreversível** — nunca no chute.
@@ -251,6 +259,18 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 3. Só então **cadastre**: **nome e telefone são obrigatórios** (sem telefone o cadastro é
    recusado); o CPF é opcional, mas recomendado — ele trava a identidade dali em diante.
 
+### Registrar o pedido do paciente sobre divulgação (consentimento)
+1. Leia o consentimento atual do paciente (ficha, pedindo o consentimento).
+2. Rode a ferramenta de consentimento em **prévia**: ela mostra o estado **atual × proposto** e se o
+   bloqueio foi pedido pelo próprio paciente.
+3. **Bloquear** (o paciente pediu para não receber): confirme com o usuário e grave. É o lado seguro.
+4. **Liberar** um bloqueio que o **próprio paciente** pediu: exige o **motivo** — o que o paciente disse,
+   nas palavras dele, nunca um texto inventado — **e** a confirmação explícita do usuário no chat. Sem as
+   duas coisas, não libere. Liberar o que a recepção bloqueou não pede confirmação extra, mas a prévia
+   pode avisar que o serviço vai pedir o motivo.
+5. Quem registrou fica gravado (é o usuário logado) e o motivo vai para o histórico do consentimento.
+   Um **agente automático nunca libera** — só pessoas, pelo chat ou pela tela.
+
 ### Dar contexto num atendimento telefônico
 1. **Histórico do cliente**: veja os últimos dias de relacionamento — quando falaram por último, o
    que foi marcado, o que aconteceu.
@@ -270,6 +290,9 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 - **Cancelado o agendamento ≠ cancelada a venda.** Se o cancelamento avisar que a venda não foi
   cancelada, nunca diga ao usuário que "está tudo cancelado".
 - **Motivo de cancelamento é pedido, não exibido.** Só traga o texto quando perguntarem o porquê.
+- **Liberar divulgação que o paciente bloqueou pede motivo + confirmação.** O motivo é o que o paciente
+  disse; a confirmação é do usuário, no chat. Bloquear é sempre permitido; agente automático nunca libera.
+- **Consentimento desconhecido = não divulgar.**
 - **Remarcar não é grátis**: conta reagendamento; não é a mesma coisa que "corrigir um erro de
   digitação".
 - **Retorno não se recobra** quando já é um direito concedido — reconheça o caso certo ao marcar.

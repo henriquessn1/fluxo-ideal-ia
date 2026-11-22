@@ -3,7 +3,7 @@ name: comunicacao-paciente
 description: O envio GOVERNADO de mensagens ao paciente no Fluxo Ideal — usar um template pronto para mandar um e-mail pontual agora, ou emitir uma INTENÇÃO governada (a plataforma decide quando entregar, com quiet-hours, teto diário e idempotência), e checar se chegou. É o operador da comunicação: usa os templates, não os cria. Use para "manda a confirmação pro paciente", "programa o lembrete do dia", "esse e-mail chegou?".
 audience: [ia, humano]
 depends_on: [mensagens, entrega, canais]
-version: 0.2.0
+version: 0.3.0
 updated: 2026-11-21
 ---
 
@@ -98,6 +98,13 @@ Ideias que sustentam tudo:
 
 - **Achar o template e ver as variáveis que ele espera** → a ferramenta que **lista templates** (com
   detalhe por canal). É o **pré-requisito** de qualquer envio.
+- **Antes de mensagem que não é de serviço** (divulgação, campanha, convite) → leia o **consentimento**
+  do paciente na ficha dele (pedindo o consentimento; pede uma autorização própria): por canal, a
+  divulgação está permitida ou bloqueada. Bloqueada → não envie por aquele canal. **Desconhecido** (o
+  serviço não respondeu) → trate como desconhecido e **não divulgue**. A plataforma também barra a
+  divulgação para quem pediu para sair; ler antes evita prometer ao usuário um envio que não vai sair.
+  Registrar ou liberar o pedido do paciente é da recepção (skill `secretaria`); um agente automático
+  nunca libera.
 - **Enviar um e-mail pontual agora** → a ferramenta de **envio de e-mail**: escolha o destinatário (o
   paciente cadastrado, cujo contato a plataforma resolve, **ou** um endereço direto), o template e as
   variáveis. **Ação real, não idempotente** — confirme com o usuário.
@@ -148,6 +155,8 @@ Ideias que sustentam tudo:
 - **A plataforma governa o quando** — quiet-hours e teto diário não se contornam por aqui.
 - **Regra de ouro do remetente** — quando escolhível, é o **e-mail do próprio usuário logado**.
 - **Toda ação que fala com o paciente é confirmada** antes de disparar (outward-facing).
+- **Divulgação respeita o consentimento.** Confira antes de mensagem que não é de serviço; bloqueado ou
+  desconhecido = não divulgar por aquele canal.
 - **Não se autoria aqui.** Criar/editar template, canais e HSM é `designer-mensageria`.
 
 ## Limites / o que esta skill NÃO cobre

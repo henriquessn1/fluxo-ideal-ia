@@ -205,8 +205,9 @@ Ideias que orientam quase tudo:
 
 **Interruptores da IA (Configurações do Sistema)**
 - Ligar ou desligar a **IA** dos agentes (o envio ao fornecedor de IA), as **ferramentas** que os agentes
-  usam e as **ações reais** deles é feito **na tela**, em **Configurações do Sistema**, por quem já pode
-  mexer nas configurações do sistema. Vale **por clínica**, sem reiniciar nada, e a troca fica no
+  usam e as **ações reais** deles é feito **na tela**, em **Configurações do Sistema**, por quem
+  administra a clínica — além de poder mexer nas configurações do sistema, a pessoa precisa da
+  autorização própria para configurar a IA. Vale **por clínica**, sem reiniciar nada, e a troca fica no
   **histórico** da configuração. O assistente **não** liga nem desliga: ele explica o efeito e leva a
   pessoa até lá. Desligar numa emergência é desligar ali.
 

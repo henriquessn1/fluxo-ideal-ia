@@ -3,7 +3,7 @@ name: administrador-clinica
 description: A "planta baixa" da clínica no Fluxo Ideal — configurar a identidade do estabelecimento (dados, contato, endereço, branding/white-label), cadastrar e gerir os profissionais (especialidades, registros de conselho, grade de horários, vínculos, documentos), os convênios aceitos, o catálogo de especialidades e o site público. Use para "cadastra a Dra. X", "adiciona esse convênio", "quais médicos temos?", "veste a marca da clínica", "monta o estabelecimento novo". Criar login/acesso (IAM) fica FORA.
 audience: [ia, humano]
 depends_on: [identidade-clinica, profissionais, especialidades, convenios, salas-recursos]
-version: 0.5.0
+version: 0.6.0
 updated: 2026-11-21
 ---
 
@@ -100,6 +100,11 @@ Ideias que orientam quase tudo:
 - **Slug**: o identificador curto/amigável da clínica, único por clínica (usado para endereçar o
   portal da clínica).
 - **Textos legais**: **termos de uso** e **política de privacidade** próprios da clínica.
+- **Encarregado de dados (LGPD)**: quem responde ao paciente sobre os dados pessoais dele — **nome e
+  e-mail**. Aparece no fim da Política de Privacidade do portal (inclusive quando a clínica tem política
+  própria); sem ele, vale o contato da clínica.
+- **Modelo de perfil**: um pacote pronto de acessos para um tipo de função (recepção, contador...),
+  que um administrador **aplica a um papel** na tela de acessos.
 - **Onboarding**: o ato de trazer uma clínica nova — conceitualmente, criar o estabelecimento e
   aplicar sua identidade é o **primeiro passo** estrutural.
 
@@ -210,6 +215,16 @@ Ideias que orientam quase tudo:
   autorização própria para configurar a IA. Vale **por clínica**, sem reiniciar nada, e a troca fica no
   **histórico** da configuração. O assistente **não** liga nem desliga: ele explica o efeito e leva a
   pessoa até lá. Desligar numa emergência é desligar ali.
+
+**Encarregado de dados e modelos de perfil (só pela tela)**
+- **Encarregado de dados**: preenchido na Central, na configuração da clínica, aba **Contato** (nome e
+  e-mail; com nome, o e-mail é obrigatório; deixar vazio limpa). O assistente explica e leva a pessoa até
+  lá; não grava por aqui.
+- **Aplicar um modelo de perfil a um papel**: na tela de acessos (papéis), um administrador escolhe um
+  modelo, **prevê** o que será concedido e só então aplica. Aplicar **soma** acessos: não tira o que o
+  papel já tinha, nunca troca uma proibição do papel e avisa o que ficou de fora. Modelos marcados como
+  "só administrador" ou "de fora da clínica" pedem atenção redobrada. É **gestão de acesso**: o assistente
+  explica o efeito e orienta, mas **não** aplica — a decisão e o clique são do administrador.
 
 ## Fluxos comuns
 

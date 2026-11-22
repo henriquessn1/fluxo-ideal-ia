@@ -3,7 +3,7 @@ name: designer-agentes
 description: Como se DESENHA o comportamento de um agente de IA no Fluxo Ideal — o que é um agente aqui, sua persona/instrução, as capacidades (capabilities nomeadas) que ele pode acionar, os gatilhos que o acordam e a escolha entre raciocínio (LLM) e roteiro determinístico. Antes de criar, checar o REGISTRO público de times prontos para reusar. Princípio central: comportamento de agente é configuração (dado), nunca código. Use para reusar, montar, ajustar ou explicar um agente sem cair em detalhe de implementação.
 audience: [ia, humano]
 depends_on: [automacao-ia, comportamento, gatilhos]
-version: 0.7.0
+version: 0.8.0
 updated: 2026-11-21
 ---
 
@@ -183,6 +183,18 @@ Cinco verdades operacionais:
   (quais capabilities), quando age e o que aconteceria; ao final a IA **gera o manifesto declarativo**.
 - **Conferir antes de aplicar** → a IA **valida** o manifesto (coerência de referências, knobs e
   capabilities) num **ensaio (dry-run)**, sem aplicar nada — aponta o que quebraria antes de virar real.
+  Além dos **erros** (que impedem importar), a validação traz **avisos**: o time importa, mas um agente
+  **não vai conseguir rodar nesta instalação** como está (a IA está desligada, um agente de IA ficou sem
+  ferramentas, as ferramentas estão desligadas, uma ação não existe). Cada aviso diz o agente, o texto
+  para a clínica e **quem resolve** (a clínica ou o suporte). A Central mostra os mesmos avisos na
+  importação.
+- **Conferir se um agente está pronto para rodar** → a ferramenta de **prontidão** responde, para um
+  agente que já existe (pelo id ou pela chave), se ele **tem como rodar aqui**: IA ligada, chave e modelo
+  válidos, ferramentas ligadas para quem usa, conta do agente ativa, ações que existem e permissões do
+  time concedidas. "Pronto" só quando nada bloqueia; cada pendência vem com o nível (**bloqueia** ou
+  **aviso**), o texto para a clínica e quem resolve. Só lê: não chama a IA nem mostra chave, e **não
+  liga nada**. Um agente de IA sem ferramentas é só aviso (há agentes que rodam assim de propósito, como
+  o que lê imagem). Use **depois de importar** e quando "o agente não fez nada".
 - **Aplicar** → **você importa** na Central — colando o **link do registro oficial** ou o JSON. A tela
   mostra o **cartão de risco** antes de aplicar e então **cria as roles, permissões e identidades** dos
   agentes. Esse passo é **humano** — a IA propõe e confere; quem cria acesso é a pessoa. *(fronteira de
@@ -191,6 +203,11 @@ Cinco verdades operacionais:
   persona/roteiro, lista de capabilities e gatilhos.
 - **Acompanhar gastos e execuções** → quantas **execuções** e erros, **por que** um agente agiu,
   **quanto** os agentes LLM gastaram e o **orçamento do mês × o consumido** — sempre por **metadados**.
+  Uma execução com erro traz um **código estável** (filtrável), uma **frase simples para a clínica** e
+  **quem resolve**. Ao explicar uma falha à clínica, use a frase e o "quem resolve"; o texto técnico do
+  erro fica para o suporte (não repasse nome de configuração interna à clínica).
+- **Ver os erros técnicos da instalação ligados a um agente** → a ferramenta de **erros técnicos**
+  (ver a skill `administrador-clinica`) filtra pelos erros de execução de um agente.
 
 **Ordem mental para resolver com agentes:** **já existe no registro?** (reusar) → se não, qual
 **evento** deve acordá-lo (gatilho + filtro) → precisa **julgar linguagem** (LLM) ou basta um
@@ -250,6 +267,15 @@ ambíguo"): a IA propõe os agentes, as capabilities de cada um, os gatilhos e o
 que aconteceria**. Fechado o desenho, a IA **gera o manifesto** e o **confere**; você **importa na
 Central** (com cartão de risco), que cria as identidades e permissões. A IA **desenha e propõe**; a
 pessoa **aplica** — quem cria acesso é sempre o humano.
+
+### "O agente não fez nada" / diagnosticar um agente
+1. **Prontidão** do agente: ele tem como rodar aqui? Se algo **bloqueia**, diga à clínica o texto da
+   pendência e quem resolve. Ligar a IA ou as ferramentas é de quem administra a clínica, em
+   **Configurações do Sistema**; conceder permissão ao papel do agente é humano, na Central.
+2. **Execuções** recentes do agente: ele acordou? Terminou com erro? Use a frase para a clínica e o
+   código do erro.
+3. Nenhuma execução → confira o **gatilho** e os **filtros** (o evento esperado aconteceu? o filtro
+   barrou?).
 
 ### Escolher LLM vs. script
 - **Script** quando: a entrada é estruturada/previsível, você quer resposta determinística e auditável,

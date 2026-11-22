@@ -3,8 +3,8 @@ name: precificador
 description: O sistema de precificação do Fluxo Ideal — como se configura preço (catálogo, tabelas, condições e formas de pagamento, favoritos) e como isso converge em orçamento e venda. Use para entender "quanto custa", como montar um orçamento e por que os valores são o que são.
 audience: [ia, humano]
 depends_on: [precos, catalogo, convenios, condicoes-pagamento, orcamentos, termos-orcamento, estoque-rastreavel, kits-material]
-version: 0.7.1
-updated: 2026-10-30
+version: 0.8.0
+updated: 2026-11-21
 ---
 
 # Precificador
@@ -75,6 +75,11 @@ Três ideias que sustentam tudo:
 - **Termo do orçamento**: o **texto legal** que acompanha o orçamento — declaração de aceite, intercorrências, itens não inclusos, **TCLE** (consentimento) ou outros. O orçamento **seleciona** um template de termo por tipo (há um **padrão** por tipo). Você **escolhe** qual termo entra; **redigir/versionar o texto** dos termos é da skill `designer-documentos` (tela **Templates de Termos**, nas configurações).
 - **Venda**: orçamento aprovado/confirmado, pronto para o ciclo de pagamento.
 - **Desconto / cortesia**: redução dentro do limite da tabela / item incluído sem custo (isenção comercial).
+- **Cortesia em item de pacote**: se o pacote tem **desconto próprio** (preço do pacote na tabela ou preço
+  fechado), a cortesia **soma** ao desconto do pacote e incide sobre o valor **já com** ele — pacote de
+  R$ 150 com 20 % sai R$ 120; com mais 10 % de cortesia, R$ 108. Pacote **sem** desconto próprio: a cortesia
+  incide sobre a soma dos itens, como num item avulso. Cortesia de 100 % continua zerando; item de
+  **terceiro** fica fora da cortesia.
 - **Política de desconto (alçada)**: até quanto cada **papel** (e/ou cada tabela) concede sozinho, até quanto
   vai **com aprovação** e, acima disso, **negado**. Quando várias políticas casam, vale a mais específica
   (papel + tabela) e depois a de maior prioridade. Sem política configurada = sem restrição.
@@ -159,6 +164,8 @@ Três ideias que sustentam tudo:
 - **Autorização é pré-condição, não preço.**
 - **Reajuste em massa só depois da prévia aprovada** — e o histórico de preço guarda cada versão.
 - **Desconto acima da alçada não se concede por fora** — o motor diz se exige aprovação; respeite.
+- **No pacote com desconto próprio, a cortesia vem depois do desconto do pacote** — não calcule a cortesia
+  sobre o valor cheio dos itens. Na dúvida, **simule a venda** e leia a memória de cálculo.
 
 ## Limites
 - Não cobre o **ciclo do dinheiro** (registrar/confirmar pagamento, parcelas, contas a receber, caixa) → `financeiro`; **faturamento/glosa TISS** → `faturamento-convenio`.

@@ -3,8 +3,8 @@ name: designer-documentos
 description: O sistema de documentos do Fluxo Ideal — como se desenha, versiona, previsualiza e publica o MODELO de um documento (receita, atestado, laudo, orçamento, TCLE…) e como esses modelos viram documentos gerados por paciente. Cobre BLOCOS REUTILIZÁVEIS (cabeçalho/rodapé/assinatura/cláusula incluídos em vários modelos — sempre reaproveitar em vez de duplicar HTML), nascer um corpo do zero (inclusive migrar DOCX→HTML, herdando as habilitações do legado pra o documento não sumir do picker), GERIR HABILITAÇÕES (quem pode emitir cada documento) e os TEMPLATES DE TERMOS (o texto legal versionado de aceite/intercorrências/itens não inclusos/TCLE que entra nos orçamentos) — o CONTEÚDO, distinto da fôrma HTML. Use para entender "como esse documento fica", para criar/editar/publicar um template com segurança, reaproveitar blocos e redigir/versionar os termos.
 audience: [ia, humano]
 depends_on: [documentos-clinicos, templates, catalogo-documentos, termos-orcamento]
-version: 0.8.0
-updated: 2026-09-28
+version: 0.9.0
+updated: 2026-11-21
 ---
 
 # Designer de Documentos
@@ -163,6 +163,12 @@ Algumas ideias sustentam tudo:
   - `{{ nome_cliente }}` — nome do paciente.
   - `{{ medico_nome }}` · `{{ medico_documentos }}` — nome e registros (CRM/CRO…) do profissional.
   - `{{ clinica_nome }}` · `{{ clinica_logo }}` · `{{ clinica_logo_pequeno }}` — identidade da clínica.
+  - **Identidade da clínica (as mesmas nos documentos e nas mensagens):** `clinica_nome`, `clinica_endereco`, `clinica_mapa_link`, `clinica_telefone`,
+  `clinica_whatsapp`, `clinica_whatsapp_link`, `clinica_email`, `clinica_site`, `clinica_instagram`,
+  `clinica_facebook`, `clinica_cnpj` e `clinica_razao_social`.
+    Saem do **cadastro da clínica** (skill `administrador-clinica`): **não as preencha à mão** na emissão
+    nem na simulação — o cadastro vence. Dado que a clínica não cadastrou sai **vazio**: corrija na
+    identidade da clínica, não no modelo.
   - `{{ emissao }}` · `{{ validade }}` — datas de emissão e validade.
   - `{{ info_assinatura }}` · `{{ assinatura_img }}` · `{{ precisa_certificar }}` — bloco/imagem de
     assinatura e se o documento exige certificação.

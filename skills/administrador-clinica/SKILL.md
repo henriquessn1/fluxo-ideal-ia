@@ -3,7 +3,7 @@ name: administrador-clinica
 description: A "planta baixa" da clínica no Fluxo Ideal — configurar a identidade do estabelecimento (dados, contato, endereço, branding/white-label), cadastrar e gerir os profissionais (especialidades, registros de conselho, grade de horários, vínculos, documentos), os convênios aceitos, o catálogo de especialidades e o site público. Use para "cadastra a Dra. X", "adiciona esse convênio", "quais médicos temos?", "veste a marca da clínica", "monta o estabelecimento novo". Criar login/acesso (IAM) fica FORA.
 audience: [ia, humano]
 depends_on: [identidade-clinica, profissionais, especialidades, convenios, salas-recursos]
-version: 0.6.0
+version: 0.7.0
 updated: 2026-11-21
 ---
 
@@ -94,6 +94,14 @@ Ideias que orientam quase tudo:
 **Estabelecimento**
 - **Estabelecimento**: a clínica (ou uma unidade dela). Guarda nome, contato (telefone/WhatsApp),
   **endereço** e o kit de marca.
+- **Identidade institucional**: além de nome, telefone e endereço, a clínica cadastra **e-mail de
+  contato**, **site**, **Instagram**, **Facebook**, **CNPJ** e **razão social** — dados da clínica, não
+  do paciente. Site e redes viram endereço completo; CNPJ inválido é recusado. Esse CNPJ é a
+  **identidade** da clínica, não o cadastro fiscal da nota fiscal (que é do `financeiro`).
+- **Variáveis da clínica nos textos**: as mensagens e os documentos usam a identidade cadastrada aqui
+  (nome, endereço, link do mapa, telefone, WhatsApp, e-mail, site, redes, CNPJ, razão social). Campo
+  vazio aqui = **vazio** em toda mensagem e documento que o usa — por isso vale manter o cadastro
+  completo.
 - **Branding / white-label**: vestir o produto com a marca da clínica — **cores** (primária,
   secundária, fundo, texto), **tema** (claro/escuro), **fonte**, **logos** (grande e pequeno),
   **favicon**, **slogan**. Aplicado ao portal do paciente.
@@ -261,7 +269,8 @@ Ideias que orientam quase tudo:
    prefira **desativar** quando a pessoa só saiu de férias ou deixou de atender por um tempo.
 
 ### Vestir a marca da clínica (white-label)
-1. Reúna o kit: nome, cores (primária/secundária/fundo/texto), tema (claro/escuro), fonte, logos,
+1. Reúna o kit (inclua e-mail de contato, site, redes, CNPJ e razão social — eles aparecem nas mensagens e
+   documentos): nome, cores (primária/secundária/fundo/texto), tema (claro/escuro), fonte, logos,
    favicon, slogan, contato e, se houver, textos legais.
 2. Use a **gestão do estabelecimento** em modo pré-visualização — confira o que seria gravado.
 3. Confirme e aplique. Ao revestir um estabelecimento existente, envie **só** o que muda (aplicação

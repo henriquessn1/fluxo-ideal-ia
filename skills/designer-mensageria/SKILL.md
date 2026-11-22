@@ -3,7 +3,7 @@ name: designer-mensageria
 description: A AUTORIA da comunicação da clínica com o paciente no Fluxo Ideal — desenhar os templates de mensagem (assunto + corpo com variáveis), gerir os canais (e-mail, WhatsApp) e a aprovação de HSM no provedor. Use para escrever/ajustar os textos que vão ao paciente, criar/ativar um template, gerir canais e submeter/acompanhar o HSM. Disparar de fato (enviar/programar/checar entrega) é do operador → skill `comunicacao-paciente`.
 audience: [ia, humano]
 depends_on: [mensagens, templates, canais, entrega]
-version: 0.6.0
+version: 0.7.0
 updated: 2026-11-21
 ---
 
@@ -72,6 +72,12 @@ Ideias que sustentam tudo:
 - **Template é molde, não a mensagem final.** O texto tem **variáveis** (`{{nome}}`, `{{data}}`…) que
   só ganham valor **no envio**. Editar o template muda **todos os próximos** envios dele — nunca os já
   disparados.
+- **A identidade da clínica entra sozinha.** As variáveis `clinica_nome`, `clinica_endereco`, `clinica_mapa_link`, `clinica_telefone`,
+  `clinica_whatsapp`, `clinica_whatsapp_link`, `clinica_email`, `clinica_site`, `clinica_instagram`,
+  `clinica_facebook`, `clinica_cnpj` e `clinica_razao_social` são preenchidas pela
+  plataforma a partir do **cadastro da clínica** (as mesmas dos documentos). Use-as no texto, mas **não
+  as passe** no envio — o cadastro vence. Dado não cadastrado sai **vazio**: corrija na identidade da
+  clínica (skill `administrador-clinica`), não no template.
 - **O mesmo template tem versões por canal.** O que sai por e-mail pode diferir do que sairia por
   WhatsApp; cada canal tem seu assunto/corpo. Um template só sai pelos canais que ele **permite**.
 - **"Enviar por intenção" ≠ "enviar agora".** Para mensagem **automática** (as que uma rotina dispara

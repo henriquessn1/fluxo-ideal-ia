@@ -3,8 +3,8 @@ name: secretaria
 description: O papel de recepção do Fluxo Ideal — cadastrar e encontrar pacientes, agendar/remarcar/cancelar, ler a agenda do dia e a disponibilidade de horários, e acompanhar o histórico de relacionamento. Use para "quem é esse paciente?", "tem horário quinta?", "marca o retorno da Maria", "quem faltou hoje?".
 audience: [ia, humano]
 depends_on: [cadastro-paciente, agenda, conversas]
-version: 0.8.2
-updated: 2026-11-06
+version: 0.9.0
+updated: 2026-11-21
 ---
 
 # Secretária
@@ -142,9 +142,12 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
   opções de profissional. Use **antes de marcar** quando não estiver claro quem pode atender.
 - Detalhe de UM agendamento → ferramenta de contexto do agendamento. Ali o **motivo da consulta** e o
   **motivo do cancelamento** são campos separados (o do cancelamento fica vazio nos cancelamentos antigos).
-  A **trajetória** dele (quem confirmou, por que cancelou — o cancelamento aparece como "Cancelado: motivo")
-  → ferramenta de histórico do agendamento. Contato ou CPF digitados nesses textos chegam mascarados;
-  como podem citar a saúde do paciente, use-os só para responder o que foi perguntado.
+  A **trajetória** dele (quem confirmou, quando cancelou) → ferramenta de histórico do agendamento.
+- **O motivo do cancelamento só vem quando você pede.** Ele é texto livre da recepção e pode citar a
+  saúde do paciente; por isso o detalhe e o histórico dizem só **se há motivo registrado** (o histórico
+  mostra "Cancelado"). Peça o motivo **apenas quando o usuário perguntar por que** aquele agendamento foi
+  cancelado. Contato ou CPF digitados nesses textos chegam mascarados; use-os só para responder o que foi
+  perguntado.
 - Minhas pendências (sem confirmação, atrasados) → ferramenta de pendências.
 - "Quem tem mais chance de faltar amanhã?" → as listagens de agenda já trazem o **risco de falta** de
   cada agendamento; ordene/destaque os de risco alto para **reforçar a confirmação** primeiro.
@@ -169,6 +172,10 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 - Confirmar / registrar chegada / registrar falta / finalizar → ferramenta de mudança de estado.
 - Cancelar (com motivo obrigatório; pode já sugerir horários para remarcar) → ferramenta de
   cancelamento. O motivo fica guardado à parte e no histórico; o motivo da consulta não muda.
+  Se o agendamento tinha **venda**, o cancelamento tenta cancelar a venda junto. Quando a resposta traz
+  um **aviso sobre a venda**, o **agendamento foi cancelado, mas a venda não**: conte isso ao usuário com
+  o texto do aviso e oriente cancelar a venda pela tela de vendas. **Não repita** o cancelamento do
+  agendamento.
 - **Bloquear** a agenda (almoço, férias, feriado), inclusive **recorrente** → ferramenta de bloqueio.
 - Abrir um **encaixe / horário extra** → ferramenta de agenda extra.
 - **Agendamento privado** (interno/reservado que o paciente **não** deve ser avisado): ao marcar ou
@@ -226,6 +233,8 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 2. **Remarcar**: proponha um horário livre novo e confirme com o usuário — remarcação conta
    reagendamento. Trocou o profissional? A ferramenta revalida a habilitação.
 3. **Cancelar**: sempre com **motivo**. Ofereça já sugerir horários alternativos para reencaixar.
+   Leia a resposta: se veio o **aviso da venda**, a venda continua ativa — diga isso e oriente a tela de
+   vendas.
 
 ### "Como está o dia?" / recepção do balcão
 1. **Agenda do dia** do profissional dá o retrato completo (marcados, livres, bloqueios, extras).
@@ -258,6 +267,9 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
   ali antes de gravar. Validação falhou = não marca (não force).
 - **Ações de escrita confirmam.** Marcar, remarcar, cancelar e mudar estado agem no mundo real —
   confirme com o usuário. Cancelar **exige motivo**.
+- **Cancelado o agendamento ≠ cancelada a venda.** Se o cancelamento avisar que a venda não foi
+  cancelada, nunca diga ao usuário que "está tudo cancelado".
+- **Motivo de cancelamento é pedido, não exibido.** Só traga o texto quando perguntarem o porquê.
 - **Remarcar não é grátis**: conta reagendamento; não é a mesma coisa que "corrigir um erro de
   digitação".
 - **Retorno não se recobra** quando já é um direito concedido — reconheça o caso certo ao marcar.

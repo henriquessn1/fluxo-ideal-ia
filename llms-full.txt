@@ -3977,8 +3977,8 @@ name: jornada
 description: A Jornada de Cuidado (Episódio de Cuidado) do Fluxo Ideal — o caso longo do paciente (cirurgia/procedimento com etapas pré e pós) que dura semanas e não cabe no atendimento do dia. Cobre configurar o modelo de uma jornada (fases, etapas, marcos, marcas), acompanhar onde cada paciente está (fase atual, quem travou), preencher/filtrar marcas (ex.: data da cirurgia, confirmado) e operar a jornada de um paciente. Use para "montar a jornada da catarata", "onde estão meus pacientes de cirurgia?", "quem travou?", "abrir a jornada da Maria", "marcar a data da cirurgia da Maria", "quais cirurgias são desta semana?".
 audience: [ia, humano]
 depends_on: [jornada-cuidado, tarefas, atendimento-clinico]
-version: 0.2.0
-updated: 2026-09-28
+version: 0.3.0
+updated: 2026-11-21
 ---
 
 # Jornada de Cuidado
@@ -4070,7 +4070,9 @@ Pense em três verbos:
 - **Filtrar por marca** (ex.: "cirurgias desta semana", "confirmados = sim") → a busca de jornadas
   aceita filtro por valor de marca (faixa de datas / opção / sim-não).
 - Ver o detalhe de uma jornada (fase atual, o que falta, próxima fase **e os valores das marcas**) →
-  ferramenta de contexto da jornada.
+  ferramenta de contexto da jornada. Numa jornada **cancelada**, o detalhe diz só **se há motivo
+  registrado**; o texto do motivo vem apenas quando você o **pede** — faça isso só quando o usuário
+  perguntar por que a jornada foi cancelada.
 - Ver a fila de pendências (parados / requisito vencido) → ferramenta de pendências de SLA.
 
 **Operar uma jornada:**
@@ -4078,7 +4080,8 @@ Pense em três verbos:
 - Atualizar dados (título/tipo/profissional/convênio) **ou preencher/alterar valores de marca**
   (ex.: setar a data da cirurgia, marcar "confirmado") → ferramenta de edição. Preencha só as marcas
   que mudaram; deixe em branco (vazio) para limpar uma marca. Editável a qualquer momento.
-- Encerrar (concluir) ou cancelar → ferramenta de mudança de estado.
+- Encerrar (concluir) ou cancelar → ferramenta de mudança de estado. A resposta das escritas não traz o
+  texto do motivo de cancelamento, só o sinal de que ele existe.
 - Ligar um atendimento à jornada → ferramenta de vínculo.
 - Recalcular a fase (após mover marcos) → ferramenta de recálculo.
 - Mover/concluir/destravar os **marcos** (que são tarefas) → ferramentas de Tarefas (ver `gestor-tarefas`).
@@ -4094,6 +4097,8 @@ Pense em três verbos:
 - **A IA não apaga** modelo nem jornada — exclusão é ação da plataforma, não da IA.
 - **Sem dado clínico** — a jornada carrega referências e progresso; o conteúdo clínico vive no
   atendimento/prontuário (fora deste papel).
+- **Motivo de cancelamento é pedido, não exibido.** É texto livre e pode citar a saúde do paciente:
+  traga-o só quando perguntarem o porquê, e use-o só para responder isso.
 - **Marca ≠ fase.** A marca é um **dado que você preenche** (data da cirurgia, confirmado); a fase é
   **derivada dos marcos**. Preencher uma marca **não** move a fase. As marcas de um tipo existem só
   se a clínica as configurou naquele modelo (nem todo tipo tem marcas).

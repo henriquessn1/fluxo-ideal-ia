@@ -3,8 +3,8 @@ name: designer-mensageria
 description: A AUTORIA da comunicação da clínica com o paciente no Fluxo Ideal — desenhar os templates de mensagem (assunto + corpo com variáveis), gerir os canais (e-mail, WhatsApp) e a aprovação de HSM no provedor. Use para escrever/ajustar os textos que vão ao paciente, criar/ativar um template, gerir canais e submeter/acompanhar o HSM. Disparar de fato (enviar/programar/checar entrega) é do operador → skill `comunicacao-paciente`.
 audience: [ia, humano]
 depends_on: [mensagens, templates, canais, entrega]
-version: 0.5.1
-updated: 2026-11-06
+version: 0.6.0
+updated: 2026-11-21
 ---
 
 # Designer de Mensageria
@@ -61,7 +61,7 @@ CANAIS: e-mail (ativo) · WhatsApp · outros
                                        │
                                        ▼
                               ENTREGA (assíncrona)
-                    na fila → enviando → entregue | falhou → re-tenta | falha definitiva
+                    na fila → enviando → entregue | falhou → (re-tenta, se a clínica ligou) | falha definitiva
 ```
 
 > **Você desenha o template; disparar (as duas formas acima) é do operador → `comunicacao-paciente`.**
@@ -79,7 +79,7 @@ Ideias que sustentam tudo:
   não reenvia o que já mandou (idempotência), não incomoda fora de hora (agenda para o expediente) e
   respeita o **teto diário**. Para um e-mail pontual, você **envia agora**.
 - **A entrega é assíncrona.** Disparar ≠ entregar. A mensagem entra numa fila e um processo a envia;
-  por isso existe o passo de **checar entrega**, com re-tentativas automáticas antes de desistir.
+  por isso existe o passo de **checar entrega**. Nova tentativa automática só existe se a clínica a ligou.
 - **Texto verificado vs texto livre (WhatsApp/HSM).** Em canais como o WhatsApp, o provedor só entrega
   mensagens fora da janela de conversa se o **template foi previamente aprovado** (o HSM). O texto é
   "verificado": você preenche variáveis, mas **não** escreve texto livre por cima do que foi aprovado —
@@ -112,8 +112,21 @@ Ideias que sustentam tudo:
   precisa sair do e-mail do próprio usuário logado).
 - **Entrega assíncrona**: a mensagem é enfileirada e enviada por um processo em segundo plano — o
   resultado se confere depois.
-- **Status de entrega**: *na fila* → *enviando* → **entregue** ao provedor; ou **falhou** (vai
-  re-tentar, com espera crescente entre tentativas) e, esgotadas as tentativas, **falha definitiva**.
+- **Status de entrega**: *na fila* → *enviando* → **entregue** ao provedor; ou **falhou**. Depois de
+  **falhou**, só há nova tentativa automática **se a clínica ligou a retentativa** (vem desligada) — e aí a
+  checagem diz **para quando** ela está agendada. Sem retentativa agendada, nada sai sozinho: é
+  **reenviar** pela origem. Quando o provedor **recusa o pedido** (template ou parâmetros que ele não
+  aceita), é **falha definitiva** na hora — retentar repetiria o erro. Esgotadas as tentativas, também
+  **falha definitiva**. Para quem desenha: recusa do provedor quase sempre é **template
+  mal formado** — variável faltando, número de variáveis que não bate com o HSM aprovado, modelo que não
+  existe lá.
+- **Finalidade do modelo**: todo template é de **marketing** (divulgação, campanha) ou **transacional**
+  (aviso que o paciente precisa receber: consulta, código de acesso, documento, cobrança). **Marketing**
+  respeita o **opt-out** do paciente e o **horário de silêncio**; **transacional** não consulta o
+  consentimento. Por isso o padrão de um template novo é **marketing** ("na dúvida, marketing"). Um envio
+  que se declara transacional com um modelo de marketing **sai como marketing**. Modelo **do sistema** é
+  sempre transacional (não se muda). Um HSM aprovado na Meta como MARKETING é marketing, qualquer que seja
+  a finalidade escolhida aqui.
 - **Prévia (dry-run)**: renderizar o template com valores de exemplo **sem gravar nem enviar** — valida
   a sintaxe e mostra como vai ficar.
 
@@ -127,8 +140,10 @@ Ideias que sustentam tudo:
 - **Ajustar o texto (assunto/corpo) de um template existente** → a ferramenta que **edita o conteúdo do
   template** — sempre em **prévia primeiro** (valida e mostra o render sem gravar); grava só na
   confirmação. Muda os **próximos** envios daquele template.
-- **Criar um template novo, ajustar seus metadados** (ex.: política de remetente) e **ativar/desativar**
-  → a ferramenta de **autoria de template**. Prévia primeiro; grava na confirmação.
+- **Criar um template novo, ajustar seus metadados** (ex.: política de remetente, **finalidade**) e
+  **ativar/desativar** → a ferramenta de **autoria de template**. Prévia primeiro; grava na confirmação.
+  Marcar um modelo como **transacional** tira dele o opt-out: é decisão de **quem desenha** o template,
+  com o usuário confirmando que é aviso necessário e não divulgação — nunca de um agente automático.
 - **Gerir por quais canais** um template pode sair (permitir/bloquear um canal, ligar/desligar a versão
   de um canal) → a ferramenta de **canais do template**.
 - **Ver o status de aprovação do HSM (WhatsApp)** na Meta — *aprovado, pendente ou rejeitado* → a

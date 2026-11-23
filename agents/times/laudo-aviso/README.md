@@ -61,7 +61,12 @@ O time **vem desligado**. Para usar:
    aviso precisa estar **aprovado** e vinculado (sem variáveis). Sem ele, o aviso vai só por e-mail.
 2. Importe este `manifest.json` (Central → Inteligência Artificial → Importar) e conceda ao papel do agente a
    permissão acima.
-3. Ligue o agente `laudo_aviso` na lista de agentes.
+3. Ligue o agente `laudo_aviso` na lista de agentes (Central → Inteligência Artificial → agentes → ligar). É ali que
+   ele liga e desliga, a qualquer momento.
+
+> **Reimportar não mexe no ligado:** importar de novo este time (por exemplo, numa versão nova) atualiza o
+> comportamento, mas **não** liga nem desliga o agente: vale o que a clínica deixou na lista de agentes. O
+> "desligado" do manifesto só vale na primeira importação.
 
 > **Publicação:** este time entra no catálogo depois que a release 2026.11.7 estiver em produção (ele depende do
 > evento e do modelo de mensagem que sobem nela).

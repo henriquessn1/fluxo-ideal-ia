@@ -7,6 +7,11 @@ Só funciona nos **tipos de exame** que a clínica marcou com **"Liberação aut
 trava é do serviço de exames, não deste agente: o agente pede, o serviço confere o tipo e recusa quando não pode.
 Por isso não há lista de tipos de exame na configuração do agente — quem decide é o campo do tipo.
 
+**Quando ele age (e quando não):** o agente só acorda quando o exame fica **laudado** (o documento de laudo foi ligado
+ao resultado). O serviço de exames também aceitaria liberar um resultado **sem** laudo (tipo sem modelo de laudo, ou
+clínica que não exige o laudo), mas este agente **não** age nesses casos: resultado sem laudo continua esperando a
+liberação da equipe.
+
 ## O que faz
 
 | Gatilho | Comportamento |
@@ -57,8 +62,12 @@ paciente ver resultados sem a revisão da médica.
    revisão. Os demais ficam como estão (o padrão é não).
 2. Importe este `manifest.json` (Central → Inteligência Artificial → Importar) e conceda ao papel do agente a
    permissão acima.
-3. Com o ok do responsável, ligue o agente `laudo_liberacao_automatica` na lista de agentes.
+3. Com o ok do responsável, ligue o agente `laudo_liberacao_automatica` na lista de agentes (Central →
+   Inteligência Artificial → agentes → ligar). É ali que ele liga e desliga, a qualquer momento.
 4. (Opcional) Instale e ligue o time [`laudo-aviso`](../laudo-aviso/) para o paciente ser avisado.
+
+> **Reimportar não mexe no ligado:** importar de novo este time atualiza o comportamento, mas **não** liga nem desliga
+> o agente: vale o que a clínica deixou na lista de agentes. O "desligado" do manifesto só vale na primeira importação.
 
 > **Publicação:** este time entra no catálogo depois que a release 2026.11.7 estiver em produção (ele depende da
 > liberação automática do serviço de exames, que sobe nela).

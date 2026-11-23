@@ -39,6 +39,19 @@ E **NÃO contém** (por design):
 3. **Consentimento informado.** A tela de importar mostra um **cartão de risco** (lê dados de
    paciente? envia algo pra fora? age sozinho?) antes de aplicar.
 
+## Reimportar um time (o que muda e o que fica)
+
+Importar de novo um time já instalado atualiza o **comportamento** dos agentes (roteiro, instrução, ações, gatilhos),
+mas **não mexe no liga/desliga** que a clínica escolheu:
+
+- **Agente:** o `enabled` do manifesto só vale quando o agente é criado (primeira importação ou depois de apagado).
+- **Gatilho de evento:** casa pelo evento **e** pelo filtro. O gatilho que já existe mantém o liga/desliga da clínica;
+  gatilho novo (outro evento ou outro filtro) entra como o manifesto diz. Dois gatilhos idênticos no mesmo agente são
+  ambíguos: o liga/desliga deles não é preservado.
+- **Gatilho de relógio** (`cron` ou `every_seconds`): se o agente tem **um único** gatilho de relógio antes e depois,
+  ele é o mesmo gatilho mesmo que o horário mude. Com mais de um, **mudar o horário conta como gatilho novo** (entra
+  como o manifesto diz).
+
 ## Duas pastas: produtivos vs. exemplos
 
 - **[`times/`](./times/) — times PRODUTIVOS (para a clínica instalar e usar).** Resolvem problemas

@@ -80,6 +80,17 @@
       "manifesto": "agents/times/jornada-cuidado/manifest.json"
     },
     {
+      "chave": "laudo-aviso",
+      "nome": "Aviso de laudo liberado",
+      "descricao": "Avisa o paciente que há um resultado novo no portal quando o resultado de um exame é liberado, sem citar o exame.",
+      "versao": "1.0",
+      "agentes": 1,
+      "tipos": [
+        "script"
+      ],
+      "manifesto": "agents/times/laudo-aviso/manifest.json"
+    },
+    {
       "chave": "lembrete-rapido",
       "nome": "Lembrete rápido",
       "descricao": "Manda pelo WhatsApp um lembrete cerca de 2h antes do agendamento (nunca antes das 8h).",

@@ -66,7 +66,7 @@ O time **vem desligado**. Para usar:
 
 > **Reimportar não mexe no ligado:** importar de novo este time (por exemplo, numa versão nova) atualiza o
 > comportamento, mas **não** liga nem desliga o agente: vale o que a clínica deixou na lista de agentes. O
-> "desligado" do manifesto só vale na primeira importação.
+> "desligado" do manifesto só vale quando o agente é criado (primeira importação ou depois de apagado).
 
 > **Publicação:** este time entra no catálogo depois que a release 2026.11.7 estiver em produção (ele depende do
 > evento e do modelo de mensagem que sobem nela).

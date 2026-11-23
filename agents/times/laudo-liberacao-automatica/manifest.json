@@ -1,0 +1,46 @@
+{
+  "chave": "laudo-liberacao-automatica",
+  "versao": "1.0",
+  "nome": "Liberação automática de laudo",
+  "descricao": "Libera ao paciente, sem a revisão da médica, o resultado laudado dos tipos de exame marcados com \"Liberação automática\".",
+  "escopo": "por-tenant",
+  "roles": [
+    {
+      "nome": "botfn-laudo-liberacao",
+      "grants": [
+        "exame_realizado:liberar_automatico"
+      ]
+    }
+  ],
+  "agentes": [
+    {
+      "chave": "laudo_liberacao_automatica",
+      "descricao": "Quando o laudo é ligado ao exame, pede a liberação do resultado ao paciente; o serviço de exames só libera se o tipo do exame tiver \"Liberação automática\" ligada.",
+      "tipo": "script",
+      "enabled": false,
+      "roles": [
+        "botfn-laudo-liberacao"
+      ],
+      "triggers": [
+        {
+          "event_type": "exames.exame_estado_alterado",
+          "enabled": true,
+          "filtro": {
+            "estado": "laudado"
+          }
+        }
+      ],
+      "config": {
+        "acoes": [
+          {
+            "nome": "liberar_laudo",
+            "capability": "exames.liberar_laudo",
+            "kind": "internal"
+          }
+        ],
+        "script": "// laudo_liberacao_automatica — agente `script`. Comportamento = ESTE arquivo (DADO), nunca código de serviço.\n//\n// Gatilho: o exame mudou de estado (evento `exames.exame_estado_alterado`) e o filtro do gatilho só deixa passar\n// `estado = laudado` (o laudo foi ligado ao exame). O evento traz só ids: `subject.exame_id`, `subject.cliente_id`\n// e `subject.venda_item_id` (pode vir vazio: exame pedido pelo médico, sem venda).\n//\n// Ação: pede ao serviço de exames para LIBERAR o resultado ao paciente (`liberar_laudo`), mandando SÓ o id do\n// exame. Libera SEM a revisão da médica. Quem decide se pode é o serviço de exames, pelo campo \"Liberação\n// automática\" do TIPO de exame — este agente não tem lista de tipos. Recusas normais (não são erro):\n//   - TIPO_SEM_LIBERACAO_AUTOMATICA: o tipo espera a revisão da médica;\n//   - SEM_RESULTADO: o exame ainda não tem resultado;\n//   - LAUDO_EXIGIDO: a clínica exige o laudo e ele ainda não está ligado.\n// Já liberado antes → o serviço responde sucesso sem mudar nada (rodar de novo é seguro).\n//\n// A liberação dispara o aviso ao paciente \"há um resultado novo no portal\" (time `laudo-aviso`, se instalado).\n//\n// Falha visível (anti falso-verde): qualquer outra resposta (erro, exame não encontrado, serviço fora) sai com\n// log WARNING e `acao_bloqueada` no resumo — nunca como \"liberado\".\n// Sem dado pessoal no log/resumo: só o id do exame e o código da recusa.\n//\n// Injetados: event, config, context, call() -> {ok,status_code,body}, log(), result().\n\nvar RECUSAS_NORMAIS = { TIPO_SEM_LIBERACAO_AUTOMATICA: true, SEM_RESULTADO: true, LAUDO_EXIGIDO: true };\nvar sub = (event && event.subject) || {};\nvar ps = (event && event.payload_safe) || {};\nvar exameId = sub.exame_id ? String(sub.exame_id) : '';\n\n// Defesa: o filtro do gatilho já garante `laudado`; outro estado (gatilho editado) não libera nada.\nif (String(ps.estado || '') !== 'laudado') {\n  result({ skip: 'estado_alheio' });\n  return { skip: 'estado_alheio' };\n}\nif (!exameId) {\n  log('laudo_liberacao_automatica: evento sem exame — nada a liberar');\n  result({ skip: 'sem_exame' });\n  return { skip: 'sem_exame' };\n}\n\nvar r = call('liberar_laudo', { exame_id: exameId });\nif (r && r.ok) {\n  var b = (r.body && r.body.data !== undefined) ? r.body.data : r.body;\n  var origem = (b && b.laudo_origem) || null;\n  log('laudo_liberacao_automatica: resultado liberado ao paciente (exame ' + exameId + ')');\n  result({ liberado: true, laudo_origem: origem });\n  return { ok: true, liberado: true };\n}\n\nvar http = (r && r.status_code) || null;\nvar detail = (r && r.body && r.body.detail) || null;\nvar codigo = (detail && typeof detail === 'object' && detail.codigo) ? String(detail.codigo) : null;\nif (http === 409 && codigo && RECUSAS_NORMAIS[codigo]) {\n  log('laudo_liberacao_automatica: não liberado (' + codigo + ') — segue o fluxo normal da clínica');\n  result({ skip: codigo, liberado: false });\n  return { skip: codigo };\n}\n\nlog('laudo_liberacao_automatica: FALHA ao liberar (exame ' + exameId + ', HTTP ' + (http || '?') +\n  (codigo ? ', ' + codigo : '') + ')', 'warning');\nresult({ acao_bloqueada: true, etapa: 'liberar_laudo', http: http, codigo: codigo, liberado: false });\nreturn { ok: false, erro: 'liberar_falhou', http: http, codigo: codigo };\n"
+      }
+    }
+  ],
+  "knobs": []
+}

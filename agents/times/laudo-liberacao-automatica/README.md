@@ -67,7 +67,7 @@ paciente ver resultados sem a revisão da médica.
 4. (Opcional) Instale e ligue o time [`laudo-aviso`](../laudo-aviso/) para o paciente ser avisado.
 
 > **Reimportar não mexe no ligado:** importar de novo este time atualiza o comportamento, mas **não** liga nem desliga
-> o agente: vale o que a clínica deixou na lista de agentes. O "desligado" do manifesto só vale na primeira importação.
+> o agente: vale o que a clínica deixou na lista de agentes. O "desligado" do manifesto só vale quando o agente é criado (primeira importação ou depois de apagado).
 
 > **Publicação:** este time entra no catálogo depois que a release 2026.11.7 estiver em produção (ele depende da
 > liberação automática do serviço de exames, que sobe nela).

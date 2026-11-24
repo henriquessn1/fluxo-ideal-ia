@@ -3,7 +3,7 @@ name: designer-agentes
 description: Como se DESENHA o comportamento de um agente de IA no Fluxo Ideal — o que é um agente aqui, sua persona/instrução, as capacidades (capabilities nomeadas) que ele pode acionar, os gatilhos que o acordam (inclusive a abertura de uma tela), os avisos e botões que ele põe na tela (snippets) e a escolha entre raciocínio (LLM) e roteiro determinístico. Antes de criar, checar o REGISTRO público de times prontos para reusar. Princípio central: comportamento de agente é configuração (dado), nunca código. Use para reusar, montar, ajustar ou explicar um agente sem cair em detalhe de implementação.
 audience: [ia, humano]
 depends_on: [automacao-ia, comportamento, gatilhos]
-version: 0.9.1
+version: 0.9.2
 updated: 2026-11-24
 ---
 
@@ -158,6 +158,10 @@ Cinco verdades operacionais:
   **persistentes** (quem não estava na Central vê ao entrar).
 - **Referência da peça**: uma chave que **substitui** a peça anterior do mesmo time em vez de duplicar.
   Leva ids opacos (o registro e quem recebe), **nunca nome ou CPF**.
+- **Botão que dispara um evento**: exige uma permissão de quem clica. Se essa permissão é de **outro
+  serviço** (ex.: criar tarefa), o evento precisa estar no **catálogo de intents** da central de
+  notificações (configuração da clínica: evento → serviço dono e permissão). Sem essa entrada, o clique é
+  negado a todos. Peça a configuração junto com as permissões do time.
 
 **Times, registro e portabilidade**
 - **Time de agentes**: um conjunto de agentes que colaboram num fluxo, descritos juntos num

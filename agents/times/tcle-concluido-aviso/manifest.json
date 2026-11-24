@@ -1,0 +1,72 @@
+{
+  "chave": "tcle-concluido-aviso",
+  "versao": "1.0",
+  "nome": "TCLE assinado: aviso na tela",
+  "descricao": "Quando o TCLE de uma venda fica completo, mostra um cartão na tela do papel escolhido (padrão: médico) com o botão para abrir o termo na venda.",
+  "escopo": "por-tenant",
+  "roles": [
+    {
+      "nome": "botfn-tcle-aviso",
+      "grants": [
+        "notificacao:emitir_ui",
+        "notificacao:emitir_snippet",
+        "venda:read"
+      ]
+    }
+  ],
+  "agentes": [
+    {
+      "chave": "tcle_cartao",
+      "descricao": "Quando o TCLE fica completo, mostra um cartão para o papel escolhido abrir o termo na venda.",
+      "tipo": "script",
+      "roles": [
+        "botfn-tcle-aviso"
+      ],
+      "triggers": [
+        {
+          "event_type": "vendas.tcle_concluido",
+          "enabled": true
+        }
+      ],
+      "config": {
+        "script": "// tcle_cartao — agente `script`. Comportamento = ESTE arquivo (DADO), nunca código de serviço.\n//\n// Gatilho: o TCLE de uma venda ficou completo (todas as assinaturas).\n//   1. pega a venda do evento (aceita `subject` ou `payload_safe`); sem venda, sai limpo;\n//   2. lê o número da venda (opcional: sem acesso, o cartão sai sem o número);\n//   3. mostra um CARTÃO no canto inferior direito da tela de quem tem o papel escolhido\n//      (`config.papel_alvo`, padrão medico), com o botão para abrir o TCLE na venda.\n//      O cartão é persistente e fica até a pessoa fechar: quem não estava na Central vê ao entrar.\n//      Só quem pode ver a venda recebe (requer_permissoes). O mesmo TCLE não duplica (ref por venda).\n//\n// Sem dado pessoal: o cartão não traz nome do paciente; o ref só leva o id opaco da venda e o papel-alvo\n// (o resumo nem isso — só flags).\n//\n// Injetados: event, config, context, call() -> {ok,status_code,body}, log(), result().\n\nvar cfg = config || {};\nvar ev = event || {};\nvar subject = ev.subject || {};\nvar safe = ev.payload_safe || {};\n\nfunction txt(v) { return (v === undefined || v === null) ? '' : String(v).trim(); }\nfunction unwrap(r) {\n  if (!r || !r.ok) return null;\n  var b = r.body;\n  return (b && b.data !== undefined) ? b.data : b;\n}\n\nvar vendaId = txt(subject.venda_id) || txt(safe.venda_id);\nif (!vendaId) {\n  log('tcle_cartao: evento sem venda — nada a mostrar', 'warning');\n  result({ avisado: false, pulado: 'sem_venda' });\n  return { ok: true, avisado: false, pulado: 'sem_venda' };\n}\n\nvar papel = txt(cfg.papel_alvo);\nif (!papel || papel.indexOf('{{') === 0) papel = 'medico';\n\n// Número da venda (só para a equipe achar a venda certa). Falha aqui não impede o cartão.\nvar numero = '';\nvar venda = unwrap(call('buscar_venda', { venda_id: vendaId }));\nif (venda && venda.numero !== undefined && venda.numero !== null) numero = txt(venda.numero);\nif (!venda) log('tcle_cartao: não leu a venda (cartão sai sem o número)', 'warning');\n\nvar titulo = numero ? ('TCLE assinado · venda ' + numero) : 'TCLE assinado';\nvar r = call('emitir_snippet', {\n  type: 'diretiva_ui',\n  kind: 'snippet',\n  componente: 'cartao',\n  posicao: { ancora: 'inf-dir', dx: 24, dy: 24 },\n  estilo: { cor: 'sucesso', icone: 'documento', variante: 'suave', borda: 'fina' },\n  titulo: titulo,\n  corpo: 'O termo de consentimento foi assinado por todos. Abra a venda para ver e baixar o documento.',\n  botoes: [{ label: 'Abrir o TCLE da venda', estilo: 'primary', acao: { tipo: 'link', href: '/venda/' + vendaId + '/tcle' } }],\n  duracao: { tipo: 'ate_fechar' },\n  persistencia: 'persistente',\n  requer_permissoes: ['venda:read'],\n  ref: 'tcle-concluido:' + vendaId + ':' + papel,\n  alvo: { role: papel }\n});\n\nif (!r || !r.ok) {\n  log('tcle_cartao: FALHA ao mostrar o cartão (HTTP ' + ((r && r.status_code) || '?') + ')', 'warning');\n  result({ avisado: false, acao_bloqueada: true, etapa: 'emitir_snippet', http: (r && r.status_code) || null, com_numero: !!numero });\n  return { ok: false, avisado: false, erro: 'emitir_snippet', http: (r && r.status_code) || null };\n}\n\nlog('tcle_cartao: cartão mostrado ao papel ' + papel);\nresult({ avisado: true, com_numero: !!numero });\nreturn { ok: true, avisado: true };\n",
+        "papel_alvo": "{{knob.papel_alvo}}",
+        "acoes": [
+          {
+            "nome": "buscar_venda",
+            "capability": "vendas.buscar_venda",
+            "kind": "internal"
+          },
+          {
+            "nome": "emitir_snippet",
+            "capability": "notificacao.emitir_snippet",
+            "kind": "internal"
+          }
+        ],
+        "snippets": [
+          {
+            "chave": "tcle_assinado",
+            "componente": "cartao",
+            "ancora": "inf-dir",
+            "requer_permissoes": [
+              "venda:read"
+            ],
+            "estilo": {
+              "cor": "sucesso"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "knobs": [
+    {
+      "chave": "papel_alvo",
+      "tipo": "string",
+      "fonte": "papeis",
+      "rotulo": "Quem vê o aviso",
+      "default": "medico",
+      "descricao": "O papel da equipe que recebe o cartão quando o TCLE fica completo. Um papel só."
+    }
+  ]
+}

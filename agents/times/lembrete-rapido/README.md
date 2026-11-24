@@ -59,10 +59,11 @@ privado na instalação. **Risco: médio** (envia mensagem ao paciente; não lê
 
 1. Confira o template `lembrete_rapido` na mensageria: HSM **APPROVED** e vinculado com as variáveis
    `cliente_nome`, `profissional_apelido`, `hora` (nessa ordem).
-2. **Antes de ligar, desligue o lembrete rápido do orquestrador** (senão o paciente recebe dois):
-   `NOTIF_LEMBRETE_RAPIDO_ENABLED=false` em escopo **global** (Configurações do Sistema → orquestrador) e
-   suprima os lembretes rápidos já pendentes no orquestrador. ⚠️ Gravar só para a clínica não basta: o
-   orquestrador lê a configuração global.
+2. **Antes de ligar, confira que o lembrete rápido do orquestrador está desligado** (senão o paciente recebe
+   dois): `NOTIF_LEMBRETE_RAPIDO_ENABLED` em Configurações do Sistema → orquestrador, escopo **global**. Desde a
+   2026.11.7 ele já nasce desligado (orquestrador#133). Se alguém o ligou, desligue: os lembretes rápidos que o
+   orquestrador já tinha agendado são suprimidos sozinhos no envio (`ponto_desligado`). ⚠️ Gravar só para a
+   clínica não basta: o orquestrador lê a configuração global.
 3. Importe este `manifest.json` e conceda ao service-account os 4 grants acima.
 4. Ligue o agente.
 

@@ -75,6 +75,7 @@ privilégio). Detalhes e charter em [`agents/README.md`](agents/README.md).
 | [jornada-cuidado](agents/jornada-cuidado/) | Vincula tarefas à jornada e avança/fecha fases | 2 (script) | médio |
 | [jornada-avisos](agents/jornada-avisos/) | Avisa a equipe sobre pendências de SLA da jornada | 1 (script) | médio |
 | [notas-fiscais](agents/times/notas-fiscais/) | Emite a NFS-e do serviço feito no nome de quem pagou e envia por e-mail, por tabelas de regras da clínica | 4 (script) | alto |
+| [tcle-concluido-aviso](agents/times/tcle-concluido-aviso/) | Cartão na tela do papel escolhido quando o TCLE de uma venda fica completo, com o botão para abrir o termo | 1 (script) | baixo |
 
 > Estes são os times **oficiais/verificados**. Um tier aberto a **terceiros/não-verificados** (com
 > assinatura e travas próprias) ainda não está habilitado.

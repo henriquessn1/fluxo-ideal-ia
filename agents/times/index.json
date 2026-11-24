@@ -112,6 +112,17 @@
         "script"
       ],
       "manifesto": "agents/times/pedido-carteirinha/manifest.json"
+    },
+    {
+      "chave": "tcle-concluido-aviso",
+      "nome": "TCLE assinado: aviso na tela",
+      "descricao": "Quando o TCLE de uma venda fica completo, mostra um cartão na tela do papel escolhido (padrão: médico) com o botão para abrir o termo na venda.",
+      "versao": "1.0",
+      "agentes": 1,
+      "tipos": [
+        "script"
+      ],
+      "manifesto": "agents/times/tcle-concluido-aviso/manifest.json"
     }
   ]
 }

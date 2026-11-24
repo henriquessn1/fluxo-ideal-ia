@@ -1,0 +1,67 @@
+{
+  "chave": "whatsapp-orcamento",
+  "versao": "1.0",
+  "nome": "WhatsApp no orçamento",
+  "descricao": "Ao abrir o orçamento, mostra um botão no canto da tela que leva à conversa com o paciente na Central de Conversas.",
+  "escopo": "por-tenant",
+  "roles": [
+    {
+      "nome": "botfn-whatsapp-orcamento",
+      "grants": [
+        "notificacao:emitir_ui",
+        "notificacao:emitir_snippet",
+        "orcamento:read"
+      ]
+    }
+  ],
+  "agentes": [
+    {
+      "chave": "whatsapp_orcamento",
+      "descricao": "Ao abrir um orçamento, mostra a quem abriu o botão para a conversa com o paciente.",
+      "tipo": "script",
+      "roles": [
+        "botfn-whatsapp-orcamento"
+      ],
+      "triggers": [
+        {
+          "navegacao": {
+            "rotas": [
+              "/orcamento/:id",
+              "/orcamento/:id/:tab"
+            ]
+          }
+        }
+      ],
+      "config": {
+        "script": "// whatsapp_orcamento — agente `script`. Comportamento = ESTE arquivo (DADO), nunca código de serviço.\n//\n// Gatilho: alguém da equipe ABRE um orçamento (a tela do orçamento ou uma aba dela).\n//   1. lê o orçamento aberto para saber o paciente;\n//   2. mostra a QUEM ABRIU um BOTÃO flutuante no canto inferior esquerdo, \"Conversa com o paciente\",\n//      que leva à conversa do paciente na Central de Conversas (link interno). Some ao trocar de tela.\n//   3. orçamento sem paciente: sai limpo, sem botão.\n//\n// Quem vê: só quem pode ler o orçamento (requer_permissoes) — o agente lê com o papel dele, então o botão\n// exige a mesma leitura de quem o vê.\n// Sem dado pessoal: o botão não traz nome; o ref leva só ids opacos (paciente e quem abriu); o resumo, só flags.\n//\n// Injetados: event, config, context, call() -> {ok,status_code,body}, log(), result().\n\nvar ev = event || {};\nvar params = ev.params || {};\nvar usuario = ev.usuario || {};\nvar ROTA = '/orcamento/:id';\n\nfunction txt(v) { return (v === undefined || v === null) ? '' : String(v).trim(); }\nfunction unwrap(r) {\n  if (!r || !r.ok) return null;\n  var b = r.body;\n  return (b && b.data !== undefined) ? b.data : b;\n}\nfunction sair(resumo, ret) { result(resumo); return ret; }\n\nvar orcamentoId = txt(params.id);\nvar quem = txt(usuario.username) || txt(usuario.id);\nif (!orcamentoId || !quem) {\n  log('whatsapp_orcamento: navegação sem orçamento ou sem usuário', 'warning');\n  return sair({ botao: false, pulado: 'sem_contexto' }, { ok: true, botao: false, pulado: 'sem_contexto' });\n}\n\nvar ro = call('buscar_orcamento', { id: orcamentoId });\nvar orc = unwrap(ro);\nif (!orc) {\n  log('whatsapp_orcamento: FALHA ao ler o orçamento (HTTP ' + ((ro && ro.status_code) || '?') + ')', 'warning');\n  return sair({ botao: false, acao_bloqueada: true, etapa: 'buscar_orcamento', http: (ro && ro.status_code) || null },\n              { ok: false, erro: 'buscar_orcamento' });\n}\nvar clienteId = txt(orc.cliente_id) || txt(orc.cliente && orc.cliente.id);\nif (!/^[A-Za-z0-9_-]{1,128}$/.test(clienteId)) {\n  return sair({ botao: false, pulado: 'sem_paciente' }, { ok: true, botao: false, pulado: 'sem_paciente' });\n}\n\nvar corpo = {\n  type: 'diretiva_ui', kind: 'snippet',\n  componente: 'botao',\n  posicao: { ancora: 'inf-esq', dx: 24, dy: 24 },\n  estilo: { cor: '#25D366', icone: 'whatsapp', variante: 'cheio' },\n  titulo: 'Conversa com o paciente',\n  botoes: [{ label: 'Conversa com o paciente', estilo: 'primary',\n             acao: { tipo: 'link', href: '/conversas/cliente/' + clienteId } }],\n  duracao: { tipo: 'tela' }, persistencia: 'efemero',\n  rota: { padrao: ROTA, params: { id: orcamentoId } },\n  requer_permissoes: ['orcamento:read'],\n  ref: 'whatsapp-orcamento:' + clienteId + ':' + quem,\n  alvo: { user_id: quem }\n};\nif (txt(ev.navegacao_id)) corpo.navegacao_id = txt(ev.navegacao_id);\n\nvar r = call('emitir_snippet', corpo);\nif (!r || !r.ok) {\n  log('whatsapp_orcamento: FALHA ao mostrar o botão (HTTP ' + ((r && r.status_code) || '?') + ')', 'warning');\n  return sair({ botao: false, acao_bloqueada: true, etapa: 'emitir_snippet', http: (r && r.status_code) || null },\n              { ok: false, erro: 'emitir_snippet' });\n}\nreturn sair({ botao: true }, { ok: true, botao: true });\n",
+        "acoes": [
+          {
+            "nome": "buscar_orcamento",
+            "capability": "vendas.buscar_orcamento",
+            "kind": "internal"
+          },
+          {
+            "nome": "emitir_snippet",
+            "capability": "notificacao.emitir_snippet",
+            "kind": "internal"
+          }
+        ],
+        "snippets": [
+          {
+            "chave": "botao_conversa",
+            "componente": "botao",
+            "rota": "/orcamento/:id",
+            "ancora": "inf-esq",
+            "requer_permissoes": [
+              "orcamento:read"
+            ],
+            "estilo": {
+              "cor": "#25D366"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "knobs": []
+}

@@ -1,0 +1,97 @@
+{
+  "chave": "aniversario-atendimento",
+  "versao": "1.0",
+  "nome": "Aniversário no atendimento",
+  "descricao": "Ao abrir o atendimento no dia do aniversário do paciente, mostra um selo \"Aniversário hoje\" no cabeçalho e um cartão com a mensagem de parabéns pronta.",
+  "escopo": "por-tenant",
+  "roles": [
+    {
+      "nome": "botfn-aniversario",
+      "grants": [
+        "notificacao:emitir_ui",
+        "notificacao:emitir_snippet",
+        "atendimento:read",
+        "cliente:read:full"
+      ]
+    }
+  ],
+  "agentes": [
+    {
+      "chave": "aniversario_atendimento",
+      "descricao": "Ao abrir um atendimento, confere se hoje é o aniversário do paciente e mostra o selo e a mensagem pronta a quem abriu.",
+      "tipo": "script",
+      "roles": [
+        "botfn-aniversario"
+      ],
+      "triggers": [
+        {
+          "navegacao": {
+            "rotas": [
+              "/atendimento/:id",
+              "/atendimento/:id/:tab"
+            ]
+          }
+        }
+      ],
+      "config": {
+        "script": "// aniversario_atendimento — agente `script`. Comportamento = ESTE arquivo (DADO), nunca código de serviço.\n//\n// Gatilho: alguém da equipe ABRE um atendimento (a tela do atendimento ou uma aba dela).\n//   1. lê o atendimento aberto (para saber o paciente) e o cadastro do paciente (data de nascimento);\n//   2. se HOJE (no fuso da clínica) é o aniversário do paciente, mostra a QUEM ABRIU:\n//      - um SELO \"Aniversário hoje\" no cabeçalho (fica nas abas do atendimento, some ao sair dele);\n//      - um CARTÃO no topo da lateral com a mensagem de parabéns pronta (texto do knob, com o 1º nome).\n//        Os botões de copiar chegam numa versão futura da Central: por ora a mensagem vai só no texto.\n//   3. não sendo o aniversário (ou faltando a data), sai limpo, sem peça na tela.\n//\n// 29/02: em ano que não é bissexto, o aniversário é comemorado em 28/02.\n// Quem vê: só quem pode ler o atendimento E o cadastro completo do paciente (requer_permissoes) — o agente\n// lê com o papel dele, então a peça exige as mesmas leituras de quem a vê.\n// Sem dado pessoal fora da tela: o ref leva só ids opacos (paciente e quem abriu); o resumo, só flags.\n//\n// Injetados: event, config, context, call() -> {ok,status_code,body}, log(), result().\n\nvar cfg = config || {};\nvar ev = event || {};\nvar params = ev.params || {};\nvar usuario = ev.usuario || {};\nvar ROTA = '/atendimento/:id';\nvar REQUER = ['atendimento:read', 'cliente:read:full'];\nvar MSG_PADRAO = 'Feliz aniversário, {nome}! Toda a equipe deseja um dia muito especial para você.';\n\nfunction txt(v) { return (v === undefined || v === null) ? '' : String(v).trim(); }\nfunction unwrap(r) {\n  if (!r || !r.ok) return null;\n  var b = r.body;\n  return (b && b.data !== undefined) ? b.data : b;\n}\nfunction knob(v, padrao) { var s = txt(v); return (!s || s.indexOf('{{') === 0) ? padrao : s; }\nfunction offsetMin(s) {\n  var m = /^([+-])(\\d{2}):(\\d{2})$/.exec(String(s));\n  if (!m) return -180;\n  var val = parseInt(m[2], 10) * 60 + parseInt(m[3], 10);\n  return m[1] === '-' ? -val : val;\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction primeiroNome(nome) {\n  var s = txt(nome);\n  if (!s) return '';\n  var i = s.indexOf(' ');\n  return i > 0 ? s.substring(0, i) : s;\n}\nfunction sair(resumo, ret) { result(resumo); return ret; }\n\nvar atendimentoId = txt(params.id);\nvar quem = txt(usuario.username) || txt(usuario.id);\nif (!atendimentoId || !quem) {\n  log('aniversario: navegação sem atendimento ou sem usuário', 'warning');\n  return sair({ aniversario: false, pulado: 'sem_contexto' }, { ok: true, aniversario: false, pulado: 'sem_contexto' });\n}\n\n// 1) atendimento → paciente\nvar ra = call('buscar_atendimento', { id: atendimentoId });\nvar at = unwrap(ra);\nif (!at) {\n  log('aniversario: FALHA ao ler o atendimento (HTTP ' + ((ra && ra.status_code) || '?') + ')', 'warning');\n  return sair({ aniversario: null, acao_bloqueada: true, etapa: 'buscar_atendimento', http: (ra && ra.status_code) || null },\n              { ok: false, erro: 'buscar_atendimento' });\n}\nvar clienteId = txt(at.cliente_id) || txt(at.cliente && at.cliente.id);\nif (!clienteId) {\n  return sair({ aniversario: false, pulado: 'sem_paciente' }, { ok: true, aniversario: false, pulado: 'sem_paciente' });\n}\n\n// 2) paciente → data de nascimento\nvar rc = call('buscar_cliente', { cliente_id: clienteId });\nvar cli = unwrap(rc);\nif (!cli) {\n  log('aniversario: FALHA ao ler o paciente (HTTP ' + ((rc && rc.status_code) || '?') + ')', 'warning');\n  return sair({ aniversario: null, acao_bloqueada: true, etapa: 'buscar_cliente', http: (rc && rc.status_code) || null },\n              { ok: false, erro: 'buscar_cliente' });\n}\nvar nasc = /^(\\d{4})-(\\d{2})-(\\d{2})/.exec(txt(cli.data_nascimento));\nif (!nasc) {\n  return sair({ aniversario: false, pulado: 'sem_data_nascimento' }, { ok: true, aniversario: false });\n}\n\n// 3) é hoje? (fuso da clínica)\nvar local = new Date(Date.now() + offsetMin(knob(cfg.tz_offset, '-03:00')) * 60000);\nvar ano = local.getUTCFullYear();\nvar hoje = pad(local.getUTCMonth() + 1) + '-' + pad(local.getUTCDate());\nvar diaNasc = nasc[2] + '-' + nasc[3];\nvar bissexto = (ano % 4 === 0 && ano % 100 !== 0) || ano % 400 === 0;\nif (diaNasc === '02-29' && !bissexto) diaNasc = '02-28';\nif (diaNasc !== hoje) {\n  return sair({ aniversario: false }, { ok: true, aniversario: false });\n}\n\n// 4) peças na tela de quem abriu\nvar rota = { padrao: ROTA, params: { id: atendimentoId } };\nvar base = {\n  type: 'diretiva_ui', kind: 'snippet',\n  duracao: { tipo: 'rota_pai' }, persistencia: 'efemero',\n  rota: rota, requer_permissoes: REQUER, alvo: { user_id: quem }\n};\nif (txt(ev.navegacao_id)) base.navegacao_id = txt(ev.navegacao_id);\nfunction peca(extra) {\n  var p = {};\n  var k;\n  for (k in base) p[k] = base[k];\n  for (k in extra) p[k] = extra[k];\n  return p;\n}\n\nvar nome = primeiroNome(cli.nome) || 'paciente';\nvar mensagem = knob(cfg.mensagem, MSG_PADRAO).split('{nome}').join(nome);\n\nvar rs = call('emitir_snippet', peca({\n  componente: 'selo',\n  posicao: { espaco: 'cabecalho.selos' },\n  estilo: { cor: '#db2777', icone: 'aniversario', variante: 'suave' },\n  titulo: 'Aniversário hoje',\n  ref: 'aniversario-selo:' + clienteId + ':' + quem\n}));\nvar rk = call('emitir_snippet', peca({\n  componente: 'cartao',\n  posicao: { espaco: 'lateral.topo' },\n  estilo: { cor: '#db2777', icone: 'presente', variante: 'suave', borda: 'fina' },\n  titulo: 'Mensagem de aniversário',\n  corpo: 'Hoje é o aniversário de **' + nome + '**. Mensagem pronta para mandar:\\n\\n> ' + mensagem,\n  ref: 'aniversario-cartao:' + clienteId + ':' + quem\n}));\n\nvar selo = !!(rs && rs.ok);\nvar cartao = !!(rk && rk.ok);\nvar resumo = { aniversario: true, selo: selo, cartao: cartao };\nif (!selo || !cartao) {\n  resumo.acao_bloqueada = true;\n  resumo.etapa = 'emitir_snippet';\n  resumo.http = (!selo ? (rs && rs.status_code) : (rk && rk.status_code)) || null;\n  log('aniversario: FALHA ao mostrar ' + (!selo ? 'o selo' : 'o cartão') + ' (HTTP ' + (resumo.http || '?') + ')', 'warning');\n}\nreturn sair(resumo, { ok: selo && cartao, aniversario: true, selo: selo, cartao: cartao });\n",
+        "mensagem": "{{knob.mensagem}}",
+        "tz_offset": "-03:00",
+        "acoes": [
+          {
+            "nome": "buscar_atendimento",
+            "capability": "atendimento.buscar_atendimento",
+            "kind": "internal"
+          },
+          {
+            "nome": "buscar_cliente",
+            "capability": "clientes.buscar_cliente",
+            "kind": "internal"
+          },
+          {
+            "nome": "emitir_snippet",
+            "capability": "notificacao.emitir_snippet",
+            "kind": "internal"
+          }
+        ],
+        "snippets": [
+          {
+            "chave": "selo_aniversario",
+            "componente": "selo",
+            "rota": "/atendimento/:id",
+            "espaco": "cabecalho.selos",
+            "requer_permissoes": [
+              "atendimento:read",
+              "cliente:read:full"
+            ],
+            "estilo": {
+              "cor": "#db2777"
+            }
+          },
+          {
+            "chave": "cartao_mensagem",
+            "componente": "cartao",
+            "rota": "/atendimento/:id",
+            "espaco": "lateral.topo",
+            "requer_permissoes": [
+              "atendimento:read",
+              "cliente:read:full"
+            ],
+            "estilo": {
+              "cor": "#db2777"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "knobs": [
+    {
+      "chave": "mensagem",
+      "tipo": "string",
+      "rotulo": "Mensagem de parabéns",
+      "default": "Feliz aniversário, {nome}! Toda a equipe deseja um dia muito especial para você.",
+      "descricao": "O texto que aparece pronto no cartão. {nome} vira o primeiro nome do paciente."
+    }
+  ]
+}

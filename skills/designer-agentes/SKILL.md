@@ -3,7 +3,7 @@ name: designer-agentes
 description: Como se DESENHA o comportamento de um agente de IA no Fluxo Ideal — o que é um agente aqui, sua persona/instrução, as capacidades (capabilities nomeadas) que ele pode acionar, os gatilhos que o acordam (inclusive a abertura de uma tela), os avisos e botões que ele põe na tela (snippets) e a escolha entre raciocínio (LLM) e roteiro determinístico. Antes de criar, checar o REGISTRO público de times prontos para reusar. Princípio central: comportamento de agente é configuração (dado), nunca código. Use para reusar, montar, ajustar ou explicar um agente sem cair em detalhe de implementação.
 audience: [ia, humano]
 depends_on: [automacao-ia, comportamento, gatilhos]
-version: 0.9.0
+version: 0.9.1
 updated: 2026-11-24
 ---
 
@@ -328,7 +328,8 @@ mostra a alguém um dado que ele não poderia abrir.
 
 **Cuidados:** a **referência** da peça leva só ids opacos (o registro e quem recebe), **nunca nome ou
 CPF**; o resumo da execução leva só flags; a peça que não cabe (lugar cheio, tela errada, aba antiga)
-é descartada pela tela sem erro para a pessoa. Time pronto no registro: aviso do TCLE assinado.
+é descartada pela tela sem erro para a pessoa. Times prontos no registro: aviso do TCLE assinado, aniversário no atendimento e conversa com o paciente
+no orçamento.
 
 ### Compor um time (armar → triar → decidir)
 Um padrão comum é **encadear** agentes: um agente **arma** o cenário, outro **tria** de forma

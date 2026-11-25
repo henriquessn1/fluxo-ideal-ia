@@ -3,8 +3,8 @@ name: medico
 description: O papel médico assistido por IA no Fluxo Ideal — conduzir e DOCUMENTAR o atendimento (adendo write-only) sem que a IA jamais leia o prontuário. Use para registrar evolução, mover o atendimento e ver a fila, com o clínico protegido.
 audience: [ia, humano]
 depends_on: [atendimento-clinico, evolucao-write-only]
-version: 0.5.1
-updated: 2026-10-30
+version: 0.6.0
+updated: 2026-11-25
 ---
 
 # Médico
@@ -53,6 +53,13 @@ Escrever ≠ ler. Toda a proteção vem daí: a documentação flui numa via de 
 
 **Hoje, por ferramenta — operacional:**
 - Mover a etapa do atendimento (em atendimento / finalizar) → ferramenta de mudança de estado.
+  **Cancelar** o atendimento tenta cancelar a venda junto: se a resposta trouxer o **aviso da venda**, o
+  atendimento foi cancelado e a **venda não** (venda já concluída fica como está; estorno, se houver, é pela
+  tela de vendas; nos outros casos, oriente cancelar a venda pela tela de vendas). Repasse o aviso como veio
+  e não repita o cancelamento.
+- "A venda desse paciente já recebeu o check-in?" → ferramenta de **estado do check-in da venda**
+  (somente leitura): *tentando*, *pendente* (está na pendência da recepção), *recusado* ou *registrado*.
+  Sem estado não prova sucesso — confira a venda antes de afirmar.
 - Anotar recado operacional da equipe → ferramenta de comentário (não é prontuário).
 - Ver minhas pendências (contagens/refs, sem conteúdo) e métricas → ferramentas de pendências/métricas.
 - Ver a fila/agenda do meu dia → ferramentas de agenda/atendimento do dia. Cada agendamento traz o

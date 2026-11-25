@@ -91,6 +91,17 @@
       "manifesto": "agents/times/laudo-aviso/manifest.json"
     },
     {
+      "chave": "laudo-liberacao-automatica",
+      "nome": "Liberação automática de laudo",
+      "descricao": "Libera ao paciente, sem a revisão da médica, o resultado laudado dos tipos de exame marcados com \"Liberação automática\".",
+      "versao": "1.0",
+      "agentes": 1,
+      "tipos": [
+        "script"
+      ],
+      "manifesto": "agents/times/laudo-liberacao-automatica/manifest.json"
+    },
+    {
       "chave": "lembrete-rapido",
       "nome": "Lembrete rápido",
       "descricao": "Manda pelo WhatsApp um lembrete cerca de 2h antes do agendamento (nunca antes das 8h).",

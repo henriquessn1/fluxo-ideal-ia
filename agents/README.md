@@ -66,6 +66,8 @@ E **NÃO contém** (por design):
 | [pedido-carteirinha](./times/pedido-carteirinha/) | Lê a carteirinha (foto ou texto) que o paciente manda em resposta ao pedido pelo WhatsApp e cria a solicitação de convênio para a recepção aprovar; o que não entender vai para a recepção | 3 (2 script + 1 IA) | médio |
 | [estoque-avisos](./times/estoque-avisos/) | Todo dia útil de manhã, avisa os papéis escolhidos pela clínica sobre lote vencido ou perto de vencer, saldo abaixo do mínimo do local e consignado perto do prazo, num único resumo e sem aviso repetido; abre uma tarefa de reposição por produto e local abaixo do mínimo; e toda semana manda por e-mail a cada fornecedor do consignado o que foi usado e aguarda reposição (identificação mínima do paciente) | 3 (script) | alto |
 | [tcle-concluido-aviso](./times/tcle-concluido-aviso/) | Quando o TCLE de uma venda fica completo, mostra um cartão na tela do papel escolhido (padrão: médico) com o botão para abrir o termo na venda (snippet; entra desligado) | 1 (script) | baixo |
+| [aniversario-atendimento](./times/aniversario-atendimento/) | Ao abrir o atendimento no dia do aniversário do paciente, mostra a quem abriu um selo "Aniversário hoje" no cabeçalho e um cartão com a mensagem de parabéns pronta (snippet com gatilho de navegação; entra desligado; lê dado sensível do paciente) | 1 (script) | médio |
+| [whatsapp-orcamento](./times/whatsapp-orcamento/) | Ao abrir o orçamento, mostra a quem abriu um botão no canto que leva à conversa com o paciente na Central de Conversas (snippet com gatilho de navegação; entra desligado) | 1 (script) | baixo |
 
 Cada pasta tem o `manifest.json` (para importar) e um `README.md` (o que faz, o que pede, o risco).
 

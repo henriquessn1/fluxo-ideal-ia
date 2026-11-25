@@ -1,0 +1,44 @@
+{
+  "chave": "laudo-aviso",
+  "versao": "1.0",
+  "nome": "Aviso de laudo liberado",
+  "descricao": "Avisa o paciente que há um resultado novo no portal quando o resultado de um exame é liberado, sem citar o exame.",
+  "escopo": "por-tenant",
+  "roles": [
+    {
+      "nome": "botfn-laudo-aviso",
+      "grants": [
+        "mensageria_mensagem:enviar_intencao"
+      ]
+    }
+  ],
+  "agentes": [
+    {
+      "chave": "laudo_aviso",
+      "descricao": "Quando o resultado de um exame é liberado ao paciente (pela médica ou pela liberação automática), manda o aviso \"há um resultado novo no portal\", uma vez por exame.",
+      "tipo": "script",
+      "enabled": false,
+      "roles": [
+        "botfn-laudo-aviso"
+      ],
+      "triggers": [
+        {
+          "event_type": "exames.resultado_disponivel",
+          "enabled": true
+        }
+      ],
+      "config": {
+        "template_slug": "resultado_exame",
+        "acoes": [
+          {
+            "nome": "enviar_intencao",
+            "capability": "mensageria.enviar_intencao",
+            "kind": "internal"
+          }
+        ],
+        "script": "// laudo_aviso — agente `script`. Comportamento = ESTE arquivo (DADO), nunca código de serviço.\n//\n// Gatilho: o resultado de um exame foi LIBERADO ao paciente (evento `exames.resultado_disponivel`), seja pela\n// médica na tela, seja pelo agente \"Liberar laudo automaticamente\". O evento traz só ids: `subject.exame_id`\n// e `subject.cliente_id`.\n//\n// Ação: 1 intenção de envio na mensageria (`enviar_intencao`) com o template `config.template_slug`\n// (\"Há um resultado novo no portal\"), SEM variáveis. Modo `failover`: WhatsApp pelo modelo aprovado quando\n// houver; senão e-mail. A mensageria descobre o contato do paciente sozinha (o agente não lê o cadastro).\n//\n// LGPD: o NOME/tipo do exame nunca vai no texto, nas variáveis, no log nem no resumo (tipo de exame + paciente\n// = dado de saúde). O agente nem recebe o nome: só ids.\n//\n// Sem duplicar: chave `resultado_exame:<cliente_id>:<exame_id>` (ids opacos, sem dado pessoal). O mesmo exame\n// liberado de novo (ou o evento reentregue) volta `deduplicado` — o paciente recebe 1 aviso por exame.\n//\n// Falha visível (anti falso-verde): envio que volta com erro ou com status fora de aceito/deduplicado/agendado\n// conta como FALHA: log WARNING e `acao_bloqueada` no resumo — nunca vira \"enviado\".\n//\n// Injetados: event, config, context, call() -> {ok,status_code,body}, log(), result().\n\nvar cfg = config || {};\nvar template = String(cfg.template_slug || 'resultado_exame').trim();\nvar sub = (event && event.subject) || {};\nvar clienteId = sub.cliente_id ? String(sub.cliente_id) : '';\nvar exameId = sub.exame_id ? String(sub.exame_id) : '';\n\nfunction unwrap(r) {\n  if (!r || !r.ok) return null;\n  var b = r.body;\n  return (b && b.data !== undefined) ? b.data : b;\n}\n\nif (!clienteId || !exameId) {\n  var motivo = !clienteId ? 'sem_paciente' : 'sem_exame';\n  log('laudo_aviso: evento sem ' + (!clienteId ? 'paciente' : 'exame') + ' — nada a enviar');\n  result({ skip: motivo });\n  return { skip: motivo };\n}\n\nvar r = call('enviar_intencao', {\n  destinatario_id: clienteId,\n  modo_entrega: 'failover',\n  template_slug: template,\n  variaveis: {},\n  origem_ms: 'agentes',\n  referencia_tipo: 'exame_resultado',\n  referencia_id: exameId,\n  idempotency_key: 'resultado_exame:' + clienteId + ':' + exameId\n});\nvar body = unwrap(r);\nvar st = body && body.status;\nif (r && r.ok && (st === 'aceito' || st === 'deduplicado' || st === 'agendado')) {\n  var resumo = { status: st, enviado: st === 'aceito', deduplicado: st === 'deduplicado', agendado: st === 'agendado' };\n  log('laudo_aviso: aviso ao paciente ' + (st === 'aceito' ? 'enviado' : (st === 'deduplicado' ? 'já enviado antes' : 'agendado')));\n  result(resumo);\n  return { ok: true, status: st };\n}\n\nvar http = (r && r.status_code) || null;\nlog('laudo_aviso: FALHA ao pedir o aviso (exame ' + exameId + ', HTTP ' + (http || '?') + ', status ' + (st || '-') + ')',\n  'warning');\nresult({ acao_bloqueada: true, etapa: 'enviar_intencao', http: http, status: st || null, enviado: false });\nreturn { ok: false, erro: 'enviar_falhou', http: http, status: st || null };\n"
+      }
+    }
+  ],
+  "knobs": []
+}

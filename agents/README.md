@@ -39,6 +39,19 @@ E **NÃO contém** (por design):
 3. **Consentimento informado.** A tela de importar mostra um **cartão de risco** (lê dados de
    paciente? envia algo pra fora? age sozinho?) antes de aplicar.
 
+## Reimportar um time (o que muda e o que fica)
+
+Importar de novo um time já instalado atualiza o **comportamento** dos agentes (roteiro, instrução, ações, gatilhos),
+mas **não mexe no liga/desliga** que a clínica escolheu:
+
+- **Agente:** o `enabled` do manifesto só vale quando o agente é criado (primeira importação ou depois de apagado).
+- **Gatilho de evento:** casa pelo evento **e** pelo filtro. O gatilho que já existe mantém o liga/desliga da clínica;
+  gatilho novo (outro evento ou outro filtro) entra como o manifesto diz. Dois gatilhos idênticos no mesmo agente são
+  ambíguos: o liga/desliga deles não é preservado.
+- **Gatilho de relógio** (`cron` ou `every_seconds`): se o agente tem **um único** gatilho de relógio antes e depois,
+  ele é o mesmo gatilho mesmo que o horário mude. Com mais de um, **mudar o horário conta como gatilho novo** (entra
+  como o manifesto diz).
+
 ## Duas pastas: produtivos vs. exemplos
 
 - **[`times/`](./times/) — times PRODUTIVOS (para a clínica instalar e usar).** Resolvem problemas
@@ -64,6 +77,7 @@ E **NÃO contém** (por design):
 | [notas-fiscais](./times/notas-fiscais/) | Emite a NFS-e do serviço feito no nome de quem pagou (prevista → em formação → Revisar/governo) e envia por e-mail, por tabelas de regras da clínica | 4 (script) | alto |
 | [aprovacao-desconto-avisos](./times/aprovacao-desconto-avisos/) | Avisa quem aprova o desconto acima do teto, abre a tarefa, aprova/recusa pelo aviso em nome de quem clicou, avisa a equipe da decisão e fecha a tarefa (recusa: manter ou cancelar a venda) | 5 (script) | alto |
 | [pedido-carteirinha](./times/pedido-carteirinha/) | Lê a carteirinha (foto ou texto) que o paciente manda em resposta ao pedido pelo WhatsApp e cria a solicitação de convênio para a recepção aprovar; o que não entender vai para a recepção | 3 (2 script + 1 IA) | médio |
+| [laudo-aviso](./times/laudo-aviso/) | Quando o resultado de um exame é liberado (pela médica ou automaticamente), avisa o paciente que há um resultado novo no portal, sem citar o exame, uma vez por exame (WhatsApp ou e-mail). Vem desligado | 1 (script) | médio |
 | [estoque-avisos](./times/estoque-avisos/) | Todo dia útil de manhã, avisa os papéis escolhidos pela clínica sobre lote vencido ou perto de vencer, saldo abaixo do mínimo do local e consignado perto do prazo, num único resumo e sem aviso repetido; abre uma tarefa de reposição por produto e local abaixo do mínimo; e toda semana manda por e-mail a cada fornecedor do consignado o que foi usado e aguarda reposição (identificação mínima do paciente) | 3 (script) | alto |
 
 Cada pasta tem o `manifest.json` (para importar) e um `README.md` (o que faz, o que pede, o risco).

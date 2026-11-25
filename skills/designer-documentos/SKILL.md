@@ -3,8 +3,8 @@ name: designer-documentos
 description: O sistema de documentos do Fluxo Ideal — como se desenha, versiona, previsualiza e publica o MODELO de um documento (receita, atestado, laudo, orçamento, TCLE…) e como esses modelos viram documentos gerados por paciente. Cobre BLOCOS REUTILIZÁVEIS (cabeçalho/rodapé/assinatura/cláusula incluídos em vários modelos — sempre reaproveitar em vez de duplicar HTML), nascer um corpo do zero (inclusive migrar DOCX→HTML, herdando as habilitações do legado pra o documento não sumir do picker), GERIR HABILITAÇÕES (quem pode emitir cada documento) e os TEMPLATES DE TERMOS (o texto legal versionado de aceite/intercorrências/itens não inclusos/TCLE que entra nos orçamentos) — o CONTEÚDO, distinto da fôrma HTML. Use para entender "como esse documento fica", para criar/editar/publicar um template com segurança, reaproveitar blocos e redigir/versionar os termos.
 audience: [ia, humano]
 depends_on: [documentos-clinicos, templates, catalogo-documentos, termos-orcamento]
-version: 0.9.0
-updated: 2026-11-21
+version: 0.10.0
+updated: 2026-11-25
 ---
 
 # Designer de Documentos
@@ -389,6 +389,10 @@ conhecidas do sistema (ex.: `medico`, `atendente`, `cliente`) — não invente.
 - **Quais documentos um paciente (ou um atendimento) já tem** ("a receita foi gerada?") → ferramenta que
   **lista os documentos** por **paciente** ou por **atendimento**. Devolve a lista (nome, tamanho, data,
   tipo) — **sem** link de download nem chave interna do arquivo; abrir/baixar é pela Central.
+  Arquivo enviado com **descrição** (o que quem enviou escreveu sobre ele) traz essa descrição. Ela pode
+  citar saúde do paciente: chega com contato e documentos mascarados, e use-a só para identificar o
+  arquivo, sem repetir o texto além do necessário. Arquivo com **cadeado** (o usuário não pode abri-lo)
+  **nunca** traz a descrição — e não ofereça abrir nem enviar esse arquivo.
 
 ## Fluxos comuns
 
@@ -470,7 +474,8 @@ conhecidas do sistema (ex.: `medico`, `atendente`, `cliente`) — não invente.
    `{{ qr_code }}`** — inclua a variável no modelo (rascunho → simular → publicar) e ligue de novo.
 
 ### Conferir se o documento de um atendimento saiu
-1. **Liste os documentos do atendimento** → veja se a receita/atestado/orçamento está lá (nome, data).
+1. **Liste os documentos do atendimento** → veja se a receita/atestado/orçamento está lá (nome, data e,
+   quando houver, a descrição de quem enviou).
 2. Para **abrir/baixar**, vá à Central — o link de arquivo não trafega por aqui.
 
 ### Ordem mental para "mudar como um documento fica"

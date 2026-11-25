@@ -3,8 +3,8 @@ name: auxiliar-medico
 description: Apoio ao fluxo de ATENDIMENTO clínico no Fluxo Ideal — check-in do paciente, o estado/etapa em que cada atendimento está, anotações da equipe, pendências operacionais do profissional e métricas do atendimento. Use para acompanhar "onde está o paciente hoje", registrar chegada, mover o atendimento de etapa e ver a fila de trabalho. NÃO cobre o conteúdo do prontuário nem conduta clínica.
 audience: [ia, humano]
 depends_on: [atendimento-operacional, checkin, evolucao-operacional, pendencias]
-version: 0.2.3
-updated: 2026-11-06
+version: 0.3.0
+updated: 2026-11-25
 ---
 
 # Auxiliar do atendimento clínico
@@ -101,6 +101,15 @@ Ideias que sustentam o domínio:
   **convênio** e a **venda** vêm do agendamento: não informe nenhum dos dois se não houver motivo.
   Particular num agendamento de convênio só se for pedido explicitamente; convênio diferente do agendamento
   fica gravado sem aviso na resposta (só na auditoria), então confirme com o usuário.
+  O check-in também registra a chegada **na venda**. Se o sistema de vendas **recusar** (ex.: convênio
+  diferente do da tabela de preço da venda), **nada é gravado**: a resposta traz o motivo; corrija e tente de
+  novo. Se ele estiver **fora**, o check-in sai assim mesmo com um **aviso da venda**: a venda é atualizada
+  **sozinha** quando o sistema voltar — repasse o aviso como veio, sem pedir que refaçam nada.
+- **Saber se a venda já recebeu o check-in** → ferramenta de **estado do check-in da venda** (somente
+  leitura, pela venda): *tentando* (nova tentativa automática em curso), *pendente* (não chegou no prazo e
+  está na pendência da recepção; "registrar de novo" é na Central), *recusado* ou *registrado*. **Sem
+  estado não prova sucesso**: pode ser check-in registrado na hora, venda sem check-in ou id que não é de
+  venda — confira a venda antes de afirmar.
 - **Ver a situação dos atendimentos** (do dia, de um período, de um paciente, ou só os **ativos agora**)
   → ferramenta de **busca** de atendimentos. Traz uma visão enxuta (estado, quem, quando) — sem detalhe
   clínico.
@@ -152,6 +161,10 @@ comentário se precisar.
 1. Confirme com o usuário o **motivo** e o **tipo** (paciente faltou? cliente cancelou? clínica cancelou?
    remarcou?).
 2. Use **cancelar** com esse motivo/tipo — é uma ação própria, não um simples avanço de etapa.
+3. **Leia a resposta.** O cancelamento tenta cancelar a venda junto. Se vier o **aviso da venda**, o
+   atendimento foi cancelado, mas a **venda não**: se a venda **já estava concluída**, ela fica como está
+   (estorno, se houver, é pela tela de vendas); nos outros casos, oriente cancelar a venda pelo ciclo de
+   venda ou pela tela de vendas. Repasse o aviso como veio e **não repita** o cancelamento.
 
 ### "O que ainda falta eu fazer hoje?"
 1. Leia as **pendências** do profissional: contagens por **urgência** (`urgente` → `baixa`) + referências.
@@ -163,6 +176,9 @@ comentário se precisar.
   parta dele; se o sistema recusar por conflito (o estado atual não é o que você esperava), releia o
   contexto e repita a ação com o estado certo. Nunca force por cima de uma leitura velha.
 - **Check-in é idempotente por agendamento** — repetir não cria um segundo atendimento.
+- **Atendimento cancelado ≠ venda cancelada.** Com o aviso da venda, nunca diga que "está tudo cancelado".
+- **Vendas fora não pede retrabalho.** A venda recebe o check-in sozinha quando o sistema volta; consulte
+  o estado em vez de repetir o check-in.
 - **Não existe atendimento sem serviço.** Walk-in exige o item atendido ou uma venda existente.
 - **Finalizar e cancelar são terminais e têm consequência** (financeiro / motivo). Trate como ações
   deliberadas, sempre confirmadas — não como "avançar mais uma etapa".

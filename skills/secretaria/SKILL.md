@@ -3,8 +3,8 @@ name: secretaria
 description: O papel de recepção do Fluxo Ideal — cadastrar e encontrar pacientes, agendar/remarcar/cancelar, ler a agenda do dia e a disponibilidade de horários, e acompanhar o histórico de relacionamento. Use para "quem é esse paciente?", "tem horário quinta?", "marca o retorno da Maria", "quem faltou hoje?".
 audience: [ia, humano]
 depends_on: [cadastro-paciente, agenda, conversas]
-version: 0.10.0
-updated: 2026-11-21
+version: 0.11.0
+updated: 2026-11-25
 ---
 
 # Secretária
@@ -124,6 +124,21 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
   precisar.
 - Cadastrar um paciente novo ou atualizar um existente → ferramenta de upsert de cliente. O **CPF**
   só entra na **criação** (é a identidade); correção de CPF é caso administrativo, fora daqui.
+- **Nacionalidade e naturalidade** (país, cidade e estado onde nasceu) → a mesma ferramenta de upsert; a
+  ficha completa as devolve. São **opcionais** e nada é preenchido sozinho: **não presuma "Brasil"**, só
+  grave o que o usuário disse. País vai em código de duas letras (BR, PT…); estado só vale para quem
+  nasceu no Brasil, e cidade pede o país (e, no Brasil, o estado). A **edição é parcial**: o que você não
+  informa **fica como está** — nunca mande vazio para "zerar". Para **apagar** um desses dados, peça
+  explicitamente a limpeza daquele campo (só na edição); nunca invente um valor para substituir. Se o
+  cadastro recusar a combinação, repasse a mensagem e pergunte o dado certo.
+- **Encerrar as sessões do portal do paciente** ("ela perdeu o celular", "alguém entrou na conta dele")
+  → ferramenta de **encerrar sessões do portal**. O paciente é **deslogado em todos os aparelhos** e, para
+  voltar, entra de novo com o código de acesso. **Não apaga dados nem bloqueia** o paciente, mas **não se
+  desfaz**. Ela mostra primeiro uma **prévia com o nome do paciente**: confira com o usuário que é a pessoa
+  certa e só execute depois da confirmação explícita dele nesta conversa. Fica registrado quem encerrou.
+  **Um agente automático nunca executa** — só uma pessoa da clínica. A resposta diz quantas sessões foram
+  encerradas (zero = ele não estava conectado). Se o portal não responder, **nada foi alterado**: tente
+  de novo em instantes.
 - Gerir o **convênio/carteirinha** do paciente (adicionar/editar/remover, e o fluxo de solicitação)
   → ferramentas de convênio do cliente.
 - **Tags**, **relacionamentos** (responsável/dependente) e marcar o cadastro como **revisado**
@@ -184,6 +199,18 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
   um **aviso sobre a venda**, o **agendamento foi cancelado, mas a venda não**: conte isso ao usuário com
   o texto do aviso e oriente cancelar a venda pela tela de vendas. **Não repita** o cancelamento do
   agendamento.
+- **Check-in na venda.** Ao registrar a chegada, a venda do paciente também recebe o check-in. Se o
+  sistema de vendas estiver fora naquele momento, o check-in sai assim mesmo, com um **aviso da venda**: a
+  venda é atualizada **sozinha** quando o sistema voltar. Repasse o aviso como veio, sem pedir que o
+  usuário refaça nada. Para saber depois se a venda já recebeu ("a venda da Maria já está com o
+  check-in?"), há a ferramenta de **estado do check-in da venda** (somente leitura): *tentando* (nova
+  tentativa em curso), *pendente* (entrou na pendência da recepção; registrar de novo é na Central),
+  *recusado* ou *registrado*. **Sem estado** não prova que deu certo: pode ser check-in registrado na
+  hora, venda sem check-in ou id errado — confira a venda antes de afirmar.
+- **Cancelar o atendimento** de quem já fez check-in também tenta cancelar a venda. Se vier o **aviso da
+  venda**, o atendimento foi cancelado e a **venda não**: venda **já concluída** fica como está (estorno, se
+  houver, é pela tela de vendas); nos demais casos, oriente cancelar a venda pela tela de vendas. Não
+  repita o cancelamento e não diga que "está tudo cancelado".
 - **Bloquear** a agenda (almoço, férias, feriado), inclusive **recorrente** → ferramenta de bloqueio.
 - Abrir um **encaixe / horário extra** → ferramenta de agenda extra.
 - **Agendamento privado** (interno/reservado que o paciente **não** deve ser avisado): ao marcar ou
@@ -213,7 +240,9 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 
 **Comunicação & briefing**
 - **Mandar ao paciente, por e-mail, um documento dele** (laudo, receita, atestado já emitidos) → liste os
-  documentos do paciente e use a ferramenta de **envio de documento**: prévia com o destinatário (e-mail do
+  documentos do paciente (cada arquivo pode trazer a **descrição** que quem enviou escreveu; ela pode
+  citar saúde, use só para achar o arquivo certo; arquivo com **cadeado** o usuário não pode abrir: não
+  ofereça abrir nem enviar) e use a ferramenta de **envio de documento**: prévia com o destinatário (e-mail do
   cadastro, mascarado), quem assina o envio e os arquivos; **só envia depois do OK**. Documento protegido de
   outro profissional só sai com a permissão de enviar em nome dele. Por **WhatsApp**, só pela plataforma, na
   conversa aberta.
@@ -293,6 +322,10 @@ auditado. Nunca despeje dados pessoais que não foram pedidos.
 - **Liberar divulgação que o paciente bloqueou pede motivo + confirmação.** O motivo é o que o paciente
   disse; a confirmação é do usuário, no chat. Bloquear é sempre permitido; agente automático nunca libera.
 - **Consentimento desconhecido = não divulgar.**
+- **Editar não apaga o que não veio.** Nacionalidade e naturalidade só mudam quando informadas; apagar é
+  pedido explícito. Nunca presuma "Brasil".
+- **Encerrar as sessões do portal é de pessoa, com prévia e confirmação.** Confira o nome na prévia;
+  agente automático nunca executa.
 - **Remarcar não é grátis**: conta reagendamento; não é a mesma coisa que "corrigir um erro de
   digitação".
 - **Retorno não se recobra** quando já é um direito concedido — reconheça o caso certo ao marcar.

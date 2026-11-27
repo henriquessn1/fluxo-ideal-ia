@@ -4,7 +4,8 @@
 
 Quando um agendamento se aproxima, este time arma a confirmação, e quando o paciente responde (pelo
 botão do WhatsApp), triage: confirmou → confere que o agendamento é desse paciente, confirma e
-resolve o ticket; pediu ajuda → encaminha à recepção; respondeu algo fora do padrão → escala para a
+resolve o ticket (se o agendamento não está mais ativo, não confirma e passa para a recepção
+responder e oferecer remarcar); pediu ajuda → encaminha à recepção; respondeu algo fora do padrão → escala para a
 IA interpretar.
 
 **Atendimento privado** (o paciente está numa conversa privada com um profissional): o time só
@@ -43,5 +44,6 @@ o atendimento — o resto fica com o profissional.
 ## Versões
 | Versão | O que mudou |
 |---|---|
-| **1.5** | A fila das conversas que precisam de uma pessoa (`fila_humana`) passa a vir como `atendente`, o papel da recepção. Antes vinha `recepcao`, que não é um papel, e essas conversas ficavam em "Não atribuídas". Quem já instalou: confira o valor na Central |
+| **1.6** | Paciente que toca em confirmar num agendamento que não está mais ativo (cancelado, falta ou finalizado): o time não confirma, não agradece e não responde. Deixa uma nota ("responda ao paciente e ofereça remarcar") e passa a conversa à recepção, que responde. Em atendimento privado, só a nota. Antes, a conversa ficava parada sem nota |
+| 1.5 | A fila das conversas que precisam de uma pessoa (`fila_humana`) passa a vir como `atendente`, o papel da recepção. Antes vinha `recepcao`, que não é um papel, e essas conversas ficavam em "Não atribuídas". Quem já instalou: confira o valor na Central |
 | 1.4 | Atendimento privado: só confirma pelo botão e deixa uma nota; confere que o agendamento é do paciente antes de confirmar |
